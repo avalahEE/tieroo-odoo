@@ -241,7 +241,8 @@ class ResConfigSettings(models.TransientModel):
     )
 
     wallet_signup_notice = fields.Selection(related="company_id.wallet_signup_notice")
-    wallet_data_consent = fields.Boolean("I agree that Odoo sends data to Tieroo")
+    wallet_data_consent = fields.Boolean("I agree that Odoo sends data to Tieroo", compute="_compute_wallet_data_consent",
+                                         inverse="_inverse_wallet_data_consent")
     wallet_connected = fields.Boolean(compute="_compute_wallet_account")
     wallet_account_error = fields.Boolean(compute="_compute_wallet_account")
     wallet_plan_name = fields.Char("Plan", compute="_compute_wallet_account")
@@ -253,6 +254,18 @@ class ResConfigSettings(models.TransientModel):
     wallet_over_limit = fields.Boolean(compute="_compute_wallet_account")
     wallet_grace_until = fields.Date(compute="_compute_wallet_account")
     wallet_can_create = fields.Boolean(compute="_compute_wallet_account")
+
+    @api.depends("company_id")
+    def _compute_wallet_data_consent(self):
+        for s in self:
+            s.wallet_data_consent = bool(s.company_id.sudo().wallet_consent_date)
+
+    def _inverse_wallet_data_consent(self):
+        for s in self:
+            company = s.company_id.sudo()
+            if s.wallet_data_consent != bool(company.wallet_consent_date):
+                s.company_id._wallet_check_admin()
+                company.wallet_consent_date = fields.Datetime.now() if s.wallet_data_consent else False
 
     @api.depends("company_id")
     def _compute_wallet_account(self):
@@ -277,9 +290,6 @@ class ResConfigSettings(models.TransientModel):
         return self.company_id._wallet_open_designer()
 
     def action_wallet_signup(self):
-        if self.wallet_data_consent and not self.company_id.sudo().wallet_consent_date:
-            self.company_id._wallet_check_admin()
-            self.company_id.sudo().wallet_consent_date = fields.Datetime.now()
         return self.company_id._wallet_start()
 
     def action_wallet_billing(self):
