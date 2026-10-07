@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_template_wallet_card" model="mail.template">
+        <field name="name">Tieroo: wallet card</field>
+        <field name="model_id" ref="model_wallet_card"/>
+        <field name="subject">Your loyalty card – {{ object.company_id.name }}</field>
+        <field name="email_from">{{ object.company_id.email_formatted or user.email_formatted }}</field>
+        <field name="partner_to">{{ object.partner_id.id }}</field>
+        <field name="lang">{{ object.partner_id.lang }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div>
+    <t t-set="card" t-value="object.sudo()"/>
+    <p>Hello <t t-out="object.partner_id.name"/>,</p>
+    <p>Add your loyalty card to your phone's wallet. Show the card at the till to use your customer benefits.</p>
+    <p style="margin: 24px 0;">
+        <a t-if="card.apple_url" t-att-href="card.apple_url"
+           style="display:inline-block;margin:0 8px 8px 0;background:#000000;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;">Add to Apple Wallet</a>
+        <a t-if="card.google_url" t-att-href="card.google_url"
+           style="display:inline-block;margin:0 8px 8px 0;background:#1f1f1f;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;">Add to Google Wallet</a>
+        <a t-if="not card.apple_url and not card.google_url" t-att-href="card.url"
+           style="display:inline-block;background:#0f172a;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;">Open loyalty card</a>
+    </p>
+    <p t-if="card.apple_url" style="color:#64748b;font-size:13px;">On an iPhone you can also open the card attached to this email.</p>
+    <p>The card updates itself. The card and the link are personal, please do not share them.</p>
+</div>
+        </field>
+    </record>
+</odoo>
