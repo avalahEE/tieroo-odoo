@@ -1,0 +1,86 @@
+<section class="container" style="max-width: 980px; color: #14213D;">
+
+  <div class="row align-items-center py-4">
+    <div class="col-12 text-center">
+      <h1 style="font-weight: 700; color: #14213D;">Loyalty cards in Apple Wallet and Google Wallet</h1>
+      <p class="lead mt-3">Your Odoo Loyalty cards on your customers' phones, updated after every purchase.
+        Design the card in Odoo, send it by email or with a QR poster, and that's it.</p>
+      <p class="mt-3"><span class="badge rounded-pill" style="background: #2EC4B6; color: #14213D; font-size: 14px; padding: 8px 16px;">Free up to 100 cards</span>
+        &nbsp;<span class="badge rounded-pill" style="background: #14213D; color: #FFFFFF; font-size: 14px; padding: 8px 16px;">Odoo 18, 19 and 20 · Community or Enterprise</span></p>
+    </div>
+  </div>
+
+  <div class="alert mt-2" role="note" style="background: #F6F4EF; border: 1px solid #DAD6CC; color: #14213D;">
+    <strong>Tieroo is an external service.</strong> The cards are issued and kept up to date by Tieroo (hosted in the EU).
+    Before anything is sent, an administrator ticks a box in Settings to agree; see <em>Data sent to Tieroo</em> below.
+  </div>
+
+  <h2 class="mt-5" style="font-weight: 700;">How it works</h2>
+  <div class="row mt-3">
+    <div class="col-md-4 mb-3"><h5 style="font-weight: 700;">1. Your programme stays in Odoo</h5>
+      <p>Points, rewards and expiry come from Odoo Loyalty. The QR code on the card is the customer's Odoo barcode, so the cashier scans it at the Odoo POS as usual.</p></div>
+    <div class="col-md-4 mb-3"><h5 style="font-weight: 700;">2. The card updates itself</h5>
+      <p>After a sale, the card on the phone shows the new points a moment later. Customers also get a lock-screen notice when a reward is ready.</p></div>
+    <div class="col-md-4 mb-3"><h5 style="font-weight: 700;">3. Nothing to set up</h5>
+      <p>No Apple or Google developer accounts, no certificates, no keys to copy. Odoo connects to Tieroo by itself when you choose a plan.</p></div>
+  </div>
+
+  <h2 class="mt-5" style="font-weight: 700;">The card designer, inside Odoo</h2>
+  <p>Settings → Tieroo → Design the card. Drag the fields onto the places Apple and Google really have, pick the colours, upload the logo and a banner, and see the iPhone and Android card side by side with a sample customer. One save updates every card on every phone.</p>
+  <img src="designer.png" class="img-fluid rounded border mt-2" alt="The Tieroo card designer at the iPhone step, placing a field on the card."/>
+  <ul class="mt-3">
+    <li>Fields: points, next reward, customer name, company, valid until, programme, rewards list, level.</li>
+    <li>27 card languages; each customer gets the card in their Odoo language.</li>
+    <li>Checks text contrast and logos that would print blurry.</li>
+    <li>QR posters to print (A4 and A5 PDF with bleed, or SVG).</li>
+  </ul>
+
+  <h2 class="mt-5" style="font-weight: 700;">What your customers get</h2>
+  <table class="table mt-3">
+    <thead><tr><th>Notification</th><th>iPhone</th><th>Android</th></tr></thead>
+    <tbody>
+      <tr><td>Points changed (at most once in 20 hours; the card value always updates)</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>A reward is ready (the points reach a reward in your programme)</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Points expire in 14 days, or the card expires</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Level changed (with the Customer Levels add-on)</td><td>Yes</td><td>The card changes quietly</td></tr>
+    </tbody>
+  </table>
+  <p>Cards are sent by email from Odoo, with Add to Apple Wallet and Add to Google Wallet buttons: to every member with an email when you switch it on, then to each new member. A customer who lost the email gets it again with one click.</p>
+
+  <h2 class="mt-5" style="font-weight: 700;">Getting started</h2>
+  <ol class="mt-3">
+    <li class="mb-2">Install <strong>Tieroo – Loyalty cards</strong>. Odoo Loyalty and Point of Sale come with it.</li>
+    <li class="mb-2">Fill in your company's VAT number and country (Settings → Companies).</li>
+    <li class="mb-2">Settings → Tieroo: tick the box to agree to send data, then <strong>Start with Tieroo</strong>. The plan page opens with your company's details filled in.</li>
+    <li class="mb-2">Choose a plan and confirm with Stripe. A payment card is asked for the free plan too, but nothing is charged.</li>
+    <li class="mb-2">Back in Odoo, you are connected. Choose the loyalty programme, design the card and send it.</li>
+  </ol>
+
+  <h2 class="mt-5" style="font-weight: 700;">Plans</h2>
+  <p>Free up to 100 cards. Bigger plans are priced by cards in use, monthly or yearly, and are shown on the plan page that opens from Settings → Tieroo. Change or cancel at any time.</p>
+
+  <h2 class="mt-5" style="font-weight: 700;">Data sent to Tieroo</h2>
+  <p>Nothing is sent until an administrator agrees in Settings → Tieroo. Then Odoo sends:</p>
+  <ul>
+    <li>To open the account: the company's name, VAT number and address, and the administrator's email.</li>
+    <li>To issue and update the cards: each card holder's name, barcode (the QR code), points, next reward, level, card expiry and language, and their company for business customers.</li>
+    <li>Card holders' email addresses are not sent: the emails with the cards come from your Odoo.</li>
+  </ul>
+  <p>Your loyalty data stays in Odoo, which remains the master. Privacy policy: https://tieroo.com/privacy.html · Terms: https://tieroo.com/terms.html</p>
+
+  <h2 class="mt-5" style="font-weight: 700;">Requirements</h2>
+  <ul>
+    <li>Odoo 18, 19 or 20, Community or Enterprise, on Odoo.sh or your own server. Odoo Online cannot install third-party apps.</li>
+    <li>The Python package <code>requests</code> (included in standard Odoo installations).</li>
+  </ul>
+
+  <h2 class="mt-5" style="font-weight: 700;">Add-ons</h2>
+  <ul>
+    <li><strong>Tieroo – Customer Levels</strong>: spend-based levels such as Silver and Gold, each with its own Odoo pricelist, shown on the card.</li>
+    <li><strong>Tieroo – Join via QR</strong>: customers scan a QR code, confirm their email and get the card. No Website app needed.</li>
+  </ul>
+
+  <h2 class="mt-5" style="font-weight: 700;">Support</h2>
+  <p class="mb-5">Write to <a href="mailto:support@tieroo.com">support@tieroo.com</a>.</p>
+
+</section>

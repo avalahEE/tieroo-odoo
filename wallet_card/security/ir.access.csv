@@ -1,0 +1,3 @@
+id,name,model_id,group_id/id,operation,domain
+access_wallet_card_user,wallet.card user,wallet.card,base.group_user,r,"[('company_id', 'in', company_ids)]"
+access_wallet_card_system,wallet.card system,wallet.card,base.group_system,crud,"[('company_id', 'in', company_ids)]"

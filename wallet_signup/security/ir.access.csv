@@ -1,0 +1,2 @@
+id,name,model_id,group_id/id,operation,domain
+access_wallet_signup_request_admin,wallet.signup.request admin,wallet.signup.request,base.group_system,r,

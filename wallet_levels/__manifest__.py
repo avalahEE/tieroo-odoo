@@ -1,0 +1,20 @@
+{
+    "name": "Tieroo – Customer Levels",
+    "summary": "Add-on for Tieroo: spend-based customer levels with their own pricelist, shown on the wallet card.",
+    "version": "20.0.1.1.0",
+    "category": "Sales/Point of Sale",
+    "license": "LGPL-3",
+    "author": "Tieroo",
+    "website": "https://tieroo.com",
+    "support": "support@tieroo.com",
+    "images": ["static/description/banner.png"],
+    "depends": ["wallet_card", "account"],
+    "data": [
+        "security/ir.access.csv",
+        "data/ir_cron.xml",
+        "views/views.xml",
+    ],
+    "assets": {"web.assets_backend": ["wallet_levels/static/src/wallet_levels.scss"]},
+    "installable": True,
+    "application": False,
+}
