@@ -1,0 +1,390 @@
+from datetime import timedelta
+from unittest.mock import MagicMock, patch
+
+import requests
+
+from odoo import fields
+from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.tests import TransactionCase, tagged
+
+
+def add_points(card, points, description="test"):
+    before = card.points
+    card.env["loyalty.history"].create({"card_id": card.id, "description": description, "issued": points, "used": 0})
+    if card.points == before:
+        card.points = before + points
+
+
+def groups(env):
+    return "group_ids" if "group_ids" in env["res.users"]._fields else "groups_id"
+
+PUT = "odoo.addons.tieroo.models.requests.put"
+DELETE = "odoo.addons.tieroo.models.requests.delete"
+GET = "odoo.addons.tieroo.models.requests.get"
+POST = "odoo.addons.tieroo.models.requests.post"
+
+
+def ok(url="https://wallet.test/p/abc?s=sig", apple=None, google=None):
+    r = MagicMock()
+    r.json.return_value = {"url": url, "serial": "abc", "apple": apple, "google": google}
+    r.raise_for_status.return_value = None
+    return r
+
+
+def platform(fail=()):
+    def put(url, json=None, headers=None, timeout=None):
+        if json is None or "customers" not in json:
+            return ok()
+        r = MagicMock()
+        r.raise_for_status.return_value = None
+        r.json.return_value = {"closed": json["close"], "results": [
+            {"ref": c["ref"], "error": "invalid"} if c["ref"] in fail else
+            {"ref": c["ref"], "serial": c["ref"], "url": f"https://wallet.test/p/{c['ref']}?s=sig", "apple": None, "google": None, "changed": True}
+            for c in json["customers"]]}
+        return r
+    return put
+
+
+@tagged("post_install", "-at_install")
+class TestWalletCard(TransactionCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env.company.write({"wallet_api_url": "https://wallet.test/", "wallet_api_key": "wk_testkey"})
+        cls.program = cls.env["loyalty.program"].create({
+            "name": "Kohviklubi", "program_type": "loyalty", "trigger": "auto", "applies_on": "both",
+            "rule_ids": [(0, 0, {"reward_point_mode": "money", "reward_point_amount": 1})],
+            "reward_ids": [
+                (0, 0, {"reward_type": "discount", "discount": 10, "required_points": 100, "description": "Tasuta kohv"}),
+                (0, 0, {"reward_type": "discount", "discount": 20, "required_points": 300, "description": "Kook"}),
+            ],
+        })
+        cls.program.wallet_card = True
+        cls.mari = cls.env["res.partner"].create({"name": "Mari Maasikas", "email": "mari@example.ee"})
+        cls.mari_card = cls.join(cls.mari, 60)
+
+    @classmethod
+    def join(cls, partner, points):
+        card = cls.env["loyalty.card"].create({"program_id": cls.program.id, "partner_id": partner.id})
+        add_points(card, points)
+        return card
+
+    def mails_to(self, partner):
+        return self.env["mail.mail"].sudo().search([("recipient_ids", "in", partner.ids), ("subject", "like", "Your loyalty card")])
+
+    def auto_send(self, on=True):
+        self.program.wallet_auto_send = on
+
+
+    def test_card_shows_points_and_next_reward(self):
+        with patch(PUT, return_value=ok()) as put:
+            self.mari._wallet_create_card()
+        self.assertRegex(self.mari.barcode, r"^042\d{13}$")
+        url, = put.call_args.args
+        self.assertEqual(url, f"https://wallet.test/sync/v1/customers/{self.mari.id}")
+        self.assertEqual(put.call_args.kwargs["headers"], {"Authorization": "Bearer wk_testkey"})
+        coffee, cake = self.program.reward_ids.sorted("required_points")
+        en = lambda text: {"en_US": text}
+        self.assertEqual(put.call_args.kwargs["json"], {
+            "barcode": self.mari.barcode,
+            "name": "Mari Maasikas",
+            "company": None,
+            "level": None,
+            "points": 60.0,
+            "next": {"kind": "reward", "id": str(coffee.id), "name": "Tasuta kohv", "missing": 40.0},
+            "keep": None,
+            "currency": None,
+            "expires": None,
+            "expiring": None,
+            "rewards": [{"id": str(coffee.id), "name": "Tasuta kohv", "points": 100.0}, {"id": str(cake.id), "name": "Kook", "points": 300.0}],
+            "lang": self.mari.lang,
+            "texts": {
+                "program": en("Kohviklubi"), "points": en(self.program.portal_point_name),
+                f"reward:{coffee.id}": en("Tasuta kohv"), f"reward:{cake.id}": en("Kook"),
+            },
+        })
+        self.assertEqual(self.mari._wallet_card().url, "https://wallet.test/p/abc?s=sig")
+
+    def test_card_tells_the_next_points_to_expire(self):
+        if not hasattr(self.env["loyalty.history"], "_get_points_left_per_award"):
+            self.skipTest("this Odoo keeps no expiry per award")
+        soon = fields.Date.today() + timedelta(days=10)
+        self.env["loyalty.history"].create({"card_id": self.mari_card.id, "description": "kampaania", "issued": 40, "used": 0, "expiration_date": soon})
+        self.env["loyalty.history"].create({"card_id": self.mari_card.id, "description": "hiljem", "issued": 5, "used": 0,
+                                            "expiration_date": soon + timedelta(days=30)})
+        self.assertEqual(self.mari._wallet_payload()["expiring"], {"points": 40.0, "date": soon.isoformat()})
+
+    def test_empty_platform_url_means_ours(self):
+        self.env.company.wallet_api_url = False
+        with patch(PUT, return_value=ok()) as put:
+            self.mari._wallet_create_card()
+        self.assertTrue(put.call_args.args[0].startswith("https://app.tieroo.com/sync/v1/"))
+
+    def test_points_change_updates_the_card(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        add_points(self.mari_card, 50, "ost")
+        self.assertTrue(self.mari._wallet_card().sync_needed)
+        with patch(PUT, return_value=ok()) as put:
+            self.env["wallet.card"]._cron_sync()
+        payload = put.call_args.kwargs["json"]
+        self.assertEqual(payload["points"], 110)
+        self.assertEqual(payload["next"], {"kind": "reward", "id": str(self.program.reward_ids.sorted("required_points")[1].id), "name": "Kook", "missing": 190.0})
+        self.assertFalse(self.mari._wallet_card().sync_needed)
+
+    def test_only_the_chosen_programme_is_shown(self):
+        other = self.env["loyalty.program"].create({
+            "name": "Muu", "program_type": "loyalty", "trigger": "auto", "applies_on": "both",
+            "rule_ids": [(0, 0, {"reward_point_mode": "money", "reward_point_amount": 1})],
+        })
+        card = self.env["loyalty.card"].create({"program_id": other.id, "partner_id": self.mari.id})
+        add_points(card, 999, "t")
+        self.assertEqual(self.mari._wallet_payload()["points"], 60)
+
+    def test_only_a_ticked_programme_is_on_the_card(self):
+        self.program.wallet_card = False
+        self.assertIsNone(self.mari._wallet_payload()["points"])
+        self.assertFalse(self.env["res.partner"]._wallet_issue_candidates(10))
+
+    def test_one_wallet_programme_per_type_and_company(self):
+        def loyalty(**vals):
+            return self.env["loyalty.program"].create({"name": "Teine", "program_type": "loyalty", "trigger": "auto", "applies_on": "both", **vals})
+        with self.assertRaises(ValidationError):
+            loyalty(wallet_card=True)
+        other_company = self.env["res.company"].create({"name": "Teine OÜ"})
+        loyalty(wallet_card=True, company_id=other_company.id)
+
+    def test_only_administrators_can_open_the_designer(self):
+        cashier = self.env["res.users"].create({"name": "Kassa", "login": "kassa", groups(self.env): [(6, 0, [self.env.ref("point_of_sale.group_pos_user").id])]})
+        with self.assertRaises(AccessError):
+            self.program.with_user(cashier).action_wallet_design()
+
+    def test_archived_programme_cannot_come_back_as_a_second_one(self):
+        self.program.action_archive()
+        self.env["loyalty.program"].create({"name": "Uus", "program_type": "loyalty", "trigger": "auto", "applies_on": "both", "wallet_card": True})
+        with self.assertRaises(ValidationError):
+            self.program.action_unarchive()
+
+    def test_programme_form_opens_the_designer(self):
+        r = MagicMock()
+        r.json.return_value = {"url": "https://wallet.test/design/open?t=abc"}
+        with patch(POST, return_value=r) as post:
+            action = self.program.action_wallet_design()
+        self.assertEqual(action["url"], "https://wallet.test/design/open?t=abc")
+        self.assertEqual(post.call_args.kwargs["json"]["texts"]["program"]["en_US"], "Kohviklubi")
+
+
+    def test_nothing_is_sent_while_automatic_sending_is_off(self):
+        with patch(PUT, return_value=ok()) as put:
+            self.env["wallet.card"]._cron_sync()
+        put.assert_not_called()
+        self.assertEqual(self.mari.wallet_card_state, "none")
+        self.assertFalse(self.mails_to(self.mari))
+
+    def test_loyalty_members_with_email_get_the_card_by_email_once(self):
+        self.auto_send()
+        no_mail = self.env["res.partner"].create({"name": "Ilma meilita"})
+        self.join(no_mail, 10)
+        outsider = self.env["res.partner"].create({"name": "Pole liige", "email": "x@example.ee"})
+        with patch(PUT, return_value=ok()):
+            self.env["wallet.card"]._cron_sync()
+            self.env["wallet.card"]._cron_sync()
+        self.assertEqual(self.mari.wallet_card_state, "active")
+        self.assertEqual(no_mail.wallet_card_state, "none")
+        self.assertEqual(outsider.wallet_card_state, "none")
+        mail = self.mails_to(self.mari)
+        self.assertEqual(len(mail), 1)
+        self.assertIn("https://wallet.test/p/abc?s=sig", mail.body_html)
+        self.assertIn("emailed to mari@example.ee", self.mari.message_ids[0].body)
+        self.assertNotIn("wallet.test/p/", self.mari.message_ids[0].body)
+
+    def test_new_member_gets_a_card(self):
+        self.auto_send()
+        jaan = self.env["res.partner"].create({"name": "Jaan", "email": "jaan@example.ee"})
+        with patch(PUT, return_value=ok()):
+            self.env["wallet.card"]._cron_sync()
+        self.assertEqual(jaan.wallet_card_state, "none")
+        self.join(jaan, 0)
+        with patch(PUT, return_value=ok("https://wallet.test/p/jaan?s=x")):
+            self.env["wallet.card"]._cron_sync()
+        self.assertEqual(jaan.wallet_card_state, "active")
+
+
+    def test_unreachable_platform_keeps_change_for_retry(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        self.mari.name = "Mari Mets"
+        with patch(PUT, side_effect=requests.ConnectionError("down")):
+            self.env["wallet.card"]._cron_sync()
+        self.assertTrue(self.mari._wallet_card().sync_needed)
+
+    def test_job_re_triggers_only_when_cards_get_through(self):
+        self.auto_send()
+        cron = self.env.ref("tieroo.cron_wallet_sync")
+        triggers = lambda: self.env["ir.cron.trigger"].search_count([("cron_id", "=", cron.id)])
+        before = triggers()
+        with patch(PUT, side_effect=requests.ConnectionError("down")):
+            self.env["res.partner"]._wallet_issue_new_cards(limit=1)
+        self.assertEqual(triggers(), before)
+        self.assertFalse(self.mails_to(self.mari))
+        jaan = self.env["res.partner"].create({"name": "Jaan Jõgi", "email": "jaan@example.ee"})
+        self.join(jaan, 10)
+        with patch(PUT, side_effect=platform()):
+            self.env["res.partner"]._wallet_issue_new_cards(limit=1)
+        self.assertGreater(triggers(), before)
+        self.assertEqual(len(self.mails_to(self.mari)), 1)
+        self.assertEqual(len(self.mails_to(jaan)), 1)
+        self.mari.name = "Mari Mets"
+        self.env.company.wallet_api_key = False
+        self.assertEqual(self.mari._wallet_card()._push(raise_errors=False), 0)
+
+    def test_many_cards_go_in_batches(self):
+        people = self.env["res.partner"].create([{"name": f"Klient {i}", "email": f"k{i}@example.ee"} for i in range(450)])
+        for p in people:
+            self.join(p, 5)
+        self.auto_send()
+        with patch(PUT, side_effect=platform(fail={str(people[3].id)})) as put:
+            self.env["wallet.card"]._cron_sync()
+        batches = [c for c in put.call_args_list if c.args[0] == "https://wallet.test/sync/v1/customers"]
+        self.assertEqual([len(c.kwargs["json"]["customers"]) for c in batches], [200, 200, 51])
+        self.assertEqual(batches[0].kwargs["json"]["texts"]["program"]["en_US"], "Kohviklubi")
+        self.assertNotIn("texts", batches[0].kwargs["json"]["customers"][0])
+        cards = self.env["wallet.card"].search([("partner_id", "in", people.ids)])
+        self.assertEqual(len(cards), 450)
+        self.assertFalse(cards.filtered("sync_needed"))
+        self.assertEqual(cards.filtered(lambda c: c.partner_id == people[0]).sudo().url, f"https://wallet.test/p/{people[0].id}?s=sig")
+        self.assertEqual(len(self.mails_to(people[0])), 1)
+        self.assertFalse(self.mails_to(people[3]))
+        for card in self.env["loyalty.card"].search([("partner_id", "in", people[:250].ids)]):
+            add_points(card, 1, "ost")
+        with patch(PUT, side_effect=platform()) as put:
+            self.env["wallet.card"]._cron_sync()
+        self.assertEqual(put.call_args_list[0].args[0], f"https://wallet.test/sync/v1/customers/{people[3].id}")
+        self.assertEqual([len(c.kwargs["json"]["customers"]) for c in put.call_args_list[1:]], [200, 49])
+        self.assertEqual(len(self.mails_to(people[3])), 1)
+
+    def test_archived_customer_card_is_closed(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        self.mari.active = False
+        self.assertEqual(self.mari.wallet_card_state, "closed")
+        with patch(DELETE, return_value=ok()) as delete:
+            self.env["wallet.card"]._cron_sync()
+        delete.assert_called_once()
+
+
+    def test_resend_on_request(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+            self.mari.email = "mari.uus@example.ee"
+            action = self.mari.action_wallet_resend()
+        self.assertEqual(action["tag"], "display_notification")
+        self.assertEqual(len(self.mails_to(self.mari)), 1)
+        self.assertIn("emailed again to mari.uus@example.ee", self.mari.message_ids[0].body)
+
+    def test_resend_needs_an_active_card(self):
+        with self.assertRaises(UserError):
+            self.mari.action_wallet_resend()
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        self.mari.active = False
+        with self.assertRaises(UserError):
+            self.mari.action_wallet_resend()
+
+    def test_clerk_can_neither_resend_nor_see_the_link(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        clerk = self.env["res.users"].create({
+            "name": "Kassapidaja", "login": "kassa@example.ee",
+            groups(self.env): [(6, 0, [self.env.ref("base.group_partner_manager").id, self.env.ref("point_of_sale.group_pos_manager").id])],
+        })
+        as_clerk = self.mari.with_user(clerk)
+        self.assertEqual(as_clerk.wallet_card_state, "active")
+        with self.assertRaises(AccessError):
+            as_clerk.wallet_card_ids.read(["url"])
+        as_clerk.email = "kassa@example.ee"
+        with patch(PUT, return_value=ok()) as put, self.assertRaises(AccessError):
+            as_clerk.action_wallet_resend()
+        put.assert_not_called()
+        self.assertFalse(self.mails_to(self.mari))
+
+    def test_employees_cannot_read_the_card_email(self):
+        links = ok(apple="https://wallet.test/p/abc/apple.pkpass?s=sig", google="https://wallet.test/p/abc/google?s=sig")
+        pkpass = MagicMock(content=b"PK\x03\x04fake-pass")
+        with patch(PUT, return_value=links), patch(GET, return_value=pkpass):
+            self.mari._wallet_create_card()._send_email()
+        self.assertEqual(len(self.mails_to(self.mari)), 1)
+        employee = self.env["res.users"].create({
+            "name": "Töötaja", "login": "tootaja@example.ee", groups(self.env): [(6, 0, [self.env.ref("base.group_user").id])],
+        })
+        env = self.env(user=employee)
+        self.assertFalse(env["mail.message"].search([("body", "ilike", "wallet.test/p/")]))
+        self.assertFalse(env["mail.message"].search([("model", "=", "wallet.card")]))
+        self.assertFalse(env["ir.attachment"].search([("name", "=", "loyalty-card.pkpass")]))
+        with self.assertRaises(AccessError):
+            env["mail.mail"].search([])
+
+    def test_pos_manager_creates_programmes(self):
+        manager = self.env["res.users"].create({
+            "name": "Juhataja", "login": "juhataja@example.ee",
+            groups(self.env): [(6, 0, [self.env.ref("base.group_user").id, self.env.ref("point_of_sale.group_pos_manager").id])],
+        })
+        promo = self.env["loyalty.program"].with_user(manager).create({"name": "Sügiskampaania", "program_type": "promotion"})
+        promo.name = "Talvekampaania"
+        self.assertFalse(promo.sudo().wallet_card)
+
+
+    def test_email_has_wallet_buttons_and_the_pass_attached(self):
+        links = ok(apple="https://wallet.test/p/abc/apple.pkpass?s=sig", google="https://wallet.test/p/abc/google?s=sig")
+        pkpass = MagicMock(content=b"PK\x03\x04fake-pass")
+        pkpass.raise_for_status.return_value = None
+        with patch(PUT, return_value=links), patch(GET, return_value=pkpass) as get:
+            self.mari._wallet_create_card()
+            self.mari.action_wallet_resend()
+        get.assert_called_once_with("https://wallet.test/p/abc/apple.pkpass?s=sig", timeout=10)
+        mail = self.mails_to(self.mari)
+        self.assertIn("Add to Apple Wallet", mail.body_html)
+        self.assertIn("https://wallet.test/p/abc/google?s=sig", mail.body_html)
+        self.assertNotIn("Open loyalty card", mail.body_html)
+        att = mail.attachment_ids
+        self.assertEqual((att.name, att.mimetype), ("loyalty-card.pkpass", "application/vnd.apple.pkpass"))
+        raw = att.raw
+        self.assertEqual(raw.open().read() if hasattr(raw, "open") else raw, b"PK\x03\x04fake-pass")
+        self.assertEqual((att.res_model, att.res_id, mail.model), ("mail.message", mail.mail_message_id.id, False))
+        try:
+            mail._postprocess_sent_message(success_pids=self.mari, success_emails=[])
+        except TypeError:
+            mail._postprocess_sent_message(success_pids=self.mari)
+        self.assertFalse(mail.exists())
+        self.assertFalse(att.exists())
+
+    def test_email_falls_back_to_the_card_page_without_wallets(self):
+        with patch(PUT, return_value=ok()), patch(GET) as get:
+            self.mari._wallet_create_card()
+            self.mari.action_wallet_resend()
+        get.assert_not_called()
+        mail = self.mails_to(self.mari)
+        self.assertIn("Open loyalty card", mail.body_html)
+        self.assertFalse(mail.attachment_ids)
+
+
+    def test_design_button_opens_the_designer_with_a_one_time_link(self):
+        r = MagicMock()
+        r.json.return_value = {"url": "https://wallet.test/design/open?t=abc"}
+        with patch(POST, return_value=r) as post:
+            action = self.env["res.config.settings"].create({}).action_wallet_design()
+        self.assertEqual(action["url"], "https://wallet.test/design/open?t=abc")
+        self.assertEqual(post.call_args.args[0], "https://wallet.test/sync/v1/design-session")
+        self.assertEqual(post.call_args.kwargs["headers"], {"Authorization": "Bearer wk_testkey"})
+        sent = post.call_args.kwargs["json"]
+        self.assertEqual((sent["company"], sent["texts"]["program"]["en_US"], sent["levels"]), (self.env.company.name, "Kohviklubi", []))
+
+    def test_language_change_and_new_reward_update_the_card(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        self.mari.lang = "en_US"
+        self.assertTrue(self.mari._wallet_card().sync_needed)
+        self.mari._wallet_card().sync_needed = False
+        self.program.reward_ids = [(0, 0, {"reward_type": "discount", "discount": 5, "required_points": 50, "description": "Kringel"})]
+        self.assertTrue(self.mari._wallet_card().sync_needed)
