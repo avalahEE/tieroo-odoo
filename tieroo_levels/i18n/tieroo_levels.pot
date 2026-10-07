@@ -1,0 +1,344 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* tieroo_levels
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 20.0-20260926\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-06 21:39+0000\n"
+"PO-Revision-Date: 2026-10-06 21:39+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: tieroo_levels
+#: model_terms:ir.ui.view,arch_db:tieroo_levels.res_partner_form_wallet_levels
+msgid "<span>–</span>"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.module.module,summary:base.module_wallet_levels
+msgid ""
+"Add-on: customer levels (Bronze/Silver/Gold...) from spend give pricelists, "
+"shown on the wallet card"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,help:tieroo_levels.field_wallet_level__pricelist_id
+msgid "Applied to the customer while they have this level."
+msgstr ""
+
+#. module: tieroo_levels
+#: model_terms:ir.actions.act_window,help:tieroo_levels.wallet_level_action
+msgid ""
+"B2B levels count the spend of the company and all its contacts; the level "
+"and pricelist go on the company."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,help:tieroo_levels.field_wallet_level__customer_type
+msgid ""
+"B2C: private customers, by their own spend. B2B: companies, by the spend of "
+"the company and all its contacts."
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Back in the loyalty program (%s)."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model,name:tieroo_levels.model_res_company
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__company_id
+msgid "Company"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields.selection,name:tieroo_levels.selection__wallet_level__customer_type__b2b
+msgid "Company (B2B)"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model,name:tieroo_levels.model_res_config_settings
+msgid "Config Settings"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model,name:tieroo_levels.model_res_partner
+msgid "Contact"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,help:tieroo_levels.field_res_company__wallet_levels_auto_send
+#: model:ir.model.fields,help:tieroo_levels.field_res_config_settings__wallet_levels_auto_send
+#: model_terms:ir.ui.view,arch_db:tieroo_levels.res_config_settings_view_form_wallet_levels
+msgid ""
+"Create a card for every customer in the levels programme who has an email "
+"(for B2B: each contact person) and email it. Switching this on emails "
+"everyone who has no card yet."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__currency_id
+msgid "Currency"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.actions.act_window,name:tieroo_levels.wallet_level_action
+#: model:ir.ui.menu,name:tieroo_levels.wallet_level_menu
+msgid "Customer Levels"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__customer_type
+msgid "Customer Type"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model,name:tieroo_levels.model_wallet_level
+#: model_terms:ir.ui.view,arch_db:tieroo_levels.res_partner_form_wallet_levels
+msgid "Customer level"
+msgstr ""
+
+#. module: tieroo_levels
+#: model_terms:ir.actions.act_window,help:tieroo_levels.wallet_level_action
+msgid ""
+"Define your levels, e.g. Bronze from 0, Silver from 300, Gold from 1000."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_account_move__display_name
+#: model:ir.model.fields,field_description:tieroo_levels.field_pos_order__display_name
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_company__display_name
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__display_name
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__display_name
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: tieroo_levels
+#: model_terms:ir.actions.act_window,help:tieroo_levels.wallet_level_action
+msgid ""
+"Each customer has a personal 12-month period from joining: they move up as "
+"soon as they spend enough, and the level is set again from that period's "
+"spend when it ends."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.constraint,message:tieroo_levels.constraint_wallet_level_tag_unique
+msgid "Each level of a customer type needs its own tag."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_excluded
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_excluded
+msgid "Excluded"
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Excluded from the loyalty program (%s)."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,help:tieroo_levels.field_res_partner__wallet_excluded
+#: model:ir.model.fields,help:tieroo_levels.field_res_users__wallet_excluded
+msgid ""
+"Excluded from the loyalty program. Hands off: level, tags and pricelist are "
+"never changed automatically (e.g. VIPs with a special deal), and the wallet "
+"card is closed. For a company this covers all its contacts."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_account_move__id
+#: model:ir.model.fields,field_description:tieroo_levels.field_pos_order__id
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_company__id
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__id
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__id
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__id
+msgid "ID"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model,name:tieroo_levels.model_account_move
+msgid "Journal Entry"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_level_id
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_level_id
+msgid "Level"
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Level changed: %(old)s → %(new)s (spend: %(spend)s, %(company)s)"
+msgstr ""
+
+#. module: tieroo_levels
+#: model_terms:ir.ui.view,arch_db:tieroo_levels.res_partner_form_wallet_levels
+msgid "Level period"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_period_end
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_period_end
+msgid "Level period end"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_period_start
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_period_start
+msgid "Level period start"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__name
+msgid "Name"
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Only Point of Sale managers can recalculate the customer levels."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_period_spend
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_period_spend
+msgid "Period spend"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model,name:tieroo_levels.model_pos_order
+msgid "Point of Sale Order"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__pricelist_id
+msgid "Pricelist"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields.selection,name:tieroo_levels.selection__wallet_level__customer_type__b2c
+msgid "Private (B2C)"
+msgstr ""
+
+#. module: tieroo_levels
+#: model_terms:ir.ui.view,arch_db:tieroo_levels.wallet_level_list
+msgid "Recalculate all customers"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_company__wallet_levels_auto_send
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__wallet_levels_auto_send
+msgid "Send wallet cards to level customers automatically"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__min_spend
+msgid "Spend from"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,help:tieroo_levels.field_wallet_level__min_spend
+msgid "Spend in the customer's personal 12-month period, taxes included."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.constraint,message:tieroo_levels.constraint_wallet_level_min_spend_positive
+msgid "Spend threshold cannot be negative."
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Standard"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__tag_id
+msgid "Tag"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,help:tieroo_levels.field_res_partner__wallet_period_start
+#: model:ir.model.fields,help:tieroo_levels.field_res_users__wallet_period_start
+msgid ""
+"The customer's personal 12-month period starts on the day they joined the "
+"programme. The level can only drop at the end of a period."
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid ""
+"This customer is excluded from the loyalty program, so the wallet card is "
+"closed."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.constraint,message:tieroo_levels.constraint_wallet_level_min_spend_unique
+msgid "Two levels of the same customer type cannot start at the same spend."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_currency_id
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_currency_id
+msgid "Wallet Currency"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.module.module,shortdesc:base.module_wallet_levels
+msgid "Tieroo – Customer Levels"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.actions.server,name:tieroo_levels.cron_wallet_levels_ir_actions_server
+msgid "Tieroo: recalculate customer levels"
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Wallet card active again."
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Wallet card closed."
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "none"
+msgstr ""
