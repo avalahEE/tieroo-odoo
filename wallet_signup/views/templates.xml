@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="join_page" name="Wallet: join the loyalty programme">
+        <t t-set="accent" t-value="brand.get('background') or '#111111'"/>
+        <t t-set="on_accent" t-value="brand.get('foreground') or '#ffffff'"/>
+        <html t-att-lang="lang and lang.replace('_', '-')">
+            <head>
+                <meta charset="utf-8"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <meta name="robots" content="noindex"/>
+                <title t-out="company.name"/>
+                <style>
+                    :root { color-scheme: light; }
+                    * { box-sizing: border-box; }
+                    body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #18181b; background: #f4f4f5; }
+                    main { max-width: 440px; margin: 0 auto; padding: 28px 20px 40px; }
+                    .band { padding: 28px 20px 52px; text-align: center; }
+                    .logo { display: block; max-width: 220px; max-height: 64px; margin: 0 auto; }
+                    .band-name { font-size: 20px; font-weight: 700; }
+                    main { margin-top: -36px; }
+                    .co { text-align: center; color: #52525b; font-size: 14px; margin: 16px 0 0; }
+                    .sheet { background: #fff; border-radius: 16px; padding: 24px 20px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+                    h1 { font-size: 22px; line-height: 1.25; margin: 0 0 8px; }
+                    p { margin: 0 0 16px; color: #3f3f46; }
+                    label { display: block; font-weight: 600; font-size: 14px; margin: 14px 0 6px; }
+                    input[type=text], input[type=email], select { width: 100%; font: inherit; padding: 12px; border: 1px solid #d4d4d8; border-radius: 10px; background: #fff; }
+                    input:focus, select:focus { outline: 3px solid color-mix(in srgb, var(--accent) 35%, transparent); border-color: var(--accent); }
+                    .row { display: flex; gap: 8px; }
+                    .row select:first-child { flex: 0 0 34%; }
+                    .hint { font-size: 13px; color: #71717a; margin: 6px 0 0; }
+                    .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; margin-top: 18px; }
+                    .check input { width: 22px; height: 22px; margin: 1px 0 0; flex: none; accent-color: var(--accent); }
+                    button { width: 100%; margin-top: 22px; padding: 14px; font: inherit; font-weight: 700; color: var(--on-accent); background: var(--accent); border: 0; border-radius: 12px; cursor: pointer; }
+                    .err { background: #fef2f2; color: #991b1b; border-radius: 10px; padding: 10px 12px; margin: 0 0 12px; }
+                    .hp { position: absolute; left: -10000px; }
+                    .langs { display: flex; justify-content: flex-end; max-width: 440px; margin: 0 auto; padding: 10px 20px 0; }
+                    .langs select { width: auto; padding: 6px 10px; font-size: 14px; border-radius: 8px; border: 0; background: rgba(255,255,255,.9); }
+                    a { color: inherit; }
+                    .wbtn { display: block; text-align: center; margin-top: 12px; padding: 14px; border-radius: 12px; background: #000; color: #fff; font-weight: 700; text-decoration: none; }
+                </style>
+            </head>
+            <body t-att-style="'--accent: %s; --on-accent: %s' % (accent, on_accent)">
+                <div class="band" t-att-style="'background: %s; color: %s' % (accent, on_accent)">
+                    <form t-if="langs" method="get" class="langs">
+                        <select name="lang" aria-label="Language" onchange="this.form.submit()">
+                            <t t-foreach="langs" t-as="l">
+                                <option t-att-value="l[0]" t-att-selected="l[0] == lang" t-out="l[1]"/>
+                            </t>
+                        </select>
+                        <noscript><button type="submit">OK</button></noscript>
+                    </form>
+                    <img t-if="brand.get('logo')" class="logo" t-att-src="brand['logo']" t-att-alt="company.name"/>
+                    <div t-else="" class="band-name" t-out="company.name"/>
+                </div>
+                <main>
+                    <div class="sheet">
+                        <t t-if="state == 'form'">
+                            <h1>Join our loyalty programme</h1>
+                            <p>Collect points and get rewards. The card goes to Apple Wallet or Google Wallet: first confirm your email address.</p>
+                            <p t-if="error" class="err" role="alert" t-out="error"/>
+                            <form method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="lang" t-att-value="lang"/>
+                                <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required="required" maxlength="120" autocomplete="name" t-att-value="post.get('name')"/>
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required="required" maxlength="254" autocomplete="email" inputmode="email" t-att-value="post.get('email')"/>
+                                <label for="day">Birthday <span style="font-weight: 400; color: #71717a">(optional)</span></label>
+                                <div class="row">
+                                    <select id="day" name="day" aria-label="Day">
+                                        <option value="">Day</option>
+                                        <t t-foreach="range(1, 32)" t-as="d">
+                                            <option t-att-value="d" t-att-selected="str(d) == post.get('day')" t-out="d"/>
+                                        </t>
+                                    </select>
+                                    <select name="month" aria-label="Month">
+                                        <option value="">Month</option>
+                                        <t t-foreach="months" t-as="m">
+                                            <option t-att-value="m[0]" t-att-selected="str(m[0]) == post.get('month')" t-out="m[1]"/>
+                                        </t>
+                                    </select>
+                                </div>
+                                <p class="hint">For a birthday offer. It cannot be changed later.</p>
+                                <label class="check">
+                                    <input type="checkbox" name="consent" value="1" required="required" t-att-checked="post.get('consent')"/>
+                                    <span>
+                                        I join the loyalty programme of <t t-out="company.name"/> and agree to its <a t-if="company.wallet_terms_url" t-att-href="company.wallet_terms_url" target="_blank" rel="noopener">terms</a><t t-else="">terms</t><t t-if="company.wallet_privacy_url"> and the <a t-att-href="company.wallet_privacy_url" target="_blank" rel="noopener">privacy policy</a></t>.
+                                    </span>
+                                </label>
+                                <div class="hp" aria-hidden="true">
+                                    <label for="website">Website</label>
+                                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off"/>
+                                </div>
+                                <button type="submit">Join</button>
+                            </form>
+                        </t>
+                        <t t-elif="state == 'sent'">
+                            <h1>Check your email</h1>
+                            <p>We sent a confirmation link to the email address you entered. Open it on your phone: after confirming you can add the card to Apple Wallet or Google Wallet.</p>
+                            <p class="hint">No email within a few minutes? Check the spam folder, or ask at the till.</p>
+                        </t>
+                        <t t-elif="state == 'limited'">
+                            <h1>Please try again later</h1>
+                            <p>Too many sign-ups from this network in the last hour. Try again in a while, or ask at the till.</p>
+                        </t>
+                        <t t-elif="state == 'confirm'">
+                            <h1>Confirm joining</h1>
+                            <p>You are joining the loyalty programme of <t t-out="company.name"/>.</p>
+                            <form method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <button type="submit">Confirm and get the card</button>
+                            </form>
+                        </t>
+                        <t t-elif="state == 'done'">
+                            <h1>Welcome!</h1>
+                            <p>Add the card to your phone:</p>
+                            <a t-if="card.get('apple')" class="wbtn" t-att-href="card['apple']">Add to Apple Wallet</a>
+                            <a t-if="card.get('google')" class="wbtn" t-att-href="card['google']">Add to Google Wallet</a>
+                            <a t-if="not card.get('apple') and not card.get('google') and card.get('page')" class="wbtn" t-att-href="card['page']">Open the card</a>
+                            <p class="hint">We also emailed you the card, so you can add it later.</p>
+                        </t>
+                        <t t-elif="state == 'expired'">
+                            <h1>This link has expired</h1>
+                            <p>The link works for 48 hours. Join again with the QR code, or ask at the till.</p>
+                        </t>
+                        <t t-elif="state == 'error'">
+                            <h1>Please try again in a few minutes</h1>
+                            <p>The card could not be made right now. Open the link in the email again in a few minutes; your sign-up is saved.</p>
+                        </t>
+                        <t t-else="">
+                            <h1>Joining is not open at the moment</h1>
+                            <p>Please ask at the till.</p>
+                        </t>
+                    </div>
+                    <p class="co" t-out="company.name"/>
+                </main>
+            </body>
+        </html>
+    </template>
+
+</odoo>
