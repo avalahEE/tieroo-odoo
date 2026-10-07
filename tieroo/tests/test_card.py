@@ -133,6 +133,25 @@ class TestWalletCard(TransactionCase):
         self.assertEqual(payload["next"], {"kind": "reward", "id": str(self.program.reward_ids.sorted("required_points")[1].id), "name": "Kook", "missing": 190.0})
         self.assertFalse(self.mari._wallet_card().sync_needed)
 
+    def test_a_points_change_goes_out_straight_after_the_save(self):
+        from contextlib import nullcontext
+        from odoo.addons.tieroo.models import _wallet_push_soon
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        add_points(self.mari_card, 50, "ost")
+        card = self.mari._wallet_card()
+        self.assertIn(card.id, self.env.cr.postcommit.data["tieroo.push"])
+        registry = MagicMock()
+        with patch("odoo.addons.tieroo.models.threading.Thread") as thread, patch("odoo.modules.module.current_test", None):
+            self.env.cr.postcommit.run()
+        _target, (reg, uid, ids) = thread.call_args.kwargs["target"], thread.call_args.kwargs["args"]
+        self.assertEqual(ids, {card.id})
+        registry.cursor = lambda: nullcontext(self.env.cr)
+        with patch(PUT, return_value=ok()) as put:
+            _wallet_push_soon(registry, uid, ids)
+        self.assertEqual(put.call_args.kwargs["json"]["points"], 110)
+        self.assertFalse(card.sync_needed)
+
     def test_only_the_chosen_programme_is_shown(self):
         other = self.env["loyalty.program"].create({
             "name": "Muu", "program_type": "loyalty", "trigger": "auto", "applies_on": "both",
