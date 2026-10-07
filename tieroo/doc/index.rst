@@ -10,6 +10,10 @@ Before you start
 * Odoo 18, 19 or 20, Community or Enterprise, on Odoo.sh or your own server.
 * A loyalty programme in Odoo Loyalty (Point of Sale > Products > Discount & Loyalty).
 * Your company's VAT number and country (Settings > Companies).
+* Odoo can send email that reaches your customers. If your company email is on your own domain, connect
+  Odoo to that domain's mail server (Settings > General Settings > Emails > Custom Email Servers, e.g. Google
+  Workspace or Microsoft 365). Sent from Odoo.sh's servers under your address, the cards often land in spam
+  or are refused when your domain has a strict DMARC policy, and so do your invoices.
 
 Set up
 ======
@@ -40,8 +44,9 @@ Send the cards
 
 * **By email**: tick *Send wallet cards automatically* on the loyalty programme.
   Every member with an email gets the card, and so does every new member.
-* **Again**: a customer did not get the email? Open the customer, check the email address
-  and click the *Wallet card* button to send it again.
+* **Again**: a customer did not get the email? Ask them to look in spam, then open the customer, check
+  the email address and click the *Wallet card* button to send it again. Emails that keep landing in spam
+  mean Odoo's outgoing mail needs your domain's server (see *Before you start*).
 * **With a QR poster**: install *Tieroo – Join via QR* and print the poster from the designer.
 
 The email has *Add to Apple Wallet* and *Add to Google Wallet* buttons.
