@@ -1,10 +1,12 @@
 import logging
 import secrets
+import threading
 
 import requests
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
+from odoo.modules import module as odoo_module
 from odoo.tools import SQL, split_every
 
 _logger = logging.getLogger(__name__)
@@ -15,6 +17,7 @@ BATCH_TIMEOUT = 120
 CRON_RESERVE = 120
 ACCOUNT_TIMEOUT = 4
 CLAIM_TIMEOUT = 30
+SOON = 20
 
 
 def _wallet_api(env, method, url, key=None, timeout=TIMEOUT, **kw):
@@ -72,6 +75,15 @@ def _wallet_commit(env, processed=1):
     if env.context.get("ir_cron_progress_id"):
         return env["ir.cron"]._commit_progress(processed)
     return float("inf")
+
+
+def _wallet_push_soon(registry, uid, ids):
+    try:
+        with registry.cursor() as cr:
+            env = api.Environment(cr, uid, {})
+            env["wallet.card"].sudo().browse(sorted(ids)).exists().filtered("sync_needed")._push(raise_errors=False)
+    except Exception:
+        _logger.warning("tieroo: sending a change straight away failed, the job will", exc_info=True)
 
 
 def _wallet_expiring(card):
@@ -603,6 +615,19 @@ class ResPartner(models.Model):
         if cards:
             cards.write({"sync_needed": True})
             self._wallet_wake()
+            self._wallet_push_after_commit(cards)
+
+    def _wallet_push_after_commit(self, cards):
+        data = self.env.cr.postcommit.data
+        if "tieroo.push" not in data:
+            ids = data["tieroo.push"] = set()
+            registry, uid = self.env.registry, self.env.uid
+
+            def start():
+                if len(ids) <= SOON and not odoo_module.current_test:
+                    threading.Thread(target=_wallet_push_soon, args=(registry, uid, ids), daemon=True).start()
+            self.env.cr.postcommit.add(start)
+        data["tieroo.push"].update(cards.ids)
 
     def _wallet_ensure_barcode(self):
         for partner in self.filtered(lambda p: not p.barcode):
