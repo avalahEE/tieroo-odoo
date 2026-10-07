@@ -56,6 +56,9 @@ class TestTieroo(TierooSetup, TransactionCase):
         with patch(POST, return_value=resp(200, {"url": "https://wallet.test/billing/open?t=x", "claimToken": TOKEN})):
             self.env["res.config.settings"].create({"wallet_data_consent": True}).action_wallet_signup()
         self.assertTrue(self.company.wallet_consent_date)
+        self.assertTrue(self.env["res.config.settings"].create({}).wallet_data_consent)
+        self.env["res.config.settings"].create({"wallet_data_consent": False}).execute()
+        self.assertFalse(self.company.wallet_consent_date)
 
     def test_missing_vat_and_refused_vat(self):
         self.company.vat = False
