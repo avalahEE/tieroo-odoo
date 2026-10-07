@@ -102,7 +102,7 @@
                             <button name="action_wallet_design" type="object" string="Design the card" icon="oi-arrow-right" class="btn-link"/>
                         </setting>
                     </block>
-                    <block title="Advanced" name="wallet_advanced">
+                    <block title="Advanced" name="wallet_advanced" groups="base.group_no_one">
                         <setting string="Platform URL" company_dependent="1" help="Leave empty to use https://app.tieroo.com">
                             <field name="wallet_api_url"/>
                         </setting>

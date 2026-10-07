@@ -60,6 +60,16 @@ class TestTieroo(TierooSetup, TransactionCase):
         self.env["res.config.settings"].create({"wallet_data_consent": False}).execute()
         self.assertFalse(self.company.wallet_consent_date)
 
+    def test_a_copy_of_the_database_loses_the_key(self):
+        from odoo.modules.neutralize import get_neutralization_queries
+        self.company.write({"wallet_api_key": "k", "wallet_claim_token": "t"})
+        self.env.flush_all()
+        for query in get_neutralization_queries(["tieroo"]):
+            self.env.cr.execute(query)
+        self.env.invalidate_all()
+        self.assertFalse(self.company.wallet_api_key)
+        self.assertFalse(self.company.wallet_claim_token)
+
     def test_missing_vat_and_refused_vat(self):
         self.company.vat = False
         with self.assertRaisesRegex(UserError, "VAT number"):
