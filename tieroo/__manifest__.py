@@ -1,7 +1,7 @@
 {
     "name": "Tieroo – Loyalty cards",
     "summary": "Loyalty cards in Apple Wallet and Google Wallet from Odoo Loyalty. Uses the Tieroo service (free up to 100 cards).",
-    "version": "19.0.1.0.2",
+    "version": "19.0.1.0.3",
     "category": "Sales/Point of Sale",
     "license": "LGPL-3",
     "author": "Tieroo",
