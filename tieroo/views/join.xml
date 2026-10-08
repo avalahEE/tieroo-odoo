@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_form_wallet_signup" model="ir.ui.view">
+        <field name="name">res.partner.form.wallet.signup</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_id']" position="after">
+                <label for="wallet_birth_day" string="Birthday" invisible="is_company"/>
+                <div class="o_row" invisible="is_company">
+                    <field name="wallet_birth_day" placeholder="Day" class="oe_inline" style="max-width: 4rem"/>
+                    <field name="wallet_birth_month" placeholder="Month" class="oe_inline"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

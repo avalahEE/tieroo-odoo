@@ -8,7 +8,7 @@ from odoo.exceptions import ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
 PUT = "odoo.addons.tieroo.models.requests.put"
-BRAND = "odoo.addons.tieroo_join.models.requests.get"
+BRAND = "odoo.addons.tieroo.join.requests.get"
 GET = "odoo.addons.tieroo.models.requests.get"
 
 
@@ -33,7 +33,7 @@ class SignupSetup:
 
     def join(self, email="mari@example.ee", name="Mari Maasikas", birthday=None, ip="ip1"):
         token = f"tok-{email}-{self.env['wallet.signup.request'].search_count([])}"
-        with patch("odoo.addons.tieroo_join.models.secrets.token_urlsafe", return_value=token):
+        with patch("odoo.addons.tieroo.join.secrets.token_urlsafe", return_value=token):
             result = self.Partner._wallet_signup_request(self.company, name, email, lang="en_US", birthday=birthday, ip_hash=ip)
         return result, token
 
@@ -62,7 +62,7 @@ class TestSignup(SignupSetup, TransactionCase):
         card = self.confirm(token)
         mari = self.Partner.search([("email", "=", "mari@example.ee")])
         self.assertEqual(card.partner_id, mari)
-        self.assertIn(self.env.ref("tieroo_join.tag_joined_via_qr"), mari.category_id)
+        self.assertIn(self.env.ref("tieroo.tag_joined_via_qr"), mari.category_id)
         self.assertEqual((mari.wallet_birth_day, mari.wallet_birth_month), (29, "2"))
         self.assertTrue(self.env["loyalty.card"].search([("partner_id", "=", mari.id), ("program_id", "=", self.program.id)]))
         self.assertEqual(len(self.card_mails(mari)), 1)
@@ -161,7 +161,7 @@ class TestJoinPage(SignupSetup, HttpCase):
         patcher = patch(BRAND, return_value=brand)
         patcher.start()
         self.addCleanup(patcher.stop)
-        from odoo.addons.tieroo_join import models as signup_models
+        from odoo.addons.tieroo import join as signup_models
         signup_models._BRAND.clear()
 
     def test_page_form_and_thank_you(self):
@@ -172,7 +172,7 @@ class TestJoinPage(SignupSetup, HttpCase):
         self.assertEqual(page.status_code, 200)
         self.assertIn("Join our loyalty programme", page.text)
         token = re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
-        with patch("odoo.addons.tieroo_join.models.secrets.token_urlsafe", return_value="kati-link-token-1234567890"):
+        with patch("odoo.addons.tieroo.join.secrets.token_urlsafe", return_value="kati-link-token-1234567890"):
             sent = self.url_open(f"/wallet/join/{path}", data={
                 "csrf_token": token, "name": "Kati", "email": "kati@example.ee", "consent": "1", "day": "", "month": ""})
         self.assertIn("Check your email", sent.text)

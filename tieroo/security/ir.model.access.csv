@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_wallet_card_user,wallet.card user,model_wallet_card,base.group_user,1,0,0,0
 access_wallet_card_system,wallet.card system,model_wallet_card,base.group_system,1,1,1,1
 access_wallet_shop_system,wallet.shop system,model_wallet_shop,base.group_system,1,1,1,1
+access_wallet_signup_request_admin,wallet.signup.request admin,model_wallet_signup_request,base.group_system,1,0,0,0
