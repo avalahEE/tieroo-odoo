@@ -6,14 +6,21 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 17:09+0000\n"
+"POT-Creation-Date: 2026-10-08 20:03+0000\n"
 "PO-Revision-Date: 2026-10-07 17:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "%(count)s members would get a card, your Tieroo plan has room for %(room)s more. Choose a bigger plan first: Settings → Tieroo → Plan and billing."
+msgstr "Kaardi saaks %(count)s liiget, sinu Tieroo paketis on ruumi veel %(room)s kaardile. Vali enne suurem pakett: Seaded → Tieroo → Pakett ja arveldus."
 
 #. module: tieroo
 #. odoo-python
@@ -27,6 +34,29 @@ msgid ", after that no new cards."
 msgstr ", pärast seda uusi kaarte ei looda."
 
 #. module: tieroo
+#: model:mail.template,body_html:tieroo.mail_template_join_confirm
+msgid ""
+"<div>\n"
+"    <p>Hello <t t-out=\"object.name or ''\"/>,</p>\n"
+"    <p>Confirm your email address to join the loyalty programme of <t t-out=\"object.company_id.name\"/>. Then add the card to your phone.</p>\n"
+"    <p style=\"margin: 24px 0;\">\n"
+"        <a t-att-href=\"ctx.get('confirm_url')\" style=\"display:inline-block;background:#111111;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;\">Confirm and get the card</a>\n"
+"    </p>\n"
+"    <p style=\"color:#64748b;font-size:13px;\">The link works for 48 hours. Did not ask for this? Ignore this email: nothing happens.</p>\n"
+"</div>\n"
+"        "
+msgstr ""
+"<div>\n"
+"    <p>Tere, <t t-out=\"object.name or ''\"/>!</p>\n"
+"    <p>Kinnita oma e-posti aadress, et liituda ettevõtte <t t-out=\"object.company_id.name\"/> kliendiprogrammiga. Seejärel lisa kaart oma telefoni.</p>\n"
+"    <p style=\"margin: 24px 0;\">\n"
+"        <a t-att-href=\"ctx.get('confirm_url')\" style=\"display:inline-block;background:#111111;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;\">Kinnita ja saa kaart</a>\n"
+"    </p>\n"
+"    <p style=\"color:#64748b;font-size:13px;\">Link kehtib 48 tundi. Sa ei soovinud liituda? Jäta see kiri tähelepanuta: midagi ei juhtu.</p>\n"
+"</div>\n"
+"        "
+
+#. module: tieroo
 #: model:mail.template,body_html:tieroo.mail_template_wallet_card
 msgid ""
 "<div>\n"
@@ -34,8 +64,10 @@ msgid ""
 "    <p>Hello <t t-out=\"object.partner_id.name\"/>,</p>\n"
 "    <p>Add your loyalty card to your phone's wallet. Show the card at the checkout to use your customer benefits.</p>\n"
 "    <p style=\"margin: 24px 0;\">\n"
-"        <a t-if=\"card.apple_url\" t-att-href=\"card.apple_url\" style=\"display:inline-block;margin:0 8px 8px 0;background:#000000;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Add to Apple Wallet</a>\n"
-"        <a t-if=\"card.google_url\" t-att-href=\"card.google_url\" style=\"display:inline-block;margin:0 8px 8px 0;background:#1f1f1f;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Add to Google Wallet</a>\n"
+"        <t t-set=\"badge\" t-value=\"card.platform_url + '/badge/'\"/>\n"
+"        <t t-set=\"lang\" t-value=\"'.png?lang=' + (object.partner_id.lang or 'en_US')\"/>\n"
+"        <a t-if=\"card.apple_url\" t-att-href=\"card.apple_url\" style=\"display:inline-block;margin:0 8px 8px 0;text-decoration:none;\"><img t-att-src=\"badge + 'apple' + lang\" height=\"48\" alt=\"Add to Apple Wallet\" style=\"display:block;height:48px;width:auto;border:0;\"/></a>\n"
+"        <a t-if=\"card.google_url\" t-att-href=\"card.google_url\" style=\"display:inline-block;margin:0 8px 8px 0;text-decoration:none;\"><img t-att-src=\"badge + 'google' + lang\" height=\"48\" alt=\"Add to Google Wallet\" style=\"display:block;height:48px;width:auto;max-width:100%;border:0;\"/></a>\n"
 "        <a t-if=\"not card.apple_url and not card.google_url\" t-att-href=\"card.url\" style=\"display:inline-block;background:#0f172a;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Open loyalty card</a>\n"
 "    </p>\n"
 "    <p style=\"color:#64748b;font-size:13px;\">The buttons work for 48 hours, until the card is on your phone.</p>\n"
@@ -48,8 +80,10 @@ msgstr ""
 "    <p>Tere <t t-out=\"object.partner_id.name\"/>,</p>\n"
 "    <p>Lisa oma kliendikaart telefoni rahakotti. Näita kaarti kassas, et kasutada oma kliendisoodustusi.</p>\n"
 "    <p style=\"margin: 24px 0;\">\n"
-"        <a t-if=\"card.apple_url\" t-att-href=\"card.apple_url\" style=\"display:inline-block;margin:0 8px 8px 0;background:#000000;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Lisa Apple Walletisse</a>\n"
-"        <a t-if=\"card.google_url\" t-att-href=\"card.google_url\" style=\"display:inline-block;margin:0 8px 8px 0;background:#1f1f1f;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Lisa Google Walletisse</a>\n"
+"        <t t-set=\"badge\" t-value=\"card.platform_url + '/badge/'\"/>\n"
+"        <t t-set=\"lang\" t-value=\"'.png?lang=' + (object.partner_id.lang or 'en_US')\"/>\n"
+"        <a t-if=\"card.apple_url\" t-att-href=\"card.apple_url\" style=\"display:inline-block;margin:0 8px 8px 0;text-decoration:none;\"><img t-att-src=\"badge + 'apple' + lang\" height=\"48\" alt=\"Lisa Apple Walletisse\" style=\"display:block;height:48px;width:auto;border:0;\"/></a>\n"
+"        <a t-if=\"card.google_url\" t-att-href=\"card.google_url\" style=\"display:inline-block;margin:0 8px 8px 0;text-decoration:none;\"><img t-att-src=\"badge + 'google' + lang\" height=\"48\" alt=\"Lisa Google Walletisse\" style=\"display:block;height:48px;width:auto;max-width:100%;border:0;\"/></a>\n"
 "        <a t-if=\"not card.apple_url and not card.google_url\" t-att-href=\"card.url\" style=\"display:inline-block;background:#0f172a;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Ava kliendikaart</a>\n"
 "    </p>\n"
 "    <p style=\"color:#64748b;font-size:13px;\">Nupud kehtivad 48 tundi ja kuni kaart on sinu telefonis.</p>\n"
@@ -69,12 +103,16 @@ msgstr ""
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid ""
-"A QR code (a poster in the shop) opens a page where customers join the loyalty"
-" programme themselves and get the card by email. Print-ready PDF and SVG "
-"posters."
+"<span invisible=\"wallet_levels_missing != 'add'\">Customer Levels is installed in Odoo but not on your Tieroo plan: levels and pricelists work in Odoo, the cards do not show them. Add Customer Levels in Plan and billing.</span>\n"
+"                                    <span invisible=\"wallet_levels_missing != 'upgrade'\">Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing.</span>"
 msgstr ""
-"QR-kood (plakat poes) avab lehe, kus kliendid liituvad kliendiprogrammiga "
-"ise ja saavad kaardi e-kirjaga. Trükivalmis PDF ja SVG plakatid."
+"<span invisible=\"wallet_levels_missing != 'add'\">Kliendi tasemed on Odoos paigaldatud, kuid pole sinu Tieroo paketis: tasemed ja hinnakirjad töötavad Odoos, kaardid neid ei näita. Lisa Kliendi tasemed lehel Pakett ja arveldus.</span>\n"
+"                                    <span invisible=\"wallet_levels_missing != 'upgrade'\">Kliendi tasemed on Odoos paigaldatud, kuid tasuta pakett seda ei sisalda: tasemed ja hinnakirjad töötavad Odoos, kaardid neid ei näita. Vali lehel Pakett ja arveldus tasuline pakett koos Kliendi tasemetega.</span>"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "A QR code (a poster in the shop) opens a page where customers join the loyalty programme themselves and get the card by email. Print-ready PDF and SVG posters."
+msgstr "QR-kood (plakat poes) avab lehe, kus kliendid liituvad kliendiprogrammiga ise ja saavad kaardi e-kirjaga. Trükivalmis PDF ja SVG plakatid."
 
 #. module: tieroo
 #: model:ir.model.constraint,message:tieroo.constraint_wallet_card_partner_company_unique
@@ -94,20 +132,58 @@ msgid "Active"
 msgstr "Aktiivne"
 
 #. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__add
+msgid "Add it to the plan"
+msgstr "Lisa paketti"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Add the card to your phone:"
+msgstr "Lisa kaart oma telefoni:"
+
+#. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid "Add the customer's email address first."
 msgstr "Lisa esmalt kliendi e-posti aadress."
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Add to Apple Wallet"
+msgstr "Lisa Apple Walletisse"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Add to Google Wallet"
+msgstr "Lisa Google Walletisse"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Add warehouse addresses"
+msgstr "Lisa ladude aadressid"
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_res_company__wallet_signup_tag_id
+#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_signup_tag_id
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Add-ons"
-msgstr "Lisamoodulid"
+msgid "Added to every customer who joins via the QR. Use it in Odoo Automation Rules or Marketing Automation, e.g. a welcome email or a newsletter. Empty = no tag."
+msgstr "Lisatakse igale QR-iga liitunud kliendile. Kasuta seda Odoo automaatikareeglites või Marketing Automationis, nt tervituskiri või uudiskiri. Tühi = silti ei lisata."
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_id
+msgid "Address"
+msgstr "Aadress"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Advanced"
 msgstr "Täpsemad seaded"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join_controllers.py:0
+msgid "Agree to the terms to join."
+msgstr "Liitumiseks nõustu tingimustega."
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_consent_date
@@ -120,9 +196,51 @@ msgid "Apple Url"
 msgstr "Apple'i link"
 
 #. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__4
+msgid "April"
+msgstr "aprill"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__8
+msgid "August"
+msgstr "august"
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.tieroo_return_page
 msgid "Back to Settings"
 msgstr "Tagasi seadetesse"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__birth_day
+msgid "Birth Day"
+msgstr "Sünnipäev (päev)"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__birth_month
+msgid "Birth Month"
+msgstr "Sünnipäev (kuu)"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
+msgid "Birthday"
+msgstr "Sünnipäev"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_birth_day
+#: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_birth_day
+msgid "Birthday (day)"
+msgstr "Sünnipäev (päev)"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_birth_month
+#: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_birth_month
+msgid "Birthday (month)"
+msgstr "Sünnipäev (kuu)"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Birthday <span style=\"font-weight: 400; color: #71717a\">(optional)</span>"
+msgstr "Sünnipäev <span style=\"font-weight: 400; color: #71717a\">(valikuline)</span>"
 
 #. module: tieroo
 #: model:ir.model.fields.selection,name:tieroo.selection__res_company__wallet_signup_notice__cancelled
@@ -150,13 +268,19 @@ msgid "Check again"
 msgstr "Kontrolli uuesti"
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Check your email"
+msgstr "Vaata oma e-posti"
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Choose a plan and connect this company to Tieroo. A card is required, also "
-"for the free plan (nothing is charged on the free plan)."
-msgstr ""
-"Vali pakett ja ühenda see ettevõte Tierooga. Maksekaart on nõutud ka tasuta "
-"paketi puhul (tasuta paketi eest midagi ei võeta)."
+msgid "Choose a plan and connect this company to Tieroo. A card is required, also for the free plan (nothing is charged on the free plan)."
+msgstr "Vali pakett ja ühenda see ettevõte Tierooga. Maksekaart on nõutud ka tasuta paketi puhul (tasuta paketi eest midagi ei võeta)."
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__city
+msgid "City"
+msgstr "Linn"
 
 #. module: tieroo
 #: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_status__closed
@@ -166,8 +290,15 @@ msgid "Closed"
 msgstr "Suletud"
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Collect points and get rewards. The card goes to Apple Wallet or Google Wallet: first confirm your email address."
+msgstr "Kogu punkte ja saa preemiaid. Kaart läheb Apple Walletisse või Google Walletisse: kõigepealt kinnita oma e-posti aadress."
+
+#. module: tieroo
 #: model:ir.model,name:tieroo.model_res_company
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__company_id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__company_id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__company_id
 msgid "Company"
 msgstr "Ettevõte"
 
@@ -175,6 +306,21 @@ msgstr "Ettevõte"
 #: model:ir.model,name:tieroo.model_res_config_settings
 msgid "Config Settings"
 msgstr "Seadistused"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Confirm and get the card"
+msgstr "Kinnita ja saa kaart"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Confirm joining"
+msgstr "Kinnita liitumine"
+
+#. module: tieroo
+#: model:mail.template,subject:tieroo.mail_template_join_confirm
+msgid "Confirm joining {{ object.company_id.name }}"
+msgstr "Kinnita liitumine: {{ object.company_id.name }}"
 
 #. module: tieroo
 #. odoo-python
@@ -208,21 +354,16 @@ msgid "Could not reach Tieroo. Try again later."
 msgstr "Tierooga ei saanud ühendust. Proovi hiljem uuesti."
 
 #. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_loyalty_program__wallet_auto_send
-msgid ""
-"Create a card for every member with an email and email it. Switching this on"
-" emails every member who has no card yet."
-msgstr ""
-"Loo kaart igale e-posti aadressiga liikmele ja saada see e-kirjaga. "
-"Sisselülitamisel saadetakse kaart kõigile liikmetele, kellel seda veel pole."
-
-#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__create_uid
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__create_uid
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__create_uid
 msgid "Created by"
 msgstr "Loonud"
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__create_date
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__create_date
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__create_date
 msgid "Created on"
 msgstr "Loomise kuupäev"
 
@@ -234,22 +375,24 @@ msgstr "Kliendi tasemed"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_card
-msgid ""
-"Customer did not get the email? Check the email address, then press to send "
-"the card again."
-msgstr ""
-"Klient ei saanud kirja kätte? Kontrolli e-posti aadressi ja vajuta, et kaart"
-" uuesti saata."
+msgid "Customer did not get the email? Check the email address, then press to send the card again."
+msgstr "Klient ei saanud kirja kätte? Kontrolli e-posti aadressi ja vajuta, et kaart uuesti saata."
 
 #. module: tieroo
 #: model:ir.model.fields,help:tieroo.field_loyalty_program__wallet_card
-msgid ""
-"Customers in this programme get a card in Apple Wallet and Google Wallet "
-"showing their points and the next reward. One loyalty programme per company."
-msgstr ""
-"Selle programmi kliendid saavad Apple Walleti ja Google Walleti kaardi, "
-"millel on nende punktid ja järgmine preemia. Üks lojaalsusprogramm ettevõtte"
-" kohta."
+msgid "Customers in this programme get a card in Apple Wallet and Google Wallet showing their points and the next reward. One loyalty programme per company."
+msgstr "Selle programmi kliendid saavad Apple Walleti ja Google Walleti kaardi, millel on nende punktid ja järgmine preemia. Üks lojaalsusprogramm ettevõtte kohta."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
+msgid "Day"
+msgstr "Päev"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__12
+msgid "December"
+msgstr "detsember"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
@@ -266,12 +409,21 @@ msgstr "Kujunda rahakoti kaarti"
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_history__display_name
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_program__display_name
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_reward__display_name
+#: model:ir.model.fields,field_description:tieroo.field_mail_template__display_name
 #: model:ir.model.fields,field_description:tieroo.field_res_company__display_name
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:tieroo.field_res_partner__display_name
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__display_name
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__display_name
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__display_name
 msgid "Display Name"
 msgstr "Näidatav nimi"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__email
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Email"
+msgstr "E-post"
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__email_pending
@@ -279,19 +431,68 @@ msgid "Email Pending"
 msgstr "E-kiri saatmata"
 
 #. module: tieroo
+#: model:ir.model,name:tieroo.model_mail_template
+msgid "Email Template"
+msgstr "E-kirja mall"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Email templates"
+msgstr "E-kirja mallid"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
+msgid "Email the Tieroo card to every member who has none yet? The emails go out through your mail server: check its daily sending limit."
+msgstr "Kas saata Tieroo kaart e-kirjaga igale liikmele, kellel seda veel pole? Kirjad lähevad välja sinu meiliserveri kaudu: kontrolli selle päevast saatmislimiiti."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0 code:addons/tieroo/join_controllers.py:0
+msgid "Enter a valid email address."
+msgstr "Sisesta korrektne e-posti aadress."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0
+msgid "Enter the birthday as a day and a month that exist (29 February is fine)."
+msgstr "Sisesta sünnipäev olemasoleva päeva ja kuuna (29. veebruar sobib)."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join_controllers.py:0
+msgid "Enter your name."
+msgstr "Sisesta oma nimi."
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_loyalty_program__wallet_auto_send
+msgid "Every new member with an email gets the card by email. Members from before get it only when you press Send to existing members."
+msgstr "Iga uus e-posti aadressiga liige saab kaardi e-kirjaga. Varasemad liikmed saavad selle alles siis, kui vajutad „Saada olemasolevatele liikmetele“."
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__2
+msgid "February"
+msgstr "veebruar"
+
+#. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid ""
-"Fill in the VAT number and the country of %(company)s first: Settings → "
-"Companies → %(company)s."
-msgstr ""
-"Sisesta esmalt ettevõtte %(company)s KMKR number ja riik: Seaded → "
-"Ettevõtted → %(company)s."
+msgid "Fill in the VAT number and the country of %(company)s first: Settings → Companies → %(company)s."
+msgstr "Sisesta esmalt ettevõtte %(company)s KMKR number ja riik: Seaded → Ettevõtted → %(company)s."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "For a birthday offer. It cannot be changed later."
+msgstr "Sünnipäevapakkumise jaoks. Seda ei saa hiljem muuta."
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__google_url
 msgid "Google Url"
 msgstr "Google'i link"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__has_point
+msgid "Has Point"
+msgstr "Asukoht olemas"
 
 #. module: tieroo
 #: model:ir.model,name:tieroo.model_loyalty_history
@@ -304,26 +505,45 @@ msgid "I agree that Odoo sends data to Tieroo"
 msgstr "Nõustun, et Odoo saadab andmed Tieroole"
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "I join the loyalty programme of"
+msgstr "Liitun kliendiprogrammiga:"
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_card__id
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_history__id
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_program__id
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_reward__id
+#: model:ir.model.fields,field_description:tieroo.field_mail_template__id
 #: model:ir.model.fields,field_description:tieroo.field_res_company__id
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__id
 #: model:ir.model.fields,field_description:tieroo.field_res_partner__id
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__id
 msgid "ID"
 msgstr "ID"
 
 #. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_res_config_settings__module_wallet_signup
-msgid ""
-"Installs Tieroo – Join via QR: customers scan a QR code, enter their name "
-"and email, and get the wallet card by email. Includes print-ready posters."
-msgstr ""
-"Paigaldab liitumise lisamooduli: kliendid skaneerivad QR-koodi, sisestavad "
-"nime ja e-posti ning saavad rahakoti kaardi e-kirjaga. Koos trükivalmis "
-"plakatitega."
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "In a big shopping centre use the shop's own point (copy it from a map app), not the centre's address: they can be 100-300 m apart."
+msgstr "Suures kaubanduskeskuses kasuta poe enda asukohta (kopeeri see kaardirakendusest), mitte keskuse aadressi: need võivad olla 100–300 m lahus."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Inventory is not installed: add the shops' addresses one by one."
+msgstr "Ladu pole paigaldatud: lisa poodide aadressid ükshaaval."
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__ip_hash
+msgid "Ip Hash"
+msgstr "IP räsi"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_card
+msgid "Issue Tieroo card"
+msgstr "Väljasta Tieroo kaart"
 
 #. module: tieroo
 #: model:ir.model.fields,help:tieroo.field_wallet_card__email_pending
@@ -336,27 +556,102 @@ msgid "It is taking longer than usual. Check again in a moment."
 msgstr "See võtab tavalisest kauem. Kontrolli hetke pärast uuesti."
 
 #. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__module_wallet_signup
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__1
+msgid "January"
+msgstr "jaanuar"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Join"
+msgstr "Liitu"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_url
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Join link"
+msgstr "Liitumislink"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Join our loyalty programme"
+msgstr "Liitu meie kliendiprogrammiga"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Join via QR"
 msgstr "Liitumine QR-iga"
 
 #. module: tieroo
+#: model:ir.model,name:tieroo.model_wallet_signup_request
+msgid "Join via QR sign-up"
+msgstr "Liitumine QR-koodiga"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0
+msgid "Joined %(program)s via the QR code: confirmed the email address and agreed to the terms (%(company)s)."
+msgstr "Liitus QR-koodiga programmiga %(program)s: kinnitas e-posti aadressi ja nõustus tingimustega (%(company)s)."
+
+#. module: tieroo
+#: model:res.partner.category,name:tieroo.tag_joined_via_qr
+msgid "Joined via QR"
+msgstr "Liitus QR-iga"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0 model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Joining is not open at the moment"
+msgstr "Liitumine ei ole praegu avatud"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__7
+msgid "July"
+msgstr "juuli"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__6
+msgid "June"
+msgstr "juuni"
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Key created for this company on Tieroo (filled in by Start with Tieroo)"
-msgstr ""
-"Sellele ettevõttele rahakoti platvormil loodud võti (täidab „Alusta "
-"Tierooga“)"
+msgid "Key created for this company on Tieroo (filled in by Start with Tieroo)"
+msgstr "Sellele ettevõttele rahakoti platvormil loodud võti (täidab „Alusta Tierooga“)"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_status__elsewhere
+msgid "Key in use elsewhere"
+msgstr "Võti on mujal kasutusel"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__lang
+msgid "Lang"
+msgstr "Keel"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Language"
+msgstr "Keel"
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__write_uid
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__write_uid
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__write_uid
 msgid "Last Updated by"
 msgstr "Viimati uuendas"
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__write_date
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__write_date
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__write_date
 msgid "Last Updated on"
 msgstr "Viimati uuendatud"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_latitude
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Latitude"
+msgstr "Laiuskraad"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
@@ -364,15 +659,33 @@ msgid "Leave empty to use https://app.tieroo.com"
 msgstr "Jäta tühjaks, et kasutada https://app.tieroo.com"
 
 #. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_res_company__wallet_privacy_url
+#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_privacy_url
+msgid "Linked from the join page's consent checkbox."
+msgstr "Lingitud liitumislehe nõusoleku märkeruudust."
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_res_company__wallet_terms_url
+#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_terms_url
+msgid "Linked from the join page's consent checkbox: \"agree to its terms\"."
+msgstr "Lingitud liitumislehe nõusoleku märkeruudust: „nõustun selle tingimustega“."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0
+msgid "Links must start with https://"
+msgstr "Lingid peavad algama https://"
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Logo, colours, background image, fields and translations, with a live "
-"preview. Saving updates every customer's card. The loyalty programme on the "
-"card: tick 'Issue Tieroo card' on it."
-msgstr ""
-"Logo, värvid, taustapilt, väljad ja tõlked koos eelvaatega. Salvestamisel "
-"uuenevad kõigi klientide kaardid. Kaardil olev lojaalsusprogramm: märgi "
-"sellel „Väljasta Tieroo kaart“."
+msgid "Logo, colours, background image, fields and translations, with a live preview. Saving updates every customer's card. The loyalty programme on the card: tick 'Issue Tieroo card' on it."
+msgstr "Logo, värvid, taustapilt, väljad ja tõlked koos eelvaatega. Salvestamisel uuenevad kõigi klientide kaardid. Kaardil olev lojaalsusprogramm: märgi sellel „Väljasta Tieroo kaart“."
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_longitude
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Longitude"
+msgstr "Pikkuskraad"
 
 #. module: tieroo
 #: model:ir.model,name:tieroo.model_loyalty_card
@@ -395,13 +708,31 @@ msgid "Loyalty cards (this company)"
 msgstr "Kliendikaardid (see ettevõte)"
 
 #. module: tieroo
-#: model:ir.module.module,summary:base.module_wallet_card
-msgid ""
-"Loyalty cards in Apple Wallet and Google Wallet from Odoo Loyalty. Uses the "
-"Tieroo service (free up to 100 cards)."
-msgstr ""
-"Odoo lojaalsuskaardid Apple Walletis ja Google Walletis: punktid, järgmine "
-"preemia, automaatne e-kiri"
+#: model:ir.module.module,summary:base.module_tieroo
+msgid "Loyalty cards in Apple Wallet and Google Wallet from Odoo Loyalty. Uses the Tieroo service (free up to 100 cards)."
+msgstr "Odoo lojaalsuskaardid Apple Walletis ja Google Walletis: punktid, järgmine preemia, automaatne e-kiri"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_terms_url
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_terms_url
+msgid "Loyalty programme terms URL"
+msgstr "Kliendiprogrammi tingimuste link"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__3
+msgid "March"
+msgstr "märts"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__5
+msgid "May"
+msgstr "mai"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
+msgid "Month"
+msgstr "Kuu"
 
 #. module: tieroo
 #. odoo-python
@@ -410,16 +741,56 @@ msgid "Monthly"
 msgstr "Igakuine"
 
 #. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__name
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Name"
+msgstr "Nimi"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Near one of your shops the iPhone shows the card on the lock screen and Android shows a reminder. Each card carries up to 10 of your shops' coordinates, chosen by where that customer bought and the city in their address, listed in your order. The phone compares its own position with them: Tieroo and Google never learn where a customer is."
+msgstr "Mõne sinu poe lähedal näitab iPhone kaarti lukustusekraanil ja Android tuletab kaarti meelde. Igal kaardil on kuni 10 sinu poe koordinaadid, valitud selle järgi, kus klient on ostnud ja mis linn on tema aadressis, ning sinu järjekorras. Telefon võrdleb ise oma asukohta nendega: Tieroo ega Google ei saa kunagi teada, kus klient on."
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__upgrade
+msgid "Needs a paid plan"
+msgstr "Vajab tasulist paketti"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "No email within a few minutes? Check the spam folder, or ask the staff."
+msgstr "Kirja pole mõne minuti jooksul tulnud? Vaata rämpsposti kausta või küsi töötajalt."
+
+#. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid "No sign-up is waiting for %s. Start again in Settings → Tieroo."
-msgstr ""
-"Ettevõttel %s pole pooleliolevat liitumist. Alusta uuesti: Seaded → Tieroo."
+msgstr "Ettevõttel %s pole pooleliolevat liitumist. Alusta uuesti: Seaded → Tieroo."
 
 #. module: tieroo
 #: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_card_state__none
 msgid "Not created"
 msgstr "Loomata"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__11
+msgid "November"
+msgstr "november"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "OK"
+msgstr "OK"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__10
+msgid "October"
+msgstr "oktoober"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__on_card
+msgid "On the card"
+msgstr "Kaardil"
 
 #. module: tieroo
 #. odoo-python
@@ -443,8 +814,12 @@ msgstr "Rahakoti kaarti saavad uuesti saata ainult administraatorid."
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid "Only one programme of this type per company can issue Tieroo cards."
-msgstr ""
-"Tieroo kaarte saab väljastada ainult üks seda tüüpi programm ettevõtte kohta."
+msgstr "Tieroo kaarte saab väljastada ainult üks seda tüüpi programm ettevõtte kohta."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Open the card"
+msgstr "Ava kaart"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
@@ -453,15 +828,12 @@ msgstr "Paketi limiit on ületatud: vali suurem pakett hiljemalt"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Over the plan's limit: no new cards until you choose a bigger plan. Existing"
-" cards keep updating."
-msgstr ""
-"Paketi limiit on ületatud: uusi kaarte ei looda enne, kui valid suurema "
-"paketi. Olemasolevad kaardid uuenevad edasi."
+msgid "Over the plan's limit: no new cards until you choose a bigger plan. Existing cards keep updating."
+msgstr "Paketi limiit on ületatud: uusi kaarte ei looda enne, kui valid suurema paketi. Olemasolevad kaardid uuenevad edasi."
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__partner_id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__partner_id
 msgid "Partner"
 msgstr "Partner"
 
@@ -491,9 +863,45 @@ msgid "Platform URL"
 msgstr "Platvormi aadress"
 
 #. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_card__platform_url
+msgid "Platform Url"
+msgstr "Platvormi URL"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Please ask the staff."
+msgstr "Palun küsi töötajalt."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Please try again in a few minutes"
+msgstr "Palun proovi mõne minuti pärast uuesti"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Please try again later"
+msgstr "Palun proovi hiljem uuesti"
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Privacy"
 msgstr "Privaatsus"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_privacy_url
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_privacy_url
+msgid "Privacy policy URL"
+msgstr "Privaatsuspoliitika link"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "QR code and posters"
+msgstr "QR-kood ja plakatid"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_auto_send
+msgid "Send Tieroo cards automatically"
+msgstr "Saada Tieroo kaardid automaatselt"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_card
@@ -501,22 +909,54 @@ msgid "Send the wallet card again to the customer's email address?"
 msgstr "Kas saata rahakoti kaart uuesti kliendi e-posti aadressile?"
 
 #. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_auto_send
-msgid "Send wallet cards automatically"
-msgstr "Saada rahakoti kaardid automaatselt"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Sign-up cancelled: nothing was charged. Start again when you are ready."
-msgstr ""
-"Liitumine tühistati: midagi ei võetud. Alusta uuesti, kui oled valmis."
+#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
+msgid "Send to existing members"
+msgstr "Saada olemasolevatele liikmetele"
 
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid ""
-"Signing up with Tieroo is not available at the moment. Try again later."
+msgid "Sending the card to %s members in the background."
+msgstr "Kaart saadetakse taustal %s liikmele."
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__9
+msgid "September"
+msgstr "september"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__sequence
+msgid "Sequence"
+msgstr "Järjestus"
+
+#. module: tieroo
+#: model:ir.model,name:tieroo.model_wallet_shop
+msgid "Shop on the Tieroo card"
+msgstr "Pood Tieroo kaardil"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Shops on the card"
+msgstr "Poed kaardil"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_shops_on
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_on
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Show the card near our shops"
+msgstr "Näita kaarti meie poodide lähedal"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Sign-up cancelled: nothing was charged. Start again when you are ready."
+msgstr "Liitumine tühistati: midagi ei võetud. Alusta uuesti, kui oled valmis."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Signing up with Tieroo is not available at the moment. Try again later."
 msgstr "Tierooga liitumine pole praegu võimalik. Proovi hiljem uuesti."
 
 #. module: tieroo
@@ -536,15 +976,18 @@ msgstr "Olek:"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.tieroo_return_page
-msgid ""
-"Stripe has not confirmed the card yet. This usually takes a few seconds."
-msgstr ""
-"Stripe pole maksekaarti veel kinnitanud. Tavaliselt võtab see paar sekundit."
+msgid "Stripe has not confirmed the card yet. This usually takes a few seconds."
+msgstr "Stripe pole maksekaarti veel kinnitanud. Tavaliselt võtab see paar sekundit."
 
 #. module: tieroo
 #: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_status__suspended
 msgid "Suspended"
 msgstr "Peatatud"
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_wallet_shop__on_card
+msgid "Switch off while the shop is closed, e.g. for renovation: it stays on the list."
+msgstr "Lülita välja, kui pood on suletud, näiteks remondi ajaks: see jääb nimekirja alles."
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__sync_needed
@@ -557,6 +1000,12 @@ msgid "Sync key"
 msgstr "Sünkroonimisvõti"
 
 #. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_tag_id
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_tag_id
+msgid "Tag for new members"
+msgstr "Uute liikmete silt"
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Terms"
 msgstr "Tingimused"
@@ -564,30 +1013,54 @@ msgstr "Tingimused"
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid ""
-"The Tieroo plan's card limit is reached: choose a bigger plan in Settings → "
-"Tieroo."
-msgstr ""
-"Tieroo paketi kaartide limiit on täis: vali suurem pakett jaotises Seaded → "
-"Tieroo."
+msgid "The Tieroo plan's card limit is reached: choose a bigger plan in Settings → Tieroo."
+msgstr "Tieroo paketi kaartide limiit on täis: vali suurem pakett jaotises Seaded → Tieroo."
 
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid ""
-"The VAT number was not accepted. Check it in the company's settings: the EU "
-"VAT number with its country prefix, e.g. EE123456780."
-msgstr ""
-"KMKR numbrit ei aktsepteeritud. Kontrolli seda ettevõtte seadetes: ELi KMKR "
-"number koos riigi eesliitega, nt EE123456780."
+msgid "The VAT number was not accepted. Check it in the company's settings: the EU VAT number with its country prefix, e.g. EE123456780."
+msgstr "KMKR numbrit ei aktsepteeritud. Kontrolli seda ettevõtte seadetes: ELi KMKR number koos riigi eesliitega, nt EE123456780."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "The card could not be made right now. Open the link in the email again in a few minutes; your sign-up is saved."
+msgstr "Kaarti ei õnnestunud praegu luua. Ava e-kirjas olev link mõne minuti pärast uuesti; sinu liitumine on salvestatud."
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"This account is suspended or closed: the cards do not update. Contact "
-"Tieroo."
-msgstr ""
-"See konto on peatatud või suletud: kaardid ei uuene. Võta ühendust Tierooga."
+msgid "The card email and the joining confirmation, sent by Odoo. Change the text and translations here; Reset Template brings back the original."
+msgstr "Kaardi e-kiri ja liitumise kinnitus, mille saadab Odoo. Muuda siin teksti ja tõlkeid; Reset Template taastab algse."
+
+#. module: tieroo
+#: model:ir.model.constraint,message:tieroo.constraint_res_company_wallet_signup_token_unique
+msgid "The join link must be unique."
+msgstr "Liitumislink peab olema unikaalne."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "The link works for 48 hours. Join again with the QR code, or ask the staff."
+msgstr "Link kehtib 48 tundi. Liitu uuesti QR-koodiga või küsi töötajalt."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "This Tieroo key is in use in another Odoo database or company: the cards do not update from here. Contact Tieroo."
+msgstr "See Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes: siit kaardid ei uuene. Võta ühendust Tierooga."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "This account is suspended or closed: the cards do not update. Contact Tieroo."
+msgstr "See konto on peatatud või suletud: kaardid ei uuene. Võta ühendust Tierooga."
+
+#. module: tieroo
+#: model:ir.model.constraint,message:tieroo.constraint_wallet_shop_partner_unique
+msgid "This address is already on the list."
+msgstr "See aadress on juba nimekirjas."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_card
+msgid "This address is on the blacklist (no marketing emails). Send the wallet card anyway? Do it only if the customer asked for it."
+msgstr "See aadress on blacklistis (turunduskirju ei saadeta). Kas saata kaart ikkagi? Tee seda ainult siis, kui klient ise palus."
 
 #. module: tieroo
 #. odoo-python
@@ -598,8 +1071,24 @@ msgstr "Selle ettevõtte Tieroo konto on peatatud. Võta ühendust Tierooga."
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
+msgid "This company's Tieroo key is in use in another Odoo database or company. Contact Tieroo."
+msgstr "Selle ettevõtte Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes. Võta ühendust Tierooga."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
 msgid "This customer has no active wallet card in %s."
 msgstr "Sellel kliendil ei ole ettevõttes %s aktiivset rahakoti kaarti."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "This link has been used. Your card was emailed to you: add it to your phone from that email."
+msgstr "Seda linki on juba kasutatud. Kaart saadeti sulle e-postiga: lisa see telefoni sellest kirjast."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "This link has expired"
+msgstr "See link on aegunud"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.tieroo_return_page
@@ -609,12 +1098,8 @@ msgstr "See leht kontrollib ise uuesti."
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid ""
-"This sign-up has already been used. If the company is still not connected, "
-"start again."
-msgstr ""
-"Seda liitumist on juba kasutatud. Kui ettevõte pole ikka ühendatud, alusta "
-"uuesti."
+msgid "This sign-up has already been used. If the company is still not connected, start again."
+msgstr "Seda liitumist on juba kasutatud. Kui ettevõte pole ikka ühendatud, alusta uuesti."
 
 #. module: tieroo
 #. odoo-python
@@ -647,11 +1132,19 @@ msgstr "Tierooga ei saanud ühendust: %s"
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid ""
-"Tieroo did not accept the company's data: check the name, email and address."
-msgstr ""
-"Tieroo ei aktsepteerinud ettevõtte andmeid: kontrolli nime, e-posti ja "
-"aadressi."
+msgid "Tieroo did not accept the company's data: check the name, email and address."
+msgstr "Tieroo ei aktsepteerinud ettevõtte andmeid: kontrolli nime, e-posti ja aadressi."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Tieroo email templates"
+msgstr "Tieroo e-kirja mallid"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Tieroo is an external service. To open the account, Odoo sends it this company's name, VAT number, address and your email. After that, to issue and update the cards, it sends each card holder's name, barcode, points, next reward, level and language, and, if you show the card near your shops, for each card up to 10 of your shops' coordinates, chosen by where that customer bought and the city in their address. Emails with the cards are sent by Odoo itself."
+msgstr "Tieroo on väline teenus. Konto avamiseks saadab Odoo sellele ettevõtte nime, KMKR numbri, aadressi ja sinu e-posti aadressi. Seejärel saadab see kaartide väljastamiseks ja uuendamiseks iga kaardiomaniku nime, triipkoodi, punktid, järgmise preemia, taseme ja keele ning, kui näitad kaarti oma poodide lähedal, iga kaardi kohta kuni 10 sinu poe koordinaadid, valitud selle järgi, kus klient on ostnud ja mis linn on tema aadressis. Kaartidega e-kirjad saadab Odoo ise."
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_api_url
@@ -660,9 +1153,20 @@ msgid "Tieroo platform URL"
 msgstr "Rahakoti platvormi aadress"
 
 #. module: tieroo
-#: model:ir.module.module,shortdesc:base.module_wallet_card
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Tieroo sends this email, so the template cannot be deleted. Change its text, or bring back the original with Reset Template."
+msgstr "Tieroo saadab seda e-kirja, nii et malli ei saa kustutada. Muuda selle teksti või taasta algne nupuga Reset Template."
+
+#. module: tieroo
+#: model:ir.module.module,shortdesc:base.module_tieroo
 msgid "Tieroo – Loyalty cards"
 msgstr "Tieroo – kliendikaardid"
+
+#. module: tieroo
+#: model:mail.template,name:tieroo.mail_template_join_confirm
+msgid "Tieroo: confirm joining"
+msgstr "Tieroo: liitumise kinnitus"
 
 #. module: tieroo
 #: model:ir.actions.server,name:tieroo.cron_wallet_sync_ir_actions_server
@@ -673,6 +1177,16 @@ msgstr "Tieroo: kaartide väljastamine ja uuendamine"
 #: model:mail.template,name:tieroo.mail_template_wallet_card
 msgid "Tieroo: wallet card"
 msgstr "Tieroo: kliendikaardi e-kiri"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__token_hash
+msgid "Token Hash"
+msgstr "Lingi räsi"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Too many sign-ups from this network in the last hour. Try again in a while, or ask the staff."
+msgstr "Sellest võrgust on viimase tunni jooksul liitutud liiga palju kordi. Proovi veidi hiljem uuesti või küsi töötajalt."
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__url
@@ -705,9 +1219,19 @@ msgid "Wallet Connected"
 msgstr "Ühendatud"
 
 #. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_existing_count
+msgid "Wallet Existing Count"
+msgstr "Kaardita liikmeid"
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_grace_until
 msgid "Wallet Grace Until"
 msgstr "Ajapikendus kuni"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_levels_missing
+msgid "Wallet Levels Missing"
+msgstr "Kliendi tasemed paketist puudu"
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_over_limit
@@ -720,15 +1244,30 @@ msgid "Wallet Plan Extra"
 msgstr "Paketi lisainfo"
 
 #. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_card
-msgid "Issue Tieroo card"
-msgstr "Väljasta Tieroo kaart"
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_send_after
+msgid "Wallet Send After"
+msgstr "Saada pärast kaarti"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_count
+msgid "Wallet Shops Count"
+msgstr "Poode nimekirjas"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_missing
+msgid "Wallet Shops Missing"
+msgstr "Poode ilma koordinaatideta"
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_notice
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_notice
 msgid "Wallet Signup Notice"
 msgstr "Liitumise teade"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_token
+msgid "Wallet Signup Token"
+msgstr "Liitumislingi võti"
 
 #. module: tieroo
 #: model:ir.model,name:tieroo.model_wallet_card
@@ -769,618 +1308,13 @@ msgid "Wallet sync key"
 msgstr "Rahakoti sünkroonimisvõti"
 
 #. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Yearly"
-msgstr "Iga-aastane"
-
-#. module: tieroo
-#: model:mail.template,subject:tieroo.mail_template_wallet_card
-msgid "Your loyalty card – {{ object.company_id.name }}"
-msgstr "Sinu kliendikaart – {{ object.company_id.name }}"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Your sign-up is being confirmed (the VAT number check). Try again in a "
-"minute."
-msgstr ""
-"Teie liitumist kinnitatakse (käibemaksunumbri kontroll). Proovige minuti "
-"pärast uuesti."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "cards in use"
-msgstr "kaarti kasutusel"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__add
-msgid "Add it to the plan"
-msgstr "Lisa paketti"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__upgrade
-msgid "Needs a paid plan"
-msgstr "Vajab tasulist paketti"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_levels_missing
-msgid "Wallet Levels Missing"
-msgstr "Kliendi tasemed paketist puudu"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Customer Levels is installed in Odoo but not on your Tieroo plan: levels and pricelists work in Odoo, the cards do not show them. Add Customer Levels in Plan and billing."
-msgstr "Kliendi tasemed on Odoos paigaldatud, kuid pole sinu Tieroo paketis: tasemed ja hinnakirjad töötavad Odoos, kaardid neid ei näita. Lisa Kliendi tasemed lehel Pakett ja arveldus."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing."
-msgstr "Kliendi tasemed on Odoos paigaldatud, kuid tasuta pakett seda ei sisalda: tasemed ja hinnakirjad töötavad Odoos, kaardid neid ei näita. Vali lehel Pakett ja arveldus tasuline pakett koos Kliendi tasemetega."
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_status__elsewhere
-msgid "Key in use elsewhere"
-msgstr "Võti on mujal kasutusel"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "This Tieroo key is in use in another Odoo database or company: the cards do not update from here. Contact Tieroo."
-msgstr "See Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes: siit kaardid ei uuene. Võta ühendust Tierooga."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "This company's Tieroo key is in use in another Odoo database or company. Contact Tieroo."
-msgstr "Selle ettevõtte Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes. Võta ühendust Tierooga."
-
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
-msgid "Add warehouse addresses"
-msgstr "Lisa ladude aadressid"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_id
-msgid "Address"
-msgstr "Aadress"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__city
-msgid "City"
-msgstr "Linn"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"In a big shopping centre use the shop's own point (copy it from a map app), "
-"not the centre's address: they can be 100-300 m apart."
-msgstr "Suures kaubanduskeskuses kasuta poe enda asukohta (kopeeri see kaardirakendusest), mitte keskuse aadressi: need võivad olla 100–300 m lahus."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Inventory is not installed: add the shops' addresses one by one."
-msgstr "Ladu pole paigaldatud: lisa poodide aadressid ükshaaval."
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_latitude
-#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
-msgid "Latitude"
-msgstr "Laiuskraad"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_longitude
-#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
-msgid "Longitude"
-msgstr "Pikkuskraad"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__sequence
-msgid "Sequence"
-msgstr "Järjestus"
-
-#. module: tieroo
-#: model:ir.model,name:tieroo.model_wallet_shop
-msgid "Shop on the Tieroo card"
-msgstr "Pood Tieroo kaardil"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Shops on the card"
-msgstr "Poed kaardil"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_shops_on
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_on
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Show the card near our shops"
-msgstr "Näita kaarti meie poodide lähedal"
-
-#. module: tieroo
-#: model:ir.model.constraint,message:tieroo.constraint_wallet_shop_partner_unique
-msgid "This address is already on the list."
-msgstr "See aadress on juba nimekirjas."
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_count
-msgid "Wallet Shops Count"
-msgstr "Poode nimekirjas"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_missing
-msgid "Wallet Shops Missing"
-msgstr "Poode ilma koordinaatideta"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"shops on the list. Each card shows up to 10: where the customer bought, then"
-" their city, then your order."
-msgstr "poodi nimekirjas. Iga kaart näitab kuni 10: kus klient ostis, siis tema linn, siis sinu järjekord."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Near one of your shops the iPhone shows the card on the lock screen and "
-"Android shows a reminder. Each card carries up to 10 of your shops' "
-"coordinates, chosen by where that customer bought and the city in their "
-"address, listed in your order. The phone compares its own position with "
-"them: Tieroo and Google never learn where a customer is."
-msgstr "Mõne sinu poe lähedal näitab iPhone kaarti lukustusekraanil ja Android tuletab kaarti meelde. Igal kaardil on kuni 10 sinu poe koordinaadid, valitud selle järgi, kus klient on ostnud ja mis linn on tema aadressis, ning sinu järjekorras. Telefon võrdleb ise oma asukohta nendega: Tieroo ega Google ei saa kunagi teada, kus klient on."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Tieroo is an external service. To open the account, Odoo sends it this "
-"company's name, VAT number, address and your email. After that, to issue and"
-" update the cards, it sends each card holder's name, barcode, points, next "
-"reward, level and language, and, if you show the card near your shops, for "
-"each card up to 10 of your shops' coordinates, chosen by where that customer"
-" bought and the city in their address. Emails with the cards are sent by "
-"Odoo itself."
-msgstr "Tieroo on väline teenus. Konto avamiseks saadab Odoo sellele ettevõtte nime, KMKR numbri, aadressi ja sinu e-posti aadressi. Seejärel saadab see kaartide väljastamiseks ja uuendamiseks iga kaardiomaniku nime, triipkoodi, punktid, järgmise preemia, taseme ja keele ning, kui näitad kaarti oma poodide lähedal, iga kaardi kohta kuni 10 sinu poe koordinaadid, valitud selle järgi, kus klient on ostnud ja mis linn on tema aadressis. Kaartidega e-kirjad saadab Odoo ise."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "without valid coordinates: left out until they have them."
-msgstr "ilma korrektsete koordinaatideta: jäävad välja, kuni need on parandatud."
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__on_card
-msgid "On the card"
-msgstr "Kaardil"
-
-#. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_wallet_shop__on_card
-msgid "Switch off while the shop is closed, e.g. for renovation: it stays on the list."
-msgstr "Lülita välja, kui pood on suletud, näiteks remondi ajaks: see jääb nimekirja alles."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Add the card to your phone:"
-msgstr "Lisa kaart oma telefoni:"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Add to Apple Wallet"
-msgstr "Lisa Apple Walletisse"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Add to Google Wallet"
-msgstr "Lisa Google Walletisse"
-
-#. module: tieroo
-#: model:ir.module.module,summary:base.module_tieroo_join
-msgid ""
-"Add-on: customers join the loyalty programme with a QR code and get their "
-"wallet card by email"
-msgstr "Lisamoodul: kliendid liituvad kliendiprogrammiga QR-koodiga ja saavad rahakoti kaardi e-kirjaga"
-
-#. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_res_company__wallet_signup_tag_id
-#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_signup_tag_id
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_signup
-msgid ""
-"Added to every customer who joins via the QR. Use it in Odoo Automation "
-"Rules or Marketing Automation, e.g. a welcome email or a newsletter. Empty ="
-" no tag."
-msgstr "Lisatakse igale QR-iga liitunud kliendile. Kasuta seda Odoo automaatikareeglites või Marketing Automationis, nt tervituskiri või uudiskiri. Tühi = silti ei lisata."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/controllers.py:0
-msgid "Agree to the terms to join."
-msgstr "Liitumiseks nõustu tingimustega."
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__4
-msgid "April"
-msgstr "aprill"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__8
-msgid "August"
-msgstr "august"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__birth_day
-msgid "Birth Day"
-msgstr "Sünnipäev (päev)"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__birth_month
-msgid "Birth Month"
-msgstr "Sünnipäev (kuu)"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
-msgid "Birthday"
-msgstr "Sünnipäev"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_birth_day
-#: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_birth_day
-msgid "Birthday (day)"
-msgstr "Sünnipäev (päev)"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_birth_month
-#: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_birth_month
-msgid "Birthday (month)"
-msgstr "Sünnipäev (kuu)"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"Birthday <span style=\"font-weight: 400; color: #71717a\">(optional)</span>"
-msgstr "Sünnipäev <span style=\"font-weight: 400; color: #71717a\">(valikuline)</span>"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Check your email"
-msgstr "Vaata oma e-posti"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"Collect points and get rewards. The card goes to Apple Wallet or Google "
-"Wallet: first confirm your email address."
-msgstr "Kogu punkte ja saa preemiaid. Kaart läheb Apple Walletisse või Google Walletisse: kõigepealt kinnita oma e-posti aadress."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Confirm and get the card"
-msgstr "Kinnita ja saa kaart"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Confirm joining"
-msgstr "Kinnita liitumine"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Confirm joining %(company)s"
-msgstr "Kinnita liitumine: %(company)s"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Confirm your email address to join the loyalty programme of %(company)s. "
-"Then add the card to your phone."
-msgstr "Kinnita oma e-posti aadress, et liituda ettevõtte %(company)s kliendiprogrammiga. Seejärel lisa kaart oma telefoni."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
-msgid "Day"
-msgstr "Päev"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__12
-msgid "December"
-msgstr "detsember"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__email
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Email"
-msgstr "E-post"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/controllers.py:0
-#: code:addons/tieroo/models.py:0
-msgid "Enter a valid email address."
-msgstr "Sisesta korrektne e-posti aadress."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Enter the birthday as a day and a month that exist (29 February is fine)."
-msgstr "Sisesta sünnipäev olemasoleva päeva ja kuuna (29. veebruar sobib)."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/controllers.py:0
-msgid "Enter your name."
-msgstr "Sisesta oma nimi."
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__2
-msgid "February"
-msgstr "veebruar"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "For a birthday offer. It cannot be changed later."
-msgstr "Sünnipäevapakkumise jaoks. Seda ei saa hiljem muuta."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Hello %(name)s,"
-msgstr "Tere, %(name)s!"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "I join the loyalty programme of"
-msgstr "Liitun kliendiprogrammiga:"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__ip_hash
-msgid "Ip Hash"
-msgstr "IP räsi"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__1
-msgid "January"
-msgstr "jaanuar"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Join"
-msgstr "Liitu"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_url
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_signup
-msgid "Join link"
-msgstr "Liitumislink"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Join our loyalty programme"
-msgstr "Liitu meie kliendiprogrammiga"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Joined %(program)s via the QR code: confirmed the email address and agreed "
-"to the terms (%(company)s)."
-msgstr "Liitus QR-koodiga programmiga %(program)s: kinnitas e-posti aadressi ja nõustus tingimustega (%(company)s)."
-
-#. module: tieroo
-#: model:res.partner.category,name:tieroo.tag_joined_via_qr
-msgid "Joined via QR"
-msgstr "Liitus QR-iga"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Joining is not open at the moment"
-msgstr "Liitumine ei ole praegu avatud"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__7
-msgid "July"
-msgstr "juuli"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__6
-msgid "June"
-msgstr "juuni"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__lang
-msgid "Lang"
-msgstr "Keel"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Language"
-msgstr "Keel"
-
-#. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_res_company__wallet_privacy_url
-#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_privacy_url
-msgid "Linked from the join page's consent checkbox."
-msgstr "Lingitud liitumislehe nõusoleku märkeruudust."
-
-#. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_res_company__wallet_terms_url
-#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_terms_url
-msgid "Linked from the join page's consent checkbox: \"agree to its terms\"."
-msgstr "Lingitud liitumislehe nõusoleku märkeruudust: „nõustun selle tingimustega“."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Links must start with https://"
-msgstr "Lingid peavad algama https://"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_terms_url
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_terms_url
-msgid "Loyalty programme terms URL"
-msgstr "Kliendiprogrammi tingimuste link"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__3
-msgid "March"
-msgstr "märts"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__5
-msgid "May"
-msgstr "mai"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
-msgid "Month"
-msgstr "Kuu"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__name
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Name"
-msgstr "Nimi"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"No email within a few minutes? Check the spam folder, or ask the staff."
-msgstr "Kirja pole mõne minuti jooksul tulnud? Vaata rämpsposti kausta või küsi töötajalt."
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__11
-msgid "November"
-msgstr "november"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "OK"
-msgstr "OK"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__10
-msgid "October"
-msgstr "oktoober"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Open the card"
-msgstr "Ava kaart"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Please ask the staff."
-msgstr "Palun küsi töötajalt."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Please try again in a few minutes"
-msgstr "Palun proovi mõne minuti pärast uuesti"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Please try again later"
-msgstr "Palun proovi hiljem uuesti"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_privacy_url
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_privacy_url
-msgid "Privacy policy URL"
-msgstr "Privaatsuspoliitika link"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_signup
-msgid "QR code and posters"
-msgstr "QR-kood ja plakatid"
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__9
-msgid "September"
-msgstr "september"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_tag_id
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_tag_id
-msgid "Tag for new members"
-msgstr "Uute liikmete silt"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"The card could not be made right now. Open the link in the email again in a "
-"few minutes; your sign-up is saved."
-msgstr "Kaarti ei õnnestunud praegu luua. Ava e-kirjas olev link mõne minuti pärast uuesti; sinu liitumine on salvestatud."
-
-#. module: tieroo
-#: model:ir.model.constraint,message:tieroo.constraint_res_company_wallet_signup_token_unique
-msgid "The join link must be unique."
-msgstr "Liitumislink peab olema unikaalne."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"The link works for 48 hours. Did not ask for this? Ignore this email: "
-"nothing happens."
-msgstr "Link kehtib 48 tundi. Sa ei soovinud liituda? Jäta see kiri tähelepanuta: midagi ei juhtu."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"The link works for 48 hours. Join again with the QR code, or ask the "
-"staff."
-msgstr "Link kehtib 48 tundi. Liitu uuesti QR-koodiga või küsi töötajalt."
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "This link has expired"
-msgstr "See link on aegunud"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__token_hash
-msgid "Token Hash"
-msgstr "Lingi räsi"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"Too many sign-ups from this network in the last hour. Try again in a while, "
-"or ask the staff."
-msgstr "Sellest võrgust on viimase tunni jooksul liitutud liiga palju kordi. Proovi veidi hiljem uuesti või küsi töötajalt."
-
-#. module: tieroo
-#: model:ir.module.module,shortdesc:base.module_tieroo_join
-msgid "Tieroo – Join via QR"
-msgstr "Tieroo – liitumine QR-koodiga"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_token
-msgid "Wallet Signup Token"
-msgstr "Liitumislingi võti"
-
-#. module: tieroo
-#: model:ir.model,name:tieroo.model_wallet_signup_request
-msgid "Join via QR sign-up"
-msgstr "Liitumine QR-koodiga"
-
-#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "We also emailed you the card, so you can add it later."
 msgstr "Saatsime kaardi ka e-kirjaga, nii et saad selle lisada ka hiljem."
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"We sent a confirmation link to the email address you entered. Open it on "
-"your phone: after confirming you can add the card to Apple Wallet or Google "
-"Wallet."
+msgid "We sent a confirmation link to the email address you entered. Open it on your phone: after confirming you can add the card to Apple Wallet or Google Wallet."
 msgstr "Saatsime kinnituslingi sinu sisestatud e-posti aadressile. Ava see telefonis: pärast kinnitamist saad kaardi lisada Apple Walletisse või Google Walletisse."
 
 #. module: tieroo
@@ -1394,9 +1328,31 @@ msgid "Welcome!"
 msgstr "Tere tulemast!"
 
 #. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Yearly"
+msgstr "Iga-aastane"
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "You are joining the loyalty programme of"
 msgstr "Liitud kliendiprogrammiga:"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "You have already joined"
+msgstr "Oled juba liitunud"
+
+#. module: tieroo
+#: model:mail.template,subject:tieroo.mail_template_wallet_card
+msgid "Your loyalty card – {{ object.company_id.name }}"
+msgstr "Sinu kliendikaart – {{ object.company_id.name }}"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Your sign-up is being confirmed (the VAT number check). Try again in a minute."
+msgstr "Teie liitumist kinnitatakse (käibemaksunumbri kontroll). Proovige minuti pärast uuesti."
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
@@ -1409,9 +1365,31 @@ msgid "and the"
 msgstr "ning"
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_signup
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "cards in use"
+msgstr "kaarti kasutusel"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "company_id"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "https://"
 msgstr "https://"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "id"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
+msgid "members from before have no card yet."
+msgstr "varasemal liikmel pole veel kaarti."
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
@@ -1419,71 +1397,16 @@ msgid "privacy policy"
 msgstr "privaatsuspoliitikaga"
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "shops on the list. Each card shows up to 10: where the customer bought, then their city, then your order."
+msgstr "poodi nimekirjas. Iga kaart näitab kuni 10: kus klient ostis, siis tema linn, siis sinu järjekord."
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "terms"
 msgstr "tingimustega"
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "You have already joined"
-msgstr "Oled juba liitunud"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "This link has been used. Your card was emailed to you: add it to your phone from that email."
-msgstr "Seda linki on juba kasutatud. Kaart saadeti sulle e-postiga: lisa see telefoni sellest kirjast."
-
-#. module: tieroo
-#: model:mail.template,body_html:tieroo.mail_template_join_confirm
-msgid ""
-"<div>\n"
-"    <p>Hello <t t-out=\"object.name or ''\"/>,</p>\n"
-"    <p>Confirm your email address to join the loyalty programme of <t t-out=\"object.company_id.name\"/>. Then add the card to your phone.</p>\n"
-"    <p style=\"margin: 24px 0;\">\n"
-"        <a t-att-href=\"ctx.get('confirm_url')\" style=\"display:inline-block;background:#111111;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;\">Confirm and get the card</a>\n"
-"    </p>\n"
-"    <p style=\"color:#64748b;font-size:13px;\">The link works for 48 hours. Did not ask for this? Ignore this email: nothing happens.</p>\n"
-"</div>\n"
-"        "
-msgstr "<div>\n    <p>Tere, <t t-out=\"object.name or ''\"/>!</p>\n    <p>Kinnita oma e-posti aadress, et liituda ettevõtte <t t-out=\"object.company_id.name\"/> kliendiprogrammiga. Seejärel lisa kaart oma telefoni.</p>\n    <p style=\"margin: 24px 0;\">\n        <a t-att-href=\"ctx.get('confirm_url')\" style=\"display:inline-block;background:#111111;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;\">Kinnita ja saa kaart</a>\n    </p>\n    <p style=\"color:#64748b;font-size:13px;\">Link kehtib 48 tundi. Sa ei soovinud liituda? Jäta see kiri tähelepanuta: midagi ei juhtu.</p>\n</div>\n        "
-
-#. module: tieroo
-#: model:mail.template,subject:tieroo.mail_template_join_confirm
-msgid "Confirm joining {{ object.company_id.name }}"
-msgstr "Kinnita liitumine: {{ object.company_id.name }}"
-
-#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Email templates"
-msgstr "E-kirja mallid"
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"The card email and the joining confirmation, sent by Odoo. Change the text "
-"and translations here; Reset Template brings back the original."
-msgstr "Kaardi e-kiri ja liitumise kinnitus, mille saadab Odoo. Muuda siin teksti ja tõlkeid; Reset Template taastab algse."
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Tieroo email templates"
-msgstr "Tieroo e-kirja mallid"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Tieroo sends this email, so the template cannot be deleted. Change its text,"
-" or bring back the original with Reset Template."
-msgstr "Tieroo saadab seda e-kirja, nii et malli ei saa kustutada. Muuda selle teksti või taasta algne nupuga Reset Template."
-
-#. module: tieroo
-#: model:mail.template,name:tieroo.mail_template_join_confirm
-msgid "Tieroo: confirm joining"
-msgstr "Tieroo: liitumise kinnitus"
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__has_point
-msgid "Has Point"
-msgstr "Asukoht olemas"
+msgid "without valid coordinates: left out until they have them."
+msgstr "ilma korrektsete koordinaatideta: jäävad välja, kuni need on parandatud."
