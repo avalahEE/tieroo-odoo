@@ -266,6 +266,7 @@ class ResConfigSettings(models.TransientModel):
     wallet_over_limit = fields.Boolean(compute="_compute_wallet_account")
     wallet_grace_until = fields.Date(compute="_compute_wallet_account")
     wallet_can_create = fields.Boolean(compute="_compute_wallet_account")
+    wallet_levels_missing = fields.Selection([("add", "Add it to the plan"), ("upgrade", "Needs a paid plan")], compute="_compute_wallet_account")
 
     @api.depends("company_id")
     def _compute_wallet_data_consent(self):
@@ -297,6 +298,8 @@ class ResConfigSettings(models.TransientModel):
             s.wallet_over_limit = bool(a.get("overLimitSince"))
             s.wallet_grace_until = (a.get("graceUntil") or "")[:10] or False
             s.wallet_can_create = a.get("canCreate", True)
+            missing = s.wallet_connected and not s.wallet_account_error and not a.get("levels") and company._wallet_levels_on()
+            s.wallet_levels_missing = ("upgrade" if plan.get("id") == "free" else "add") if missing else False
 
     def action_wallet_design(self):
         return self.company_id._wallet_open_designer()
