@@ -75,6 +75,7 @@ class TestWalletCard(TransactionCase):
 
     def auto_send(self, on=True):
         self.program.wallet_auto_send = on
+        self.program.wallet_send_after = 0
 
 
     def test_card_shows_points_and_next_reward(self):
@@ -221,6 +222,42 @@ class TestWalletCard(TransactionCase):
         self.assertIn("https://wallet.test/p/abc?s=sig", mail.body_html)
         self.assertIn("emailed to mari@example.ee", self.mari.message_ids[0].body)
         self.assertNotIn("wallet.test/p/", self.mari.message_ids[0].body)
+
+    def test_blacklisted_member_gets_no_card_by_itself_but_a_resend_still_goes(self):
+        self.auto_send()
+        self.env["mail.blacklist"].sudo()._add("mari@example.ee")
+        with patch(PUT, return_value=ok()):
+            self.env["wallet.card"]._cron_sync()
+        self.assertEqual(self.mari.wallet_card_state, "none")
+        self.assertFalse(self.mails_to(self.mari))
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+            self.mari.action_wallet_resend()
+        self.assertEqual(len(self.mails_to(self.mari)), 1)
+
+    def test_switching_on_sends_only_to_new_members_until_the_button(self):
+        self.program.wallet_auto_send = True
+        newcomer = self.env["res.partner"].create({"name": "Uus", "email": "uus@example.ee"})
+        self.join(newcomer, 5)
+        with patch(PUT, return_value=ok()):
+            self.env["wallet.card"]._cron_sync()
+        self.assertEqual(self.mari.wallet_card_state, "none")
+        self.assertEqual(newcomer.wallet_card_state, "active")
+        self.program.invalidate_recordset(["wallet_existing_count"])
+        self.assertEqual(self.program.wallet_existing_count, 1)
+        account = MagicMock(status_code=200, json=lambda: {"limit": 100, "billableCards": 1})
+        with patch(GET, return_value=account), patch(PUT, return_value=ok()):
+            self.program.action_wallet_send_existing()
+            self.env["wallet.card"]._cron_sync()
+        self.assertEqual(self.mari.wallet_card_state, "active")
+        self.assertEqual(len(self.mails_to(self.mari)), 1)
+
+    def test_sending_to_existing_members_must_fit_the_plan(self):
+        self.program.wallet_auto_send = True
+        full = MagicMock(status_code=200, json=lambda: {"limit": 100, "billableCards": 100})
+        with patch(GET, return_value=full), self.assertRaises(UserError):
+            self.program.action_wallet_send_existing()
+        self.assertTrue(self.program.wallet_send_after)
 
     def test_new_member_gets_a_card(self):
         self.auto_send()
