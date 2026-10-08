@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from datetime import timedelta
 
 from odoo import fields
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
 from .test_card import add_points
@@ -82,6 +82,19 @@ class TestSignup(SignupSetup, TransactionCase):
         self.Partner.create({"name": "Mari teine", "email": "mari@example.ee"})
         card = self.confirm(self.join()[1])
         self.assertEqual(card.partner_id, mari)
+
+    def test_the_confirmation_email_is_an_odoo_template_with_the_link(self):
+        _result, token = self.join()
+        mail = self.env["mail.mail"].sudo().search([("email_to", "=", "mari@example.ee")], order="id desc", limit=1)
+        self.assertIn(f"/confirm/{token}", mail.body_html)
+        self.assertIn("Confirm and get the card", mail.body_html)
+        self.assertEqual(mail.subject, f"Confirm joining {self.company.name}")
+        self.assertFalse(mail.model)
+        templates = self.env["res.config.settings"].create({}).action_wallet_email_templates()
+        found = self.env["mail.template"].search(templates["domain"])
+        self.assertEqual(set(found.mapped("name")), {"Tieroo: wallet card", "Tieroo: confirm joining"})
+        with self.assertRaises(UserError):
+            found.unlink()
 
     def test_an_archived_customer_joining_again_comes_back_with_their_points(self):
         mari = self.Partner.create({"name": "Mari", "email": "mari@example.ee"})
