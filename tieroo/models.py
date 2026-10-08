@@ -383,6 +383,19 @@ class WalletCard(models.Model):
         _sql_constraints = [("partner_company_unique", "UNIQUE(partner_id, company_id)", "A customer has one card per company.")]
 
     @api.depends("partner_id.active")
+    def unlink(self):
+        for card in self.sudo():
+            company = card.company_id
+            if not company.wallet_api_key:
+                continue
+            try:
+                requests.delete(f"{company._wallet_base()}/sync/v1/customers/{card.partner_id.id}", params={"erase": 1},
+                                headers=company._wallet_headers(), timeout=TIMEOUT).raise_for_status()
+            except requests.RequestException as e:
+                raise UserError(_("Tieroo could not be reached, so the customer's wallet card cannot be deleted there. "
+                                  "Try again in a few minutes. (%s)", e)) from e
+        return super().unlink()
+
     def _compute_platform_url(self):
         for card in self:
             card.platform_url = card.company_id._wallet_base()
@@ -516,6 +529,10 @@ class ResPartner(models.Model):
     _inherit = "res.partner"
 
     wallet_card_ids = fields.One2many("wallet.card", "partner_id", "Wallet cards")
+
+    def unlink(self):
+        self.sudo().wallet_card_ids.unlink()
+        return super().unlink()
     wallet_card_state = fields.Selection(
         [("none", "Not created"), ("active", "Active"), ("closed", "Closed")],
         "Wallet card",
