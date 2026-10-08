@@ -333,6 +333,24 @@ class TestWalletCard(TransactionCase):
             self.env["wallet.card"]._cron_sync()
         delete.assert_called_once()
 
+    def test_deleted_contact_erases_the_card_on_the_platform(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        self.mari_card.unlink()
+        with patch(DELETE, side_effect=requests.ConnectionError("down")), self.assertRaises(UserError):
+            self.mari.unlink()
+        self.assertTrue(self.mari.exists())
+        with patch(DELETE, return_value=ok()) as delete:
+            self.mari.unlink()
+        self.assertEqual(delete.call_args.kwargs["params"], {"erase": 1})
+        self.assertIn(f"/sync/v1/customers/{self.mari.id}", delete.call_args.args[0])
+
+    def test_uninstalling_closes_every_card(self):
+        from odoo.addons.tieroo import uninstall_hook
+        with patch(DELETE, return_value=ok()) as delete:
+            uninstall_hook(self.env)
+        self.assertTrue(delete.call_args.args[0].endswith("/sync/v1/customers"))
+
 
     def test_resend_on_request(self):
         with patch(PUT, return_value=ok()):
