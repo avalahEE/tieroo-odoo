@@ -119,6 +119,10 @@
                             <a t-if="not card.get('apple') and not card.get('google') and card.get('page')" class="wbtn" t-att-href="card['page']">Open the card</a>
                             <p class="hint">We also emailed you the card, so you can add it later.</p>
                         </t>
+                        <t t-elif="state == 'used'">
+                            <h1>You have already joined</h1>
+                            <p>This link has been used. Your card was emailed to you: add it to your phone from that email.</p>
+                        </t>
                         <t t-elif="state == 'expired'">
                             <h1>This link has expired</h1>
                             <p>The link works for 48 hours. Join again with the QR code, or ask the staff.</p>

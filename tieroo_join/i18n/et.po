@@ -535,3 +535,13 @@ msgstr "privaatsuspoliitikaga"
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
 msgid "terms"
 msgstr "tingimustega"
+
+#. module: tieroo_join
+#: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
+msgid "You have already joined"
+msgstr "Oled juba liitunud"
+
+#. module: tieroo_join
+#: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
+msgid "This link has been used. Your card was emailed to you: add it to your phone from that email."
+msgstr "Seda linki on juba kasutatud. Kaart saadeti sulle e-postiga: lisa see telefoni sellest kirjast."

@@ -187,6 +187,9 @@ class TestJoinPage(SignupSetup, HttpCase):
         self.assertIn("Welcome", done.text)
         self.assertIn("https://wallet.test/p/abc", done.text)
         self.assertTrue(self.Partner.search([("email", "=", "kati@example.ee")]))
+        again = self.url_open(link)
+        self.assertIn("You have already joined", again.text)
+        self.assertNotIn("https://wallet.test/p/abc", again.text)
         self.assertIn("This link has expired", self.url_open(f"/wallet/join/{path}/confirm/not-a-valid-link-token-00").text)
 
     def test_honeypot_and_bad_link(self):
