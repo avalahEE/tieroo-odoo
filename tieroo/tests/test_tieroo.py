@@ -135,6 +135,18 @@ class TestTieroo(TierooSetup, TransactionCase):
             settings = self.env["res.config.settings"].create({})
             self.assertTrue(settings.wallet_account_error)
 
+    def test_levels_installed_but_not_on_the_plan(self):
+        company_cls = type(self.env["res.company"])
+        free = {"plan": {"id": "free", "name": "Loyalty Cards 100", "cards": 100}, "status": "active", "billableCards": 1, "limit": 100, "canCreate": True}
+        paid = {**free, "plan": {"id": "cards_300", "name": "Loyalty Cards 300", "cards": 300}, "subscribed": True, "interval": "month"}
+        with patch.object(company_cls, "_wallet_levels_on", return_value=True):
+            self.assertEqual(self.connected(resp(200, free))[0].wallet_levels_missing, "upgrade")
+            self.assertEqual(self.connected(resp(200, paid))[0].wallet_levels_missing, "add")
+            self.assertFalse(self.connected(resp(200, {**paid, "levels": True}))[0].wallet_levels_missing)
+            self.assertFalse(self.connected(resp(503, {}))[0].wallet_levels_missing)
+        with patch.object(company_cls, "_wallet_levels_on", return_value=False):
+            self.assertFalse(self.connected(resp(200, paid))[0].wallet_levels_missing)
+
     def test_plan_and_billing_opens_the_page(self):
         settings, _get = self.connected(resp(200, {"plan": {"id": "cards_300", "name": "Loyalty Cards 300", "cards": 300}, "status": "active",
                                                    "billableCards": 10, "limit": 300, "canCreate": True, "subscribed": True,
