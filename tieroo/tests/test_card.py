@@ -107,14 +107,16 @@ class TestWalletCard(TransactionCase):
         })
         self.assertEqual(self.mari._wallet_card().url, "https://wallet.test/p/abc?s=sig")
 
-    def test_card_tells_the_next_points_to_expire(self):
+    def test_card_lists_the_points_to_expire_by_date(self):
         if not hasattr(self.env["loyalty.history"], "_get_points_left_per_award"):
             self.skipTest("this Odoo keeps no expiry per award")
         soon = fields.Date.today() + timedelta(days=10)
         self.env["loyalty.history"].create({"card_id": self.mari_card.id, "description": "kampaania", "issued": 40, "used": 0, "expiration_date": soon})
         self.env["loyalty.history"].create({"card_id": self.mari_card.id, "description": "hiljem", "issued": 5, "used": 0,
                                             "expiration_date": soon + timedelta(days=30)})
-        self.assertEqual(self.mari._wallet_payload()["expiring"], {"points": 40.0, "date": soon.isoformat()})
+        self.env["loyalty.history"].create({"card_id": self.mari_card.id, "description": "sama päev", "issued": 2, "used": 0, "expiration_date": soon})
+        self.assertEqual(self.mari._wallet_payload()["expiring"], [
+            {"points": 42.0, "date": soon.isoformat()}, {"points": 5.0, "date": (soon + timedelta(days=30)).isoformat()}])
 
     def test_empty_platform_url_means_ours(self):
         self.env.company.wallet_api_url = False
