@@ -50,7 +50,7 @@ Send the cards
 * **With a QR poster**: install *Tieroo – Join via QR* and print the poster from the designer.
 
 The email has *Add to Apple Wallet* and *Add to Google Wallet* buttons.
-At the till, the cashier scans the QR code on the card in the Odoo POS as usual.
+At the checkout, the cashier scans the QR code on the card in the Odoo POS as usual.
 
 What customers see
 ==================
