@@ -798,3 +798,28 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "cards in use"
 msgstr "kaarti kasutusel"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__add
+msgid "Add it to the plan"
+msgstr "Lisa paketti"
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__upgrade
+msgid "Needs a paid plan"
+msgstr "Vajab tasulist paketti"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_levels_missing
+msgid "Wallet Levels Missing"
+msgstr "Kliendi tasemed paketist puudu"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Customer Levels is installed in Odoo but not on your Tieroo plan: levels and pricelists work in Odoo, the cards do not show them. Add Customer Levels in Plan and billing."
+msgstr "Kliendi tasemed on Odoos paigaldatud, kuid pole sinu Tieroo paketis: tasemed ja hinnakirjad töötavad Odoos, kaardid neid ei näita. Lisa Kliendi tasemed lehel Pakett ja arveldus."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing."
+msgstr "Kliendi tasemed on Odoos paigaldatud, kuid tasuta pakett seda ei sisalda: tasemed ja hinnakirjad töötavad Odoos, kaardid neid ei näita. Vali lehel Pakett ja arveldus tasuline pakett koos Kliendi tasemetega."

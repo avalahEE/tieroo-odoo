@@ -60,6 +60,7 @@
                         <field name="wallet_account_error" invisible="1"/>
                         <field name="wallet_over_limit" invisible="1"/>
                         <field name="wallet_can_create" invisible="1"/>
+                        <field name="wallet_levels_missing" invisible="1"/>
                         <setting string="Start with Tieroo" company_dependent="1" invisible="wallet_connected"
                                  help="Choose a plan and connect this company to Tieroo. A card is required, also for the free plan (nothing is charged on the free plan).">
                             <div class="text-muted mt-2" invisible="wallet_signup_notice != 'cancelled'">Sign-up cancelled: nothing was charged. Start again when you are ready.</div>
@@ -86,6 +87,11 @@
                                 </div>
                                 <div class="alert alert-danger mt-2 mb-0" role="alert" invisible="wallet_can_create">
                                     Over the plan's limit: no new cards until you choose a bigger plan. Existing cards keep updating.
+                                </div>
+                                <div class="alert alert-info mt-2 mb-0" role="status" invisible="not wallet_levels_missing">
+                                    <span invisible="wallet_levels_missing != 'add'">Customer Levels is installed in Odoo but not on your Tieroo plan: levels and pricelists work in Odoo, the cards do not show them. Add Customer Levels in Plan and billing.</span>
+                                    <span invisible="wallet_levels_missing != 'upgrade'">Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing.</span>
+                                    <button name="action_wallet_billing" type="object" string="Plan and billing" class="btn-link ps-0 d-block" icon="oi-arrow-right"/>
                                 </div>
                                 <div class="alert alert-warning mt-2 mb-0" role="alert" invisible="wallet_status != 'past_due'">
                                     Payment failed. Stripe tries again; update your card.
