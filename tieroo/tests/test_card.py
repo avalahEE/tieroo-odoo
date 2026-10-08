@@ -365,6 +365,7 @@ class TestWalletCard(TransactionCase):
         get.assert_not_called()
         mail = self.mails_to(self.mari)
         self.assertIn("Add to Apple Wallet", mail.body_html)
+        self.assertIn("/badge/apple.png?lang=", mail.body_html)
         self.assertIn("https://wallet.test/p/abc/google?s=sig", mail.body_html)
         self.assertIn("48 hours", mail.body_html)
         self.assertNotIn("Open loyalty card", mail.body_html)

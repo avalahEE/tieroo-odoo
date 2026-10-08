@@ -14,10 +14,10 @@
     <p>Hello <t t-out="object.partner_id.name"/>,</p>
     <p>Add your loyalty card to your phone's wallet. Show the card at the checkout to use your customer benefits.</p>
     <p style="margin: 24px 0;">
-        <a t-if="card.apple_url" t-att-href="card.apple_url"
-           style="display:inline-block;margin:0 8px 8px 0;background:#000000;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;">Add to Apple Wallet</a>
-        <a t-if="card.google_url" t-att-href="card.google_url"
-           style="display:inline-block;margin:0 8px 8px 0;background:#1f1f1f;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;">Add to Google Wallet</a>
+        <t t-set="badge" t-value="card.platform_url + '/badge/'"/>
+        <t t-set="lang" t-value="'.png?lang=' + (object.partner_id.lang or 'en_US')"/>
+        <a t-if="card.apple_url" t-att-href="card.apple_url" style="display:inline-block;margin:0 8px 8px 0;text-decoration:none;"><img t-att-src="badge + 'apple' + lang" height="48" alt="Add to Apple Wallet" style="display:block;height:48px;width:auto;border:0;"/></a>
+        <a t-if="card.google_url" t-att-href="card.google_url" style="display:inline-block;margin:0 8px 8px 0;text-decoration:none;"><img t-att-src="badge + 'google' + lang" height="48" alt="Add to Google Wallet" style="display:block;height:48px;width:auto;max-width:100%;border:0;"/></a>
         <a t-if="not card.apple_url and not card.google_url" t-att-href="card.url"
            style="display:inline-block;background:#0f172a;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;">Open loyalty card</a>
     </p>
