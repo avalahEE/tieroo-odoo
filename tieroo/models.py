@@ -283,6 +283,12 @@ class ResConfigSettings(models.TransientModel):
             s.wallet_shops_count = len(shops)
             s.wallet_shops_missing = len(shops.filtered(lambda x: not x.has_point))
 
+    def action_wallet_email_templates(self):
+        return {
+            "type": "ir.actions.act_window", "name": _("Tieroo email templates"), "res_model": "mail.template",
+            "view_mode": "list,form", "domain": [("id", "in", self.env["mail.template"]._wallet_template_ids())],
+        }
+
     def action_wallet_shops(self):
         self.ensure_one()
         return {
@@ -874,3 +880,18 @@ class WalletShop(models.Model):
         self.create([{"company_id": company.id, "partner_id": a.id} for a in addresses])
         return {"type": "ir.actions.client", "tag": "soft_reload"}
 
+
+class MailTemplate(models.Model):
+    _inherit = "mail.template"
+
+    _WALLET_TEMPLATES = ("tieroo.mail_template_wallet_card", "tieroo.mail_template_join_confirm")
+
+    @api.model
+    def _wallet_template_ids(self):
+        return [t.id for t in (self.env.ref(x, raise_if_not_found=False) for x in self._WALLET_TEMPLATES) if t]
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_wallet(self):
+        if set(self.ids) & set(self._wallet_template_ids()):
+            raise UserError(_("Tieroo sends this email, so the template cannot be deleted. Change its text, or bring "
+                              "back the original with Reset Template."))
