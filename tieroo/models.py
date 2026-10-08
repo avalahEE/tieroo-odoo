@@ -295,11 +295,6 @@ class ResConfigSettings(models.TransientModel):
     wallet_shops_on = fields.Boolean(related="company_id.wallet_shops_on", readonly=False)
     wallet_shops_count = fields.Integer(compute="_compute_wallet_shops")
     wallet_shops_missing = fields.Integer(compute="_compute_wallet_shops")
-    module_tieroo_join = fields.Boolean(
-        "Join via QR",
-        help="Installs Tieroo – Join via QR: customers scan a QR code, enter their name and email, and get "
-        "the wallet card by email. Includes print-ready posters.",
-    )
 
     wallet_signup_notice = fields.Selection(related="company_id.wallet_signup_notice")
     wallet_data_consent = fields.Boolean("I agree that Odoo sends data to Tieroo", compute="_compute_wallet_data_consent",

@@ -8,7 +8,7 @@ from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.tools import email_normalize
 
-from .models import ip_hash
+from .join import ip_hash
 
 TOKEN = re.compile(r"^[A-Za-z0-9_-]{16,64}$")
 
@@ -77,7 +77,7 @@ class WalletSignup(http.Controller):
                             ip_hash=ip_hash(request.env, request.httprequest.remote_addr or ""))
                     except UserError as e:
                         values["error"] = str(e)
-        return request.render("tieroo_join.join_page", values)
+        return request.render("tieroo.join_page", values)
 
     @http.route("/wallet/join/<string:token>/confirm/<string:rtoken>", type="http", auth="public", methods=["GET", "POST"], sitemap=False)
     def confirm(self, token, rtoken, **post):
@@ -97,4 +97,4 @@ class WalletSignup(http.Controller):
                     values.update(state="done", card={"apple": card.apple_url, "google": card.google_url, "page": card.url})
                 except UserError:
                     values["state"] = "error"
-        return request.render("tieroo_join.join_page", values)
+        return request.render("tieroo.join_page", values)

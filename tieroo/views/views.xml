@@ -148,9 +148,30 @@
                             <field name="wallet_api_key" password="True"/>
                         </setting>
                     </block>
-                    <block title="Add-ons" name="wallet_addons">
-                        <setting help="A QR code (a poster in the shop) opens a page where customers join the loyalty programme themselves and get the card by email. Print-ready PDF and SVG posters.">
-                            <field name="module_tieroo_join"/>
+                    <block title="Join via QR" name="wallet_join">
+                        <setting string="Join via QR" company_dependent="1" help="A QR code (a poster in the shop) opens a page where customers join the loyalty programme themselves and get the card by email. Print-ready PDF and SVG posters.">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="wallet_signup_url" string="Join link" class="col-lg-4 o_light_label"/>
+                                    <field name="wallet_signup_url" widget="CopyClipboardChar" class="col-lg-8"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="wallet_signup_tag_id" class="col-lg-4 o_light_label"/>
+                                    <field name="wallet_signup_tag_id" class="col-lg-8"/>
+                                    <div class="text-muted col-lg-12">Added to every customer who joins via the QR. Use it in Odoo Automation Rules or Marketing Automation, e.g. a welcome email or a newsletter. Empty = no tag.</div>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="wallet_terms_url" class="col-lg-4 o_light_label"/>
+                                    <field name="wallet_terms_url" placeholder="https://" class="col-lg-8"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="wallet_privacy_url" class="col-lg-4 o_light_label"/>
+                                    <field name="wallet_privacy_url" placeholder="https://" class="col-lg-8"/>
+                                </div>
+                                <div class="mt8">
+                                    <button name="action_wallet_signup_posters" type="object" string="QR code and posters" icon="oi-arrow-right" class="btn-link ps-0"/>
+                                </div>
+                            </div>
                         </setting>
                     </block>
                 </app>

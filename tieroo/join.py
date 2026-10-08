@@ -29,7 +29,7 @@ class ResCompany(models.Model):
     wallet_privacy_url = fields.Char("Privacy policy URL", help="Linked from the join page's consent checkbox.")
     wallet_signup_tag_id = fields.Many2one(
         "res.partner.category", "Tag for new members",
-        default=lambda self: self.env.ref("tieroo_join.tag_joined_via_qr", raise_if_not_found=False),
+        default=lambda self: self.env.ref("tieroo.tag_joined_via_qr", raise_if_not_found=False),
         help="Added to every customer who joins via the QR. Use it in Odoo Automation Rules or Marketing "
         "Automation, e.g. a welcome email or a newsletter. Empty = no tag.",
     )
@@ -47,7 +47,7 @@ class ResCompany(models.Model):
 
     @api.model
     def _wallet_signup_set_default_tag(self):
-        tag = self.env.ref("tieroo_join.tag_joined_via_qr")
+        tag = self.env.ref("tieroo.tag_joined_via_qr")
         self.sudo().search([("wallet_signup_tag_id", "=", False)]).wallet_signup_tag_id = tag
 
     def _wallet_signup_url(self):
@@ -81,7 +81,7 @@ class ResCompany(models.Model):
                     "foreground": data.get("foreground") if COLOR.match(str(data.get("foreground"))) else None,
                 }
             except (requests.RequestException, ValueError, AttributeError) as e:
-                _logger.info("tieroo_join: brand not available for company %s: %s", company.id, e)
+                _logger.info("tieroo: join page brand not available for company %s: %s", company.id, e)
         _BRAND[(self.env.cr.dbname, company.id)] = (time.monotonic(), brand)
         return brand
 
