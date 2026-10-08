@@ -337,13 +337,25 @@ class TestWalletCard(TransactionCase):
         with patch(PUT, return_value=ok()):
             self.mari._wallet_create_card()
         self.mari_card.unlink()
-        with patch(DELETE, side_effect=requests.ConnectionError("down")), self.assertRaises(UserError):
-            self.mari.unlink()
-        self.assertTrue(self.mari.exists())
+        ref = str(self.mari.id)
+        self.mari.unlink()
+        Erasure = self.env["wallet.erasure"].sudo()
+        with patch(DELETE, side_effect=requests.ConnectionError("down")):
+            self.env["wallet.card"]._cron_sync()
+        self.assertEqual(Erasure.search([]).ref, ref)
         with patch(DELETE, return_value=ok()) as delete:
-            self.mari.unlink()
+            self.env["wallet.card"]._cron_sync()
         self.assertEqual(delete.call_args.kwargs["params"], {"erase": 1})
-        self.assertIn(f"/sync/v1/customers/{self.mari.id}", delete.call_args.args[0])
+        self.assertTrue(delete.call_args.args[0].endswith(f"/sync/v1/customers/{ref}"))
+        self.assertFalse(Erasure.search([]))
+
+    def test_erasure_on_a_closed_account_is_done(self):
+        Erasure = self.env["wallet.erasure"].sudo()
+        Erasure.create({"company_id": self.env.company.id, "ref": "999"})
+        closed = MagicMock(status_code=401)
+        with patch(DELETE, return_value=closed):
+            self.env["wallet.card"]._cron_sync()
+        self.assertFalse(Erasure.search([]))
 
     def test_uninstalling_closes_every_card(self):
         from odoo.addons.tieroo import uninstall_hook

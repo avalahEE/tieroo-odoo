@@ -259,6 +259,8 @@ class ResCompany(models.Model):
             return None
         if status == 403 and data.get("error") in ("suspended", "closed"):
             return {"status": data["error"]}
+        if status == 401:
+            return {"status": "closed"}
         if status == 409 and data.get("error") == "key_in_use":
             return {"status": "elsewhere"}
         return data if status == 200 else None
@@ -385,24 +387,18 @@ class WalletCard(models.Model):
     else:
         _sql_constraints = [("partner_company_unique", "UNIQUE(partner_id, company_id)", "A customer has one card per company.")]
 
-    @api.depends("partner_id.active")
     def unlink(self):
-        for card in self.sudo():
-            company = card.company_id
-            if not company.wallet_api_key:
-                continue
-            try:
-                requests.delete(f"{company._wallet_base()}/sync/v1/customers/{card.partner_id.id}", params={"erase": 1},
-                                headers=company._wallet_headers(), timeout=TIMEOUT).raise_for_status()
-            except requests.RequestException as e:
-                raise UserError(_("Tieroo could not be reached, so the customer's wallet card cannot be deleted there. "
-                                  "Try again in a few minutes. (%s)", e)) from e
-        return super().unlink()
+        self.env["wallet.erasure"].sudo().create([
+            {"company_id": card.company_id.id, "ref": str(card.partner_id.id)} for card in self.sudo() if card.company_id.wallet_api_key])
+        res = super().unlink()
+        self.env["res.partner"]._wallet_wake()
+        return res
 
     def _compute_platform_url(self):
         for card in self:
             card.platform_url = card.company_id._wallet_base()
 
+    @api.depends("partner_id.active")
     def _compute_state(self):
         for card in self:
             card.state = "active" if card._open() else "closed"
@@ -511,6 +507,7 @@ class WalletCard(models.Model):
 
     @api.model
     def _cron_sync(self):
+        self.env["wallet.erasure"].sudo().search([])._send()
         for company in self.env["res.company"].sudo().search([("wallet_api_key", "!=", False)]):
             Partner = self.env["res.partner"].sudo().with_company(company)
             if not Partner._wallet_issue_new_cards():
@@ -745,6 +742,26 @@ class ResPartner(models.Model):
             "tag": "display_notification",
             "params": {"type": "success", "message": _("Wallet card sent to %s.", self.email)},
         }
+
+
+class WalletErasure(models.Model):
+    _name = "wallet.erasure"
+    _description = "Wallet card to erase on Tieroo"
+
+    company_id = fields.Many2one("res.company", required=True, ondelete="cascade")
+    ref = fields.Char(required=True)
+
+    def _send(self):
+        for e in self:
+            company = e.company_id
+            try:
+                r = requests.delete(f"{company._wallet_base()}/sync/v1/customers/{e.ref}", params={"erase": 1},
+                                    headers=company._wallet_headers(), timeout=TIMEOUT)
+                if r.status_code not in (401, 403):
+                    r.raise_for_status()
+                e.unlink()
+            except requests.RequestException as err:
+                _logger.warning("tieroo: could not erase card %s of %s yet: %s", e.ref, company.name, err)
 
 
 class LoyaltyHistory(models.Model):
