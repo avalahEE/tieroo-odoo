@@ -111,7 +111,7 @@
                         </setting>
                     </block>
                     <block title="Add-ons" name="wallet_addons">
-                        <setting help="A QR code (poster at the till) opens a page where customers join the loyalty programme themselves and get the card by email. Print-ready PDF and SVG posters.">
+                        <setting help="A QR code (a poster in the shop) opens a page where customers join the loyalty programme themselves and get the card by email. Print-ready PDF and SVG posters.">
                             <field name="module_tieroo_join"/>
                         </setting>
                     </block>

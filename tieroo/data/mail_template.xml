@@ -12,7 +12,7 @@
 <div>
     <t t-set="card" t-value="object.sudo()"/>
     <p>Hello <t t-out="object.partner_id.name"/>,</p>
-    <p>Add your loyalty card to your phone's wallet. Show the card at the till to use your customer benefits.</p>
+    <p>Add your loyalty card to your phone's wallet. Show the card at the checkout to use your customer benefits.</p>
     <p style="margin: 24px 0;">
         <a t-if="card.apple_url" t-att-href="card.apple_url"
            style="display:inline-block;margin:0 8px 8px 0;background:#000000;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;">Add to Apple Wallet</a>
