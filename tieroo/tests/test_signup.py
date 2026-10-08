@@ -7,6 +7,8 @@ from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
+from .test_card import add_points
+
 PUT = "odoo.addons.tieroo.models.requests.put"
 BRAND = "odoo.addons.tieroo.join.requests.get"
 GET = "odoo.addons.tieroo.models.requests.get"
@@ -80,6 +82,20 @@ class TestSignup(SignupSetup, TransactionCase):
         self.Partner.create({"name": "Mari teine", "email": "mari@example.ee"})
         card = self.confirm(self.join()[1])
         self.assertEqual(card.partner_id, mari)
+
+    def test_an_archived_customer_joining_again_comes_back_with_their_points(self):
+        mari = self.Partner.create({"name": "Mari", "email": "mari@example.ee"})
+        old = self.env["loyalty.card"].create({"program_id": self.program.id, "partner_id": mari.id})
+        add_points(old, 40)
+        old.active = False
+        mari.active = False
+        card = self.confirm(self.join()[1])
+        self.assertEqual(card.partner_id, mari)
+        self.assertTrue(mari.active)
+        self.assertTrue(old.active)
+        self.assertEqual(old.points, 40)
+        self.assertEqual(self.env["loyalty.card"].search_count([("partner_id", "=", mari.id), ("program_id", "=", self.program.id)]), 1)
+        self.assertEqual(len(self.card_mails(mari)), 1)
 
     def test_known_email_is_not_duplicated_and_birthday_cannot_be_changed(self):
         self.confirm(self.join(name="Mari", birthday=("3", "5"))[1])

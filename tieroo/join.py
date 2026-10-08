@@ -204,16 +204,22 @@ class WalletSignupRequest(models.Model):
         if self.partner_id and (card := self.partner_id.with_company(company)._wallet_card()):
             return card
         if not self.partner_id:
-            partner = env["res.partner"].search([
+            partner = env["res.partner"].with_context(active_test=False).search([
                 ("email_normalized", "=", self.email), ("company_id", "in", [company.id, False]), ("is_company", "=", False), ("parent_id", "=", False), ("vat", "=", False),
                 ("type", "=", "contact"), "|", ("user_ids", "=", False), ("user_ids.share", "=", True),
-            ], order="id", limit=1) or env["res.partner"].create({"name": self.name or self.email, "email": self.email, **({"lang": self.lang} if self.lang else {})})
+            ], order="active desc, id", limit=1) or env["res.partner"].create({"name": self.name or self.email, "email": self.email, **({"lang": self.lang} if self.lang else {})})
+            if not partner.active:
+                partner.active = True
             if company.wallet_signup_tag_id:
                 partner.category_id = [(4, company.wallet_signup_tag_id.id)]
             if self.birth_month and not partner.wallet_birth_month:
                 partner.write({"wallet_birth_day": self.birth_day, "wallet_birth_month": self.birth_month})
-            if not env["loyalty.card"].search_count([("partner_id", "=", partner.id), ("program_id", "=", program.id)]):
+            loyalty = env["loyalty.card"].with_context(active_test=False).search(
+                [("partner_id", "=", partner.id), ("program_id", "=", program.id)], order="active desc, id", limit=1)
+            if not loyalty:
                 env["loyalty.card"].create({"program_id": program.id, "partner_id": partner.id})
+            elif not loyalty.active:
+                loyalty.active = True
             note_env = partner.with_context(lang=company.partner_id.lang or env.lang).env
             partner.message_post(body=note_env._("Joined %(program)s via the QR code: confirmed the email address and agreed to the terms (%(company)s).",
                                                  program=program.name, company=company.name))
