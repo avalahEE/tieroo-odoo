@@ -1,7 +1,7 @@
 {
     "name": "Tieroo – Join via QR",
     "summary": "Add-on for Tieroo: customers join with a QR code and get their wallet card by email.",
-    "version": "18.0.1.0.2",
+    "version": "18.0.1.0.3",
     "category": "Sales/Point of Sale",
     "license": "LGPL-3",
     "author": "Tieroo",
