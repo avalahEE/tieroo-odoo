@@ -101,7 +101,7 @@
                             <div class="text-muted mt-2" invisible="wallet_signup_notice != 'cancelled'">Sign-up cancelled: nothing was charged. Start again when you are ready.</div>
                             <div class="mt-2">
                                 <p class="text-muted mb-1">Tieroo is an external service. To open the account, Odoo sends it this company's name, VAT number, address and your email. After that, to issue and update the cards, it sends each card holder's name, barcode, points, next reward, level and language, and, if you show the card near your shops, for each card up to 10 of your shops' coordinates, chosen by where that customer bought and the city in their address. Emails with the cards are sent by Odoo itself.
-                                    <a href="https://tieroo.com/terms.html" target="_blank">Terms</a> · <a href="https://tieroo.com/privacy.html" target="_blank">Privacy</a></p>
+                                    <a href="https://tieroo.com/terms.html" target="_blank">Terms of service</a> · <a href="https://tieroo.com/dpa.html" target="_blank">Data processing agreement</a> · <a href="https://tieroo.com/privacy.html" target="_blank">Privacy</a></p>
                                 <div class="d-flex gap-2 align-items-center">
                                     <field name="wallet_data_consent" nolabel="1"/>
                                     <label for="wallet_data_consent" class="o_form_label fw-normal"/>

@@ -39,7 +39,10 @@ class TestTieroo(TierooSetup, TransactionCase):
             action = self.env["res.config.settings"].create({"wallet_data_consent": True}).action_wallet_signup()
         self.assertEqual(action, {"type": "ir.actions.act_url", "url": "https://wallet.test/billing/open?t=x", "target": "self"})
         self.assertEqual(post.call_args.args[0], "https://wallet.test/onboard/v1/start")
-        self.assertEqual(post.call_args.kwargs["json"], {
+        sent = post.call_args.kwargs["json"]
+        self.assertEqual(sent["accepted"]["terms"], "2026-10-08")
+        self.assertIn(self.env.user.name, sent["accepted"]["by"])
+        self.assertEqual({k: v for k, v in sent.items() if k != "accepted"}, {
             "company": {"name": self.company.name, "vat": "EE123456780", "country": "EE", "email": "admin@kohvik.ee",
                         "street": "Rüütli 1", "city": "Tartu", "zip": "51007"},
             "returnUrl": f"{self.company.get_base_url()}/tieroo/return?company={self.company.id}",
@@ -49,7 +52,7 @@ class TestTieroo(TierooSetup, TransactionCase):
         self.assertFalse(self.company.wallet_api_key)
 
     def test_nothing_is_sent_without_consent(self):
-        with patch(POST) as post, self.assertRaisesRegex(UserError, "agree to send data"):
+        with patch(POST) as post, self.assertRaisesRegex(UserError, "accept the Tieroo terms"):
             self.env["res.config.settings"].create({}).action_wallet_signup()
         post.assert_not_called()
         self.assertFalse(self.company.wallet_consent_date)
