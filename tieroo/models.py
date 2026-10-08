@@ -12,6 +12,7 @@ from odoo.tools import SQL, split_every
 _logger = logging.getLogger(__name__)
 PLATFORM_URL = "https://app.tieroo.com"
 TIMEOUT = 10
+TERMS_VERSION = "2026-10-08"
 BATCH = 200
 BATCH_TIMEOUT = 120
 CRON_RESERVE = 120
@@ -210,7 +211,7 @@ class ResCompany(models.Model):
         if company.wallet_api_key:
             raise UserError(_("%s is already connected to Tieroo.", company.name))
         if not company.wallet_consent_date:
-            raise UserError(_("Tick the box that you agree to send data to Tieroo first."))
+            raise UserError(_("Tick the box to accept the Tieroo terms of service and data processing agreement first."))
         if company.wallet_claim_token:
             state = company._wallet_claim(gone_ok=True)
             if state == "done":
@@ -221,6 +222,8 @@ class ResCompany(models.Model):
             "company": {k: v.strip() for k, v in company._wallet_signup_data().items() if isinstance(v, str) and v.strip()},
             "returnUrl": f"{company.get_base_url()}/tieroo/return?company={company.id}",
             "levelsModule": company._wallet_levels_on(),
+            "accepted": {"terms": TERMS_VERSION, "by": f"{self.env.user.name} <{self.env.user.email or self.env.user.login}>",
+                         "at": fields.Datetime.to_string(company.wallet_consent_date)},
         }
         status, answer = _wallet_api(self.env, "post", f"{company._wallet_base()}/onboard/v1/start", json=body)
         if status != 200 or not answer.get("url") or not answer.get("claimToken"):
@@ -303,7 +306,7 @@ class ResConfigSettings(models.TransientModel):
     wallet_shops_missing = fields.Integer(compute="_compute_wallet_shops")
 
     wallet_signup_notice = fields.Selection(related="company_id.wallet_signup_notice")
-    wallet_data_consent = fields.Boolean("I agree that Odoo sends data to Tieroo", compute="_compute_wallet_data_consent",
+    wallet_data_consent = fields.Boolean("I accept the Tieroo terms of service and data processing agreement", compute="_compute_wallet_data_consent",
                                          inverse="_inverse_wallet_data_consent")
     wallet_connected = fields.Boolean(compute="_compute_wallet_account")
     wallet_account_error = fields.Boolean(compute="_compute_wallet_account")

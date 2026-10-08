@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 20:03+0000\n"
+"POT-Creation-Date: 2026-10-08 21:03+0000\n"
 "PO-Revision-Date: 2026-10-07 17:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -384,6 +384,11 @@ msgid "Customers in this programme get a card in Apple Wallet and Google Wallet 
 msgstr "Selle programmi kliendid saavad Apple Walleti ja Google Walleti kaardi, millel on nende punktid ja järgmine preemia. Üks lojaalsusprogramm ettevõtte kohta."
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Data processing agreement"
+msgstr "Andmetöötlusleping"
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 #: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
 msgid "Day"
@@ -501,8 +506,8 @@ msgstr "Lojaalsuskaartide ja e-rahakottide ajalugu"
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_data_consent
-msgid "I agree that Odoo sends data to Tieroo"
-msgstr "Nõustun, et Odoo saadab andmed Tieroole"
+msgid "I accept the Tieroo terms of service and data processing agreement"
+msgstr "Nõustun Tieroo kasutustingimuste ja andmetöötluslepinguga"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
@@ -1007,8 +1012,8 @@ msgstr "Uute liikmete silt"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Terms"
-msgstr "Tingimused"
+msgid "Terms of service"
+msgstr "Kasutustingimused"
 
 #. module: tieroo
 #. odoo-python
@@ -1104,8 +1109,8 @@ msgstr "Seda liitumist on juba kasutatud. Kui ettevõte pole ikka ühendatud, al
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid "Tick the box that you agree to send data to Tieroo first."
-msgstr "Märgi esmalt linnuke, et nõustud andmete saatmisega Tieroole."
+msgid "Tick the box to accept the Tieroo terms of service and data processing agreement first."
+msgstr "Märgi esmalt linnuke, et nõustud Tieroo kasutustingimuste ja andmetöötluslepinguga."
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
@@ -1122,6 +1127,12 @@ msgstr "Tieroo konto"
 #: code:addons/tieroo/models.py:0
 msgid "Tieroo answered with an error (%(status)s %(error)s)."
 msgstr "Tieroo vastas veaga (%(status)s %(error)s)."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Tieroo could not be reached, so the customer's wallet card cannot be deleted there. Try again in a few minutes. (%s)"
+msgstr "Tieroo ei vasta, seega ei saa kliendi kaarti sealt kustutada. Proovi mõne minuti pärast uuesti. (%s)"
 
 #. module: tieroo
 #. odoo-python

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 20:03+0000\n"
-"PO-Revision-Date: 2026-10-08 20:03+0000\n"
+"POT-Creation-Date: 2026-10-08 21:03+0000\n"
+"PO-Revision-Date: 2026-10-08 21:03+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -372,6 +372,11 @@ msgid ""
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Data processing agreement"
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 #: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
 msgid "Day"
@@ -496,7 +501,7 @@ msgstr ""
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_data_consent
-msgid "I agree that Odoo sends data to Tieroo"
+msgid "I accept the Tieroo terms of service and data processing agreement"
 msgstr ""
 
 #. module: tieroo
@@ -1026,7 +1031,7 @@ msgstr ""
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Terms"
+msgid "Terms of service"
 msgstr ""
 
 #. module: tieroo
@@ -1144,7 +1149,9 @@ msgstr ""
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid "Tick the box that you agree to send data to Tieroo first."
+msgid ""
+"Tick the box to accept the Tieroo terms of service and data processing "
+"agreement first."
 msgstr ""
 
 #. module: tieroo
@@ -1161,6 +1168,14 @@ msgstr ""
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid "Tieroo answered with an error (%(status)s %(error)s)."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid ""
+"Tieroo could not be reached, so the customer's wallet card cannot be deleted"
+" there. Try again in a few minutes. (%s)"
 msgstr ""
 
 #. module: tieroo
