@@ -601,15 +601,6 @@ msgid ""
 msgstr ""
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Tieroo is an external service. To open the account, Odoo sends it this "
-"company's name, VAT number, address and your email. After that, to issue and"
-" update the cards, it sends each card holder's name, barcode, points, next "
-"reward, level and language. Emails with the cards are sent by Odoo itself."
-msgstr ""
-
-#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_api_url
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_api_url
 msgid "Tieroo platform URL"
@@ -787,4 +778,118 @@ msgstr ""
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid "This company's Tieroo key is in use in another Odoo database or company. Contact Tieroo."
+msgstr ""
+
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Add warehouse addresses"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_id
+msgid "Address"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__city
+msgid "City"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"In a big shopping centre use the shop's own point (copy it from a map app), "
+"not the centre's address: they can be 100-300 m apart."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Inventory is not installed: add the shops' addresses one by one."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_latitude
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Latitude"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_longitude
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Longitude"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model,name:tieroo.model_wallet_shop
+msgid "Shop on the Tieroo card"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Shops on the card"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_shops_on
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_on
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Show the card near our shops"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.constraint,message:tieroo.constraint_wallet_shop_partner_unique
+msgid "This address is already on the list."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_count
+msgid "Wallet Shops Count"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_missing
+msgid "Wallet Shops Missing"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"shops on the list. Each card shows up to 10: where the customer bought, then"
+" their city, then your order."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"Near one of your shops the iPhone shows the card on the lock screen and "
+"Android shows a reminder. Each card carries up to 10 of your shops' "
+"coordinates, chosen by where that customer bought and the city in their "
+"address, listed in your order. The phone compares its own position with "
+"them: Tieroo and Google never learn where a customer is."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"Tieroo is an external service. To open the account, Odoo sends it this "
+"company's name, VAT number, address and your email. After that, to issue and"
+" update the cards, it sends each card holder's name, barcode, points, next "
+"reward, level and language, and, if you show the card near your shops, for "
+"each card up to 10 of your shops' coordinates, chosen by where that customer"
+" bought and the city in their address. Emails with the cards are sent by "
+"Odoo itself."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "without valid coordinates: left out until they have them."
 msgstr ""

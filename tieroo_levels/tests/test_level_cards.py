@@ -50,6 +50,7 @@ class TestLevelCards(TransactionCase):
             "expiring": None,
             "rewards": [],
             "lang": self.mari.lang,
+            "places": [], "shops": [],
         })
 
     def test_b2b_contact_gets_own_card_with_company_level(self):

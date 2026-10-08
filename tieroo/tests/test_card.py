@@ -104,6 +104,7 @@ class TestWalletCard(TransactionCase):
                 "program": en("Kohviklubi"), "points": en(self.program.portal_point_name),
                 f"reward:{coffee.id}": en("Tasuta kohv"), f"reward:{cake.id}": en("Kook"),
             },
+            "places": [], "shops": [],
         })
         self.assertEqual(self.mari._wallet_card().url, "https://wallet.test/p/abc?s=sig")
 
@@ -415,3 +416,38 @@ class TestWalletCard(TransactionCase):
             card.sync_needed = False
             record.write(vals)
             self.assertTrue(card.sync_needed, vals)
+
+
+    def test_shops_on_the_card_city_first_then_the_merchants_order(self):
+        Partner, Shop = self.env["res.partner"], self.env["wallet.shop"]
+        big = Partner.create({"name": "Tallinn Kristiine", "city": "Tallinn", "partner_latitude": 59.42, "partner_longitude": 24.70})
+        tartu = Partner.create({"name": "Tartu Lõunakeskus", "city": "Tartu", "partner_latitude": 58.36, "partner_longitude": 26.68})
+        nowhere = Partner.create({"name": "Pärnu", "city": "Pärnu"})
+        Shop.create([{"partner_id": big.id, "sequence": 1}, {"partner_id": tartu.id, "sequence": 2}, {"partner_id": nowhere.id, "sequence": 3}])
+        self.mari.city = "Tartu"
+        self.assertEqual(self.mari._wallet_payload()["places"], [])
+        self.env.company.wallet_shops_on = True
+        payload = self.mari._wallet_payload()
+        self.assertEqual(payload["places"], [{"lat": 59.42, "lon": 24.70}, {"lat": 58.36, "lon": 26.68}])
+        self.assertEqual(payload["shops"], payload["places"])
+        more = Partner.create([{"name": f"Tallinn {i}", "city": "Tallinn", "partner_latitude": 59.4 + i / 100, "partner_longitude": 24.7} for i in range(10)])
+        Shop.create([{"partner_id": p.id, "sequence": 5 + i} for i, p in enumerate(more)])
+        Shop.search([("partner_id", "=", tartu.id)]).sequence = 30
+        places = self.mari._wallet_payload()["places"]
+        self.assertEqual(len(places), 10)
+        self.assertEqual(places[0], {"lat": 59.42, "lon": 24.70})
+        self.assertEqual(places[-1], {"lat": 58.36, "lon": 26.68})
+        self.assertNotIn({"lat": 58.36, "lon": 26.68}, self.mari._wallet_payload()["shops"])
+        nowhere.partner_latitude = 594.37
+        self.assertNotIn(594.37, [p["lat"] for p in self.mari._wallet_payload()["places"]])
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        card = self.mari._wallet_card()
+        card.sync_needed = False
+        tartu.partner_latitude = 58.37
+        self.assertTrue(card.sync_needed)
+        card.sync_needed = False
+        self.mari.city = "Tallinn"
+        self.assertTrue(card.sync_needed)
+        settings = self.env["res.config.settings"].create({})
+        self.assertEqual((settings.wallet_shops_count, settings.wallet_shops_missing), (13, 1))
