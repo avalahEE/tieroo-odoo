@@ -2,3 +2,4 @@ id,name,model_id,group_id/id,operation,domain
 access_wallet_card_user,wallet.card user,wallet.card,base.group_user,r,"[('company_id', 'in', company_ids)]"
 access_wallet_card_system,wallet.card system,wallet.card,base.group_system,crud,"[('company_id', 'in', company_ids)]"
 access_wallet_shop_system,wallet.shop system,wallet.shop,base.group_system,crud,"[('company_id', 'in', company_ids)]"
+access_wallet_signup_request_admin,wallet.signup.request admin,wallet.signup.request,base.group_system,r,
