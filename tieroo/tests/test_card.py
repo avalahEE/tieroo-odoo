@@ -458,3 +458,35 @@ class TestWalletCard(TransactionCase):
             Shop.browse().action_add_warehouses()
             addresses = self.env["stock.warehouse"].search([("company_id", "=", self.env.company.id)]).partner_id
             self.assertEqual(Shop.search([("partner_id", "in", addresses.ids)]).partner_id, addresses)
+
+
+    def test_archived_or_deleted_loyalty_card_closes_the_card(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        card = self.mari._wallet_card()
+        if "wallet_period_start" in self.mari._fields:
+            self.mari.wallet_period_start = False
+        self.mari_card.active = False
+        card.invalidate_recordset(["state"])
+        self.assertEqual(card.state, "closed")
+        with patch(DELETE, return_value=ok()) as delete:
+            self.env["wallet.card"]._cron_sync()
+        delete.assert_called_once()
+        self.mari_card.active = True
+        self.assertTrue(card.sync_needed)
+        with patch(PUT, return_value=ok()) as put:
+            self.env["wallet.card"]._cron_sync()
+        put.assert_called_once()
+        card.invalidate_recordset(["state"])
+        self.assertEqual(card.state, "active")
+        self.assertFalse(self.mails_to(self.mari))
+        card.sync_needed = False
+        self.mari_card.unlink()
+        self.assertTrue(card.sync_needed)
+        card.invalidate_recordset(["state"])
+        self.assertEqual(card.state, "closed")
+
+    def test_no_card_for_an_archived_loyalty_card(self):
+        self.mari_card.active = False
+        self.program.wallet_auto_send = True
+        self.assertFalse(self.env["res.partner"]._wallet_issue_candidates(10))

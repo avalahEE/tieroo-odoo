@@ -526,7 +526,11 @@ class ResPartner(models.Model):
 
     def _wallet_card_open(self):
         self.ensure_one()
-        return self.active
+        return self.active and self._wallet_is_member()
+
+    def _wallet_is_member(self):
+        self.ensure_one()
+        return bool(self._wallet_loyalty_card())
 
 
     @api.model
@@ -596,7 +600,7 @@ class ResPartner(models.Model):
         self.env.flush_all()
         self.env.cr.execute(SQL("""
             SELECT DISTINCT lc.partner_id FROM loyalty_card lc
-            WHERE lc.program_id = %s AND lc.partner_id IS NOT NULL
+            WHERE lc.program_id = %s AND lc.partner_id IS NOT NULL AND lc.active
               AND NOT EXISTS (SELECT 1 FROM wallet_card w WHERE w.partner_id = lc.partner_id AND w.company_id = %s)""",
             program.id, self.env.company.id))
         ids = [row[0] for row in self.env.cr.fetchall()]
@@ -808,6 +812,12 @@ class LoyaltyCard(models.Model):
         if {"partner_id", "active", "program_id"} & vals.keys():
             (before | self.partner_id)._wallet_mark()
             self.partner_id._wallet_wake()
+        return res
+
+    def unlink(self):
+        partners = self.partner_id
+        res = super().unlink()
+        partners._wallet_mark()
         return res
 
 

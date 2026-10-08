@@ -369,6 +369,9 @@ class ResPartner(models.Model):
     def _wallet_issue_domain(self):
         return super()._wallet_issue_domain() + [("commercial_partner_id.wallet_excluded", "!=", True)]
 
+    def _wallet_is_member(self):
+        return super()._wallet_is_member() or bool(self.commercial_partner_id.sudo().wallet_period_start)
+
     def _wallet_prepare_card(self):
         self.ensure_one()
         entity = self.commercial_partner_id.sudo()

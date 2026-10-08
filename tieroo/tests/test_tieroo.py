@@ -213,6 +213,8 @@ class TestPlanLimit(TransactionCase):
     def test_plan_limit_keeps_the_change_and_the_job_does_not_loop(self):
         self.env.company.write({"wallet_api_url": "https://wallet.test/", "wallet_api_key": "wk_testkey"})
         people = self.env["res.partner"].create([{"name": f"Klient {i}", "email": f"k{i}@example.ee"} for i in range(3)])
+        program = self.env["loyalty.program"].create({"name": "Kohviklubi", "program_type": "loyalty", "wallet_card": True})
+        self.env["loyalty.card"].create([{"program_id": program.id, "partner_id": p.id} for p in people])
         cards = self.env["wallet.card"].create([{"partner_id": p.id, "sync_needed": True} for p in people])
         cron = self.env.ref("tieroo.cron_wallet_sync")
         triggers = lambda: self.env["ir.cron.trigger"].search_count([("cron_id", "=", cron.id)])
