@@ -93,11 +93,11 @@ def _wallet_expiring(card):
     if not card or not hasattr(history, "_get_points_left_per_award"):
         return None
     awards, left = history._get_points_left_per_award(card)
-    dated = [(a.expiration_date, left[a]) for a in awards if a.expiration_date and left[a] > 0]
-    if not dated:
-        return None
-    first = min(d for d, _p in dated)
-    return {"points": sum(p for d, p in dated if d == first), "date": first.isoformat()}
+    by_date = {}
+    for a in awards:
+        if a.expiration_date and left[a] > 0:
+            by_date[a.expiration_date] = by_date.get(a.expiration_date, 0) + left[a]
+    return [{"points": p, "date": d.isoformat()} for d, p in sorted(by_date.items())[:10]] or None
 
 
 def _wallet_programs_changed(programs):
