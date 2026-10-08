@@ -451,3 +451,7 @@ class TestWalletCard(TransactionCase):
         self.assertTrue(card.sync_needed)
         settings = self.env["res.config.settings"].create({})
         self.assertEqual((settings.wallet_shops_count, settings.wallet_shops_missing), (13, 1))
+        if "stock.warehouse" in self.env:
+            Shop.browse().action_add_warehouses()
+            addresses = self.env["stock.warehouse"].search([("company_id", "=", self.env.company.id)]).partner_id
+            self.assertEqual(Shop.search([("partner_id", "in", addresses.ids)]).partner_id, addresses)

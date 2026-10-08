@@ -859,7 +859,6 @@ class WalletShop(models.Model):
         companies._wallet_mark_all()
         return res
 
-    @api.model
     def action_add_warehouses(self):
         company = self.env.company
         if "stock.warehouse" not in self.env:
@@ -867,4 +866,5 @@ class WalletShop(models.Model):
         have = self.search([("company_id", "=", company.id)]).partner_id
         addresses = self.env["stock.warehouse"].search([("company_id", "=", company.id)]).partner_id - have
         self.create([{"company_id": company.id, "partner_id": a.id} for a in addresses])
+        return {"type": "ir.actions.client", "tag": "soft_reload"}
 
