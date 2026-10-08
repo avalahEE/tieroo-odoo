@@ -1377,3 +1377,58 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "This link has been used. Your card was emailed to you: add it to your phone from that email."
 msgstr ""
+
+#. module: tieroo
+#: model:mail.template,body_html:tieroo.mail_template_join_confirm
+msgid ""
+"<div>\n"
+"    <p>Hello <t t-out=\"object.name or ''\"/>,</p>\n"
+"    <p>Confirm your email address to join the loyalty programme of <t t-out=\"object.company_id.name\"/>. Then add the card to your phone.</p>\n"
+"    <p style=\"margin: 24px 0;\">\n"
+"        <a t-att-href=\"ctx.get('confirm_url')\" style=\"display:inline-block;background:#111111;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;\">Confirm and get the card</a>\n"
+"    </p>\n"
+"    <p style=\"color:#64748b;font-size:13px;\">The link works for 48 hours. Did not ask for this? Ignore this email: nothing happens.</p>\n"
+"</div>\n"
+"        "
+msgstr ""
+
+#. module: tieroo
+#: model:mail.template,subject:tieroo.mail_template_join_confirm
+msgid "Confirm joining {{ object.company_id.name }}"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Email templates"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"The card email and the joining confirmation, sent by Odoo. Change the text "
+"and translations here; Reset Template brings back the original."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Tieroo email templates"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid ""
+"Tieroo sends this email, so the template cannot be deleted. Change its text,"
+" or bring back the original with Reset Template."
+msgstr ""
+
+#. module: tieroo
+#: model:mail.template,name:tieroo.mail_template_join_confirm
+msgid "Tieroo: confirm joining"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__has_point
+msgid "Has Point"
+msgstr ""

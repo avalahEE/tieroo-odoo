@@ -136,6 +136,9 @@
                                 <button name="action_wallet_shops" type="object" string="Shops on the card" icon="oi-arrow-right" class="btn-link ps-0"/>
                             </div>
                         </setting>
+                        <setting string="Email templates" help="The card email and the joining confirmation, sent by Odoo. Change the text and translations here; Reset Template brings back the original.">
+                            <button name="action_wallet_email_templates" type="object" string="Email templates" icon="oi-arrow-right" class="btn-link"/>
+                        </setting>
                         <setting string="Card design" company_dependent="1" help="Logo, colours, background image, fields and translations, with a live preview. Saving updates every customer's card. The loyalty programme on the card: tick 'Issue Tieroo card' on it.">
                             <button name="action_wallet_design" type="object" string="Design the card" icon="oi-arrow-right" class="btn-link"/>
                         </setting>

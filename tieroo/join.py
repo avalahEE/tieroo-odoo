@@ -8,7 +8,6 @@ from datetime import timedelta
 
 import requests
 
-from markupsafe import Markup
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
@@ -167,25 +166,12 @@ class WalletSignupRequest(models.Model):
 
     def _send_confirmation(self, token):
         self.ensure_one()
-        company = self.company_id.sudo()
-        env = self.with_context(lang=self.lang or company.partner_id.lang or "en_US").env
-        url = f"{company._wallet_signup_url()}/confirm/{token}"
-        body = (Markup('<div style="font-family: Arial, sans-serif; font-size: 15px; color: #222;">'
-                       '<p>%s</p><p>%s</p><p><a href="%s" style="display: inline-block; padding: 12px 20px; background: #111; '
-                       'color: #fff; text-decoration: none; border-radius: 8px; font-weight: bold;">%s</a></p>'
-                       '<p style="color: #666; font-size: 13px;">%s</p></div>') % (
-            env._("Hello %(name)s,", name=self.name or ""),
-            env._("Confirm your email address to join the loyalty programme of %(company)s. Then add the card to your phone.", company=company.name),
-            url,
-            env._("Confirm and get the card"),
-            env._("The link works for 48 hours. Did not ask for this? Ignore this email: nothing happens."),
-        ))
-        self.env["mail.mail"].sudo().create({
-            "email_to": self.email,
-            "subject": env._("Confirm joining %(company)s", company=company.name),
-            "body_html": body,
-            **({"email_from": company.email_formatted} if company.email else {}),
-        })
+        url = f"{self.company_id.sudo()._wallet_signup_url()}/confirm/{token}"
+        self.env.ref("tieroo.mail_template_join_confirm").sudo().with_context(confirm_url=url).send_mail(
+            self.id,
+            email_values={"model": False, "res_id": False, "auto_delete": True},
+            email_layout_xmlid="mail.mail_notification_light",
+        )
 
     @api.model
     def _find(self, company, token):
