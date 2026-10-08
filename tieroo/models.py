@@ -4,7 +4,7 @@ import threading
 
 import requests
 
-from odoo import Command, _, api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.modules import module as odoo_module
 from odoo.tools import SQL, split_every
@@ -434,26 +434,13 @@ class WalletCard(models.Model):
         self.ensure_one()
         card = self.sudo()
         card.email_pending = False
-        pkpass = None
-        if card.apple_url:
-            try:
-                r = requests.get(card.apple_url, timeout=TIMEOUT)
-                r.raise_for_status()
-                pkpass = r.content
-            except requests.RequestException as e:
-                _logger.warning("tieroo: could not attach the pass for card %s: %s", card.id, e)
-        mail = self.env["mail.mail"].sudo().browse(
+        self.env["mail.mail"].sudo().browse(
             self.env.ref("tieroo.mail_template_wallet_card").sudo().with_company(card.company_id).send_mail(
                 card.id,
                 email_values={"model": False, "res_id": False, "auto_delete": True},
                 email_layout_xmlid="mail.mail_notification_light",
             )
         )
-        if pkpass:
-            mail.attachment_ids = [Command.create({
-                "name": "loyalty-card.pkpass", "raw": pkpass, "mimetype": "application/vnd.apple.pkpass",
-                "res_model": "mail.message", "res_id": mail.mail_message_id.id,
-            })]
         partner = card.partner_id.with_context(lang=card.company_id.partner_id.lang or card.env.lang)
         args = {"company": card.company_id.name, "email": partner.email}
         partner.message_post(body=partner.env._("Wallet card (%(company)s) emailed again to %(email)s.", **args) if again

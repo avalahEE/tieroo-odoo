@@ -87,6 +87,8 @@ class WalletSignup(http.Controller):
             company, values = self._page(token, post.get("lang") or req.lang)
         if not req:
             values["state"] = "expired"
+        elif req.partner_id and req.partner_id.with_company(company)._wallet_card():
+            values["state"] = "used"
         elif values["state"] == "form":
             values["state"] = "confirm"
             if request.httprequest.method == "POST":

@@ -21,7 +21,7 @@
         <a t-if="not card.apple_url and not card.google_url" t-att-href="card.url"
            style="display:inline-block;background:#0f172a;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;">Open loyalty card</a>
     </p>
-    <p t-if="card.apple_url" style="color:#64748b;font-size:13px;">On an iPhone you can also open the card attached to this email.</p>
+    <p style="color:#64748b;font-size:13px;">The buttons work for 48 hours, until the card is on your phone.</p>
     <p>The card updates itself. The card and the link are personal, please do not share them.</p>
 </div>
         </field>

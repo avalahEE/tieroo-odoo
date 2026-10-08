@@ -331,8 +331,7 @@ class TestWalletCard(TransactionCase):
 
     def test_employees_cannot_read_the_card_email(self):
         links = ok(apple="https://wallet.test/p/abc/apple.pkpass?s=sig", google="https://wallet.test/p/abc/google?s=sig")
-        pkpass = MagicMock(content=b"PK\x03\x04fake-pass")
-        with patch(PUT, return_value=links), patch(GET, return_value=pkpass):
+        with patch(PUT, return_value=links):
             self.mari._wallet_create_card()._send_email()
         self.assertEqual(len(self.mails_to(self.mari)), 1)
         employee = self.env["res.users"].create({
@@ -355,29 +354,24 @@ class TestWalletCard(TransactionCase):
         self.assertFalse(promo.sudo().wallet_card)
 
 
-    def test_email_has_wallet_buttons_and_the_pass_attached(self):
+    def test_email_has_wallet_buttons_and_no_pass_file(self):
         links = ok(apple="https://wallet.test/p/abc/apple.pkpass?s=sig", google="https://wallet.test/p/abc/google?s=sig")
-        pkpass = MagicMock(content=b"PK\x03\x04fake-pass")
-        pkpass.raise_for_status.return_value = None
-        with patch(PUT, return_value=links), patch(GET, return_value=pkpass) as get:
+        with patch(PUT, return_value=links), patch(GET) as get:
             self.mari._wallet_create_card()
             self.mari.action_wallet_resend()
-        get.assert_called_once_with("https://wallet.test/p/abc/apple.pkpass?s=sig", timeout=10)
+        get.assert_not_called()
         mail = self.mails_to(self.mari)
         self.assertIn("Add to Apple Wallet", mail.body_html)
         self.assertIn("https://wallet.test/p/abc/google?s=sig", mail.body_html)
+        self.assertIn("48 hours", mail.body_html)
         self.assertNotIn("Open loyalty card", mail.body_html)
-        att = mail.attachment_ids
-        self.assertEqual((att.name, att.mimetype), ("loyalty-card.pkpass", "application/vnd.apple.pkpass"))
-        raw = att.raw
-        self.assertEqual(raw.open().read() if hasattr(raw, "open") else raw, b"PK\x03\x04fake-pass")
-        self.assertEqual((att.res_model, att.res_id, mail.model), ("mail.message", mail.mail_message_id.id, False))
+        self.assertFalse(mail.attachment_ids)
+        self.assertFalse(mail.model)
         try:
             mail._postprocess_sent_message(success_pids=self.mari, success_emails=[])
         except TypeError:
             mail._postprocess_sent_message(success_pids=self.mari)
         self.assertFalse(mail.exists())
-        self.assertFalse(att.exists())
 
     def test_email_falls_back_to_the_card_page_without_wallets(self):
         with patch(PUT, return_value=ok()), patch(GET) as get:
