@@ -99,6 +99,7 @@ class TestWalletCard(TransactionCase):
             "currency": None,
             "expires": None,
             "expiring": None,
+            "lastSale": None,
             "rewards": [{"id": str(coffee.id), "name": "Tasuta kohv", "points": 100.0}, {"id": str(cake.id), "name": "Kook", "points": 300.0}],
             "lang": self.mari.lang,
             "texts": {
