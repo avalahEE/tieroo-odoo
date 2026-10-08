@@ -36,6 +36,8 @@
                     .langs { display: flex; justify-content: flex-end; max-width: 440px; margin: 0 auto; padding: 10px 20px 0; }
                     .langs select { width: auto; padding: 6px 10px; font-size: 14px; border-radius: 8px; border: 0; background: rgba(255,255,255,.9); }
                     a { color: inherit; }
+                    .wbadge { display: block; width: max-content; max-width: 100%; margin: 16px auto 0; }
+                    .wbadge img { display: block; max-width: 100%; height: 48px; object-fit: contain; }
                     .wbtn { display: block; text-align: center; margin-top: 12px; padding: 14px; border-radius: 12px; background: #000; color: #fff; font-weight: 700; text-decoration: none; }
                 </style>
             </head>
@@ -114,8 +116,8 @@
                         <t t-elif="state == 'done'">
                             <h1>Welcome!</h1>
                             <p>Add the card to your phone:</p>
-                            <a t-if="card.get('apple')" class="wbtn" t-att-href="card['apple']">Add to Apple Wallet</a>
-                            <a t-if="card.get('google')" class="wbtn" t-att-href="card['google']">Add to Google Wallet</a>
+                            <a t-if="card.get('apple')" class="wbadge" t-att-href="card['apple']"><img t-att-src="'%s/apple.png?lang=%s' % (card['badge'], lang)" height="48" alt="Add to Apple Wallet"/></a>
+                            <a t-if="card.get('google')" class="wbadge" t-att-href="card['google']"><img t-att-src="'%s/google.png?lang=%s' % (card['badge'], lang)" height="48" alt="Add to Google Wallet"/></a>
                             <a t-if="not card.get('apple') and not card.get('google') and card.get('page')" class="wbtn" t-att-href="card['page']">Open the card</a>
                             <p class="hint">We also emailed you the card, so you can add it later.</p>
                         </t>
