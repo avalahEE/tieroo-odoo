@@ -10,7 +10,7 @@ Set up
 1. Install **Tieroo – Join via QR** next to Tieroo – Loyalty cards.
 2. **Settings > Tieroo**: check the *Join link* and choose the tag new members get
    (for example *Joined via QR*).
-3. Click **QR code and posters**, print the poster and put it by the till.
+3. Click **QR code and posters**, print the poster and put it up where customers see it, for example at the checkout.
 
 How it works
 ============

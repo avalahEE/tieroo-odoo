@@ -359,8 +359,8 @@ msgstr "Nimi"
 #. module: tieroo_join
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
 msgid ""
-"No email within a few minutes? Check the spam folder, or ask at the till."
-msgstr "Kirja pole mõne minuti jooksul tulnud? Vaata rämpsposti kausta või küsi kassast."
+"No email within a few minutes? Check the spam folder, or ask the staff."
+msgstr "Kirja pole mõne minuti jooksul tulnud? Vaata rämpsposti kausta või küsi töötajalt."
 
 #. module: tieroo_join
 #: model:ir.model.fields.selection,name:tieroo_join.selection__res_partner__wallet_birth_month__11
@@ -389,8 +389,8 @@ msgstr "Partner"
 
 #. module: tieroo_join
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
-msgid "Please ask at the till."
-msgstr "Palun küsi kassast."
+msgid "Please ask the staff."
+msgstr "Palun küsi töötajalt."
 
 #. module: tieroo_join
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
@@ -447,9 +447,9 @@ msgstr "Link kehtib 48 tundi. Sa ei soovinud liituda? Jäta see kiri tähelepanu
 #. module: tieroo_join
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
 msgid ""
-"The link works for 48 hours. Join again with the QR code, or ask at the "
-"till."
-msgstr "Link kehtib 48 tundi. Liitu uuesti QR-koodiga või küsi kassast."
+"The link works for 48 hours. Join again with the QR code, or ask the "
+"staff."
+msgstr "Link kehtib 48 tundi. Liitu uuesti QR-koodiga või küsi töötajalt."
 
 #. module: tieroo_join
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
@@ -465,8 +465,8 @@ msgstr "Lingi räsi"
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
 msgid ""
 "Too many sign-ups from this network in the last hour. Try again in a while, "
-"or ask at the till."
-msgstr "Sellest võrgust on viimase tunni jooksul liitutud liiga palju kordi. Proovi veidi hiljem uuesti või küsi kassast."
+"or ask the staff."
+msgstr "Sellest võrgust on viimase tunni jooksul liitutud liiga palju kordi. Proovi veidi hiljem uuesti või küsi töötajalt."
 
 #. module: tieroo_join
 #: model:ir.module.module,shortdesc:base.module_tieroo_join

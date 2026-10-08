@@ -359,7 +359,7 @@ msgstr ""
 #. module: tieroo_join
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
 msgid ""
-"No email within a few minutes? Check the spam folder, or ask at the till."
+"No email within a few minutes? Check the spam folder, or ask the staff."
 msgstr ""
 
 #. module: tieroo_join
@@ -389,7 +389,7 @@ msgstr ""
 
 #. module: tieroo_join
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
-msgid "Please ask at the till."
+msgid "Please ask the staff."
 msgstr ""
 
 #. module: tieroo_join
@@ -447,8 +447,8 @@ msgstr ""
 #. module: tieroo_join
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
 msgid ""
-"The link works for 48 hours. Join again with the QR code, or ask at the "
-"till."
+"The link works for 48 hours. Join again with the QR code, or ask the "
+"staff."
 msgstr ""
 
 #. module: tieroo_join
@@ -465,7 +465,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:tieroo_join.join_page
 msgid ""
 "Too many sign-ups from this network in the last hour. Try again in a while, "
-"or ask at the till."
+"or ask the staff."
 msgstr ""
 
 #. module: tieroo_join

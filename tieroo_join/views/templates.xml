@@ -97,11 +97,11 @@
                         <t t-elif="state == 'sent'">
                             <h1>Check your email</h1>
                             <p>We sent a confirmation link to the email address you entered. Open it on your phone: after confirming you can add the card to Apple Wallet or Google Wallet.</p>
-                            <p class="hint">No email within a few minutes? Check the spam folder, or ask at the till.</p>
+                            <p class="hint">No email within a few minutes? Check the spam folder, or ask the staff.</p>
                         </t>
                         <t t-elif="state == 'limited'">
                             <h1>Please try again later</h1>
-                            <p>Too many sign-ups from this network in the last hour. Try again in a while, or ask at the till.</p>
+                            <p>Too many sign-ups from this network in the last hour. Try again in a while, or ask the staff.</p>
                         </t>
                         <t t-elif="state == 'confirm'">
                             <h1>Confirm joining</h1>
@@ -121,7 +121,7 @@
                         </t>
                         <t t-elif="state == 'expired'">
                             <h1>This link has expired</h1>
-                            <p>The link works for 48 hours. Join again with the QR code, or ask at the till.</p>
+                            <p>The link works for 48 hours. Join again with the QR code, or ask the staff.</p>
                         </t>
                         <t t-elif="state == 'error'">
                             <h1>Please try again in a few minutes</h1>
@@ -129,7 +129,7 @@
                         </t>
                         <t t-else="">
                             <h1>Joining is not open at the moment</h1>
-                            <p>Please ask at the till.</p>
+                            <p>Please ask the staff.</p>
                         </t>
                     </div>
                     <p class="co" t-out="company.name"/>
