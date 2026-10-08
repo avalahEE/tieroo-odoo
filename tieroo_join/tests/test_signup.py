@@ -110,6 +110,14 @@ class TestSignup(SignupSetup, TransactionCase):
         self.assertTrue(person)
         self.assertFalse(company_rec.category_id)
 
+    def test_a_company_contact_person_is_not_the_private_customer(self):
+        firma = self.Partner.create({"name": "Avalah OÜ", "is_company": True})
+        at_work = self.Partner.create({"name": "Mari", "email": "mari@example.ee", "parent_id": firma.id})
+        card = self.confirm(self.join(email="mari@example.ee")[1])
+        self.assertNotEqual(card.partner_id, at_work)
+        self.assertFalse(card.partner_id.parent_id)
+        self.assertEqual(card.partner_id.email, "mari@example.ee")
+
     def test_terms_and_privacy_links_must_be_web_addresses(self):
         with self.assertRaises(ValidationError):
             self.company.wallet_terms_url = "javascript:alert(1)"

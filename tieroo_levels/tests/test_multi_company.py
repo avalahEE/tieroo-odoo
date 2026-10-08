@@ -66,11 +66,11 @@ class TestMultiCompany(AccountTestInvoicingCommon):
         with patch(PUT, return_value=ok("https://a.wallet.test/p/1?s=x")) as put:
             self.in_company(self.company_a)._wallet_create_card()
         self.assertEqual(put.call_args.args[0], f"https://a.wallet.test/sync/v1/customers/{self.mari.id}")
-        self.assertEqual(put.call_args.kwargs["headers"], {"Authorization": "Bearer wk_a"})
+        self.assertEqual(put.call_args.kwargs["headers"]["Authorization"], "Bearer wk_a")
         self.assertEqual(put.call_args.kwargs["json"]["level"]["name"], "Gold")
         with patch(PUT, return_value=ok("https://b.wallet.test/p/2?s=y")) as put:
             self.in_company(self.company_b)._wallet_create_card()
-        self.assertEqual(put.call_args.kwargs["headers"], {"Authorization": "Bearer wk_b"})
+        self.assertEqual(put.call_args.kwargs["headers"]["Authorization"], "Bearer wk_b")
         cards = self.mari.wallet_card_ids
         self.assertEqual(sorted(cards.company_id.mapped("name")), sorted([self.company_a.name, "Pood B"]))
         self.assertEqual(self.in_company(self.company_a).wallet_card_state, "active")

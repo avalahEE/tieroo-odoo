@@ -20,9 +20,9 @@ CLAIM_TIMEOUT = 30
 SOON = 20
 
 
-def _wallet_api(env, method, url, key=None, timeout=TIMEOUT, **kw):
+def _wallet_api(env, method, url, company=None, timeout=TIMEOUT, **kw):
     try:
-        r = getattr(requests, method)(url, headers={"Authorization": f"Bearer {key}"} if key else None, timeout=timeout, **kw)
+        r = getattr(requests, method)(url, headers=company._wallet_headers() if company else None, timeout=timeout, **kw)
     except requests.RequestException as e:
         raise UserError(env._("Tieroo could not be reached: %s", e)) from e
     try:
@@ -40,6 +40,8 @@ def _wallet_api_error(env, status, data):
         return env._("Tieroo did not accept the company's data: check the name, email and address.")
     if code == "billing_not_configured":
         return env._("Signing up with Tieroo is not available at the moment. Try again later.")
+    if code == "key_in_use":
+        return env._("This company's Tieroo key is in use in another Odoo database or company. Contact Tieroo.")
     if code == "suspended":
         return env._("This company's Tieroo account is suspended. Contact Tieroo.")
     if code == "already_claimed":
@@ -116,6 +118,11 @@ class ResCompany(models.Model):
     def _wallet_base(self):
         return (self.sudo().wallet_api_url or PLATFORM_URL).rstrip("/")
 
+    def _wallet_headers(self):
+        params = self.env["ir.config_parameter"].sudo()
+        uuid = (params.get_str if hasattr(params, "get_str") else params.get_param)("database.uuid")
+        return {"Authorization": f"Bearer {self.sudo().wallet_api_key}", "X-Tieroo-Instance": f"{uuid}:{self.id}"}
+
     def _wallet_loyalty_program(self):
         self.ensure_one()
         return self.env["loyalty.program"].sudo().search([
@@ -132,7 +139,7 @@ class ResCompany(models.Model):
         company.wallet_signup_notice = False
         try:
             r = requests.post(f"{base}/sync/v1/design-session", json={**company._wallet_design_context(), **({"start": start} if start else {})},
-                              headers={"Authorization": f"Bearer {key}"}, timeout=TIMEOUT)
+                              headers=company._wallet_headers(), timeout=TIMEOUT)
             r.raise_for_status()
             url = r.json()["url"]
         except (requests.RequestException, ValueError, KeyError) as e:
@@ -220,12 +227,14 @@ class ResCompany(models.Model):
     def _wallet_account(self):
         company = self.sudo()
         try:
-            status, data = _wallet_api(self.env, "get", f"{company._wallet_base()}/sync/v1/account", key=company.wallet_api_key, timeout=ACCOUNT_TIMEOUT)
+            status, data = _wallet_api(self.env, "get", f"{company._wallet_base()}/sync/v1/account", company=company, timeout=ACCOUNT_TIMEOUT)
         except UserError as e:
             _logger.warning("tieroo: could not read the account of %s: %s", company.name, e)
             return None
         if status == 403 and data.get("error") in ("suspended", "closed"):
             return {"status": data["error"]}
+        if status == 409 and data.get("error") == "key_in_use":
+            return {"status": "elsewhere"}
         return data if status == 200 else None
 
     def _wallet_billing(self):
@@ -234,7 +243,7 @@ class ResCompany(models.Model):
         company = self.sudo()
         if not company.wallet_api_key:
             raise UserError(_("Connect %s to Tieroo first: Settings → Tieroo.", company.name))
-        status, data = _wallet_api(self.env, "post", f"{company._wallet_base()}/sync/v1/billing", key=company.wallet_api_key,
+        status, data = _wallet_api(self.env, "post", f"{company._wallet_base()}/sync/v1/billing", company=company,
                                    json={"returnUrl": company._wallet_settings_url(), "levelsModule": company._wallet_levels_on()})
         if status != 200 or not data.get("url"):
             raise UserError(_wallet_api_error(self.env, status, data))
@@ -261,7 +270,8 @@ class ResConfigSettings(models.TransientModel):
     wallet_plan_extra = fields.Char(compute="_compute_wallet_account")
     wallet_cards_used = fields.Integer("Cards in use", compute="_compute_wallet_account")
     wallet_cards_limit = fields.Integer("Card limit", compute="_compute_wallet_account")
-    wallet_status = fields.Selection([("active", "Active"), ("past_due", "Payment failed"), ("suspended", "Suspended"), ("closed", "Closed")],
+    wallet_status = fields.Selection([("active", "Active"), ("past_due", "Payment failed"), ("suspended", "Suspended"), ("closed", "Closed"),
+                                      ("elsewhere", "Key in use elsewhere")],
                                      "Account status", compute="_compute_wallet_account")
     wallet_over_limit = fields.Boolean(compute="_compute_wallet_account")
     wallet_grace_until = fields.Date(compute="_compute_wallet_account")
@@ -294,7 +304,7 @@ class ResConfigSettings(models.TransientModel):
             s.wallet_plan_extra = " · ".join(extra + ([_("Customer Levels")] if a.get("levels") else []))
             s.wallet_cards_used = a.get("billableCards") or 0
             s.wallet_cards_limit = a.get("limit") or plan.get("cards") or 0
-            s.wallet_status = a.get("status") if a.get("status") in ("active", "past_due", "suspended", "closed") else False
+            s.wallet_status = a.get("status") if a.get("status") in ("active", "past_due", "suspended", "closed", "elsewhere") else False
             s.wallet_over_limit = bool(a.get("overLimitSince"))
             s.wallet_grace_until = (a.get("graceUntil") or "")[:10] or False
             s.wallet_can_create = a.get("canCreate", True)
@@ -376,7 +386,7 @@ class WalletCard(models.Model):
             else:
                 close.append(ref)
         r = requests.put(f"{company._wallet_base()}/sync/v1/customers", json={"texts": texts, "customers": customers, "close": close},
-                         headers={"Authorization": f"Bearer {company.wallet_api_key}"}, timeout=BATCH_TIMEOUT)
+                         headers=company._wallet_headers(), timeout=BATCH_TIMEOUT)
         r.raise_for_status()
         results = {x["ref"]: x for x in r.json()["results"]}
         done = 0
@@ -399,9 +409,8 @@ class WalletCard(models.Model):
         done = 0
         for card in self:
             company = card.company_id
-            base, key = company._wallet_base(), company.wallet_api_key
-            url = f"{base}/sync/v1/customers/{card.partner_id.id}"
-            headers = {"Authorization": f"Bearer {key}"}
+            url = f"{company._wallet_base()}/sync/v1/customers/{card.partner_id.id}"
+            headers = company._wallet_headers()
             try:
                 if card._open():
                     r = requests.put(url, json=card._scoped()._wallet_payload(), headers=headers, timeout=TIMEOUT)
@@ -669,7 +678,7 @@ class LoyaltyProgram(models.Model):
     _inherit = "loyalty.program"
 
     wallet_card = fields.Boolean(
-        "Wallet card", copy=False, groups="base.group_system",
+        "Issue Tieroo card", copy=False, groups="base.group_system",
         help="Customers in this programme get a card in Apple Wallet and Google Wallet showing their points and the "
         "next reward. One loyalty programme per company.",
     )
@@ -686,7 +695,7 @@ class LoyaltyProgram(models.Model):
             company = [program.company_id.id, False] if program.company_id else program.env["res.company"].search([]).ids + [False]
             if program.search_count([("id", "!=", program.id), ("wallet_card", "=", True),
                                   ("program_type", "=", program.program_type), ("company_id", "in", company)]):
-                raise ValidationError(_("Only one programme of this type per company can have wallet cards."))
+                raise ValidationError(_("Only one programme of this type per company can issue Tieroo cards."))
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -697,7 +706,7 @@ class LoyaltyProgram(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if {"wallet_card", "active", "company_id", "program_type"} & vals.keys():
+        if {"wallet_card", "active", "company_id", "program_type", "name", "portal_point_name", "currency_id"} & vals.keys():
             _wallet_programs_changed(self)
             self.env["res.partner"]._wallet_wake()
         elif "wallet_auto_send" in vals:
@@ -712,7 +721,8 @@ class LoyaltyProgram(models.Model):
 class LoyaltyReward(models.Model):
     _inherit = "loyalty.reward"
 
-    _WALLET_FIELDS = {"required_points", "active", "program_id"}
+    _WALLET_FIELDS = {"required_points", "active", "program_id", "description", "reward_type", "discount", "discount_mode",
+                      "discount_applicability", "reward_product_id"}
 
     @api.model_create_multi
     def create(self, vals_list):

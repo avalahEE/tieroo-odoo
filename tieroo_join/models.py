@@ -72,7 +72,7 @@ class ResCompany(models.Model):
         base = company._wallet_base()
         if company.wallet_api_key:
             try:
-                r = requests.get(f"{base}/sync/v1/brand", headers={"Authorization": f"Bearer {company.wallet_api_key}"}, timeout=3)
+                r = requests.get(f"{base}/sync/v1/brand", headers=company._wallet_headers(), timeout=3)
                 r.raise_for_status()
                 data = r.json()
                 brand = {
@@ -205,7 +205,7 @@ class WalletSignupRequest(models.Model):
             return card
         if not self.partner_id:
             partner = env["res.partner"].search([
-                ("email_normalized", "=", self.email), ("company_id", "in", [company.id, False]), ("is_company", "=", False), ("vat", "=", False),
+                ("email_normalized", "=", self.email), ("company_id", "in", [company.id, False]), ("is_company", "=", False), ("parent_id", "=", False), ("vat", "=", False),
                 ("type", "=", "contact"), "|", ("user_ids", "=", False), ("user_ids.share", "=", True),
             ], order="id", limit=1) or env["res.partner"].create({"name": self.name or self.email, "email": self.email, **({"lang": self.lang} if self.lang else {})})
             if company.wallet_signup_tag_id:
