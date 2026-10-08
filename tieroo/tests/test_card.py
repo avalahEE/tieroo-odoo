@@ -83,7 +83,8 @@ class TestWalletCard(TransactionCase):
         self.assertRegex(self.mari.barcode, r"^042\d{13}$")
         url, = put.call_args.args
         self.assertEqual(url, f"https://wallet.test/sync/v1/customers/{self.mari.id}")
-        self.assertEqual(put.call_args.kwargs["headers"], {"Authorization": "Bearer wk_testkey"})
+        self.assertEqual(put.call_args.kwargs["headers"]["Authorization"], "Bearer wk_testkey")
+        self.assertRegex(put.call_args.kwargs["headers"]["X-Tieroo-Instance"], rf"^[0-9a-f-]{{36}}:{self.env.company.id}$")
         coffee, cake = self.program.reward_ids.sorted("required_points")
         en = lambda text: {"en_US": text}
         self.assertEqual(put.call_args.kwargs["json"], {
@@ -395,7 +396,7 @@ class TestWalletCard(TransactionCase):
             action = self.env["res.config.settings"].create({}).action_wallet_design()
         self.assertEqual(action["url"], "https://wallet.test/design/open?t=abc")
         self.assertEqual(post.call_args.args[0], "https://wallet.test/sync/v1/design-session")
-        self.assertEqual(post.call_args.kwargs["headers"], {"Authorization": "Bearer wk_testkey"})
+        self.assertEqual(post.call_args.kwargs["headers"]["Authorization"], "Bearer wk_testkey")
         sent = post.call_args.kwargs["json"]
         self.assertEqual((sent["company"], sent["texts"]["program"]["en_US"], sent["levels"]), (self.env.company.name, "Kohviklubi", []))
 
@@ -407,3 +408,14 @@ class TestWalletCard(TransactionCase):
         self.mari._wallet_card().sync_needed = False
         self.program.reward_ids = [(0, 0, {"reward_type": "discount", "discount": 5, "required_points": 50, "description": "Kringel"})]
         self.assertTrue(self.mari._wallet_card().sync_needed)
+
+    def test_renaming_in_odoo_updates_the_card(self):
+        with patch(PUT, return_value=ok()):
+            self.mari._wallet_create_card()
+        card = self.mari._wallet_card()
+        for record, vals in ((self.program, {"name": "Püsikliendid"}), (self.program, {"portal_point_name": "Templid"}),
+                             (self.program.reward_ids[:1], {"description": "Tasuta kohv"}),
+                             (self.program.reward_ids.filtered(lambda r: r.reward_type == "discount")[:1], {"discount": 15})):
+            card.sync_needed = False
+            record.write(vals)
+            self.assertTrue(card.sync_needed, vals)

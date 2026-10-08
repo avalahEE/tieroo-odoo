@@ -65,6 +65,8 @@ class WalletLevel(models.Model):
         res = super().write(vals)
         if "pricelist_id" in vals:
             self._wallet_allow_in_pos()
+        if "name" in vals:
+            self.env["wallet.card"].sudo().search([("company_id", "in", self.company_id.ids)]).partner_id._wallet_mark()
         return res
 
     def _wallet_allow_in_pos(self):

@@ -442,9 +442,9 @@ msgstr "Rahakoti kaarti saavad uuesti saata ainult administraatorid."
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid "Only one programme of this type per company can have wallet cards."
+msgid "Only one programme of this type per company can issue Tieroo cards."
 msgstr ""
-"Rahakoti kaart saab olla ainult ühel seda tüüpi programmil ettevõtte kohta."
+"Tieroo kaarte saab väljastada ainult üks seda tüüpi programm ettevõtte kohta."
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
@@ -729,6 +729,11 @@ msgid "Wallet Plan Extra"
 msgstr "Paketi lisainfo"
 
 #. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_card
+msgid "Issue Tieroo card"
+msgstr "Väljasta Tieroo kaart"
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_notice
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_notice
 msgid "Wallet Signup Notice"
@@ -736,7 +741,6 @@ msgstr "Liitumise teade"
 
 #. module: tieroo
 #: model:ir.model,name:tieroo.model_wallet_card
-#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_card
 #: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_card_state
 #: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_card_state
 msgid "Wallet card"
@@ -823,3 +827,19 @@ msgstr "Kliendi tasemed on Odoos paigaldatud, kuid pole sinu Tieroo paketis: tas
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing."
 msgstr "Kliendi tasemed on Odoos paigaldatud, kuid tasuta pakett seda ei sisalda: tasemed ja hinnakirjad töötavad Odoos, kaardid neid ei näita. Vali lehel Pakett ja arveldus tasuline pakett koos Kliendi tasemetega."
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_status__elsewhere
+msgid "Key in use elsewhere"
+msgstr "Võti on mujal kasutusel"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "This Tieroo key is in use in another Odoo database or company: the cards do not update from here. Contact Tieroo."
+msgstr "See Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes: siit kaardid ei uuene. Võta ühendust Tierooga."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "This company's Tieroo key is in use in another Odoo database or company. Contact Tieroo."
+msgstr "Selle ettevõtte Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes. Võta ühendust Tierooga."
