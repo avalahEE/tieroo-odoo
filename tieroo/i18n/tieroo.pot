@@ -333,9 +333,9 @@ msgstr ""
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid ""
-"Logo, colours, banner, fields and translations, with a live preview. Saving "
-"updates every customer's card. The loyalty programme on the card: tick "
-"'Wallet card' on it."
+"Logo, colours, background image, fields and translations, with a live "
+"preview. Saving updates every customer's card. The loyalty programme on the "
+"card: tick 'Issue Tieroo card' on it."
 msgstr ""
 
 #. module: tieroo

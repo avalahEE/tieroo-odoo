@@ -107,7 +107,7 @@
                                 <button name="action_wallet_billing" type="object" string="Plan and billing" class="btn-link ps-0" icon="oi-arrow-right"/>
                             </div>
                         </setting>
-                        <setting string="Card design" company_dependent="1" help="Logo, colours, banner, fields and translations, with a live preview. Saving updates every customer's card. The loyalty programme on the card: tick 'Wallet card' on it.">
+                        <setting string="Card design" company_dependent="1" help="Logo, colours, background image, fields and translations, with a live preview. Saving updates every customer's card. The loyalty programme on the card: tick 'Issue Tieroo card' on it.">
                             <button name="action_wallet_design" type="object" string="Design the card" icon="oi-arrow-right" class="btn-link"/>
                         </setting>
                     </block>
