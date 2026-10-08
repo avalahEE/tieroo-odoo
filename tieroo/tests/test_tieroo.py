@@ -134,6 +134,8 @@ class TestTieroo(TierooSetup, TransactionCase):
             (True, False, "Loyalty Cards 100", 112, 100, "past_due", True, "2026-10-15", True, ""))
         settings, _get = self.connected(resp(403, {"error": "suspended"}))
         self.assertEqual((settings.wallet_status, settings.wallet_account_error), ("suspended", False))
+        settings, _get = self.connected(resp(401, {"error": "unauthorized"}))
+        self.assertEqual((settings.wallet_status, settings.wallet_account_error), ("closed", False))
         settings, _get = self.connected(resp(409, {"error": "key_in_use"}))
         self.assertEqual((settings.wallet_status, settings.wallet_account_error), ("elsewhere", False))
         with patch(GET, side_effect=requests.Timeout("slow")):
