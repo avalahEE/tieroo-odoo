@@ -604,22 +604,22 @@ class ResPartner(models.Model):
 
 
     @api.model
-    def _wallet_issue_candidates(self, limit):
+    def _wallet_issue_candidates(self, limit, everyone=False):
         program = self._wallet_points_program()
         if not program or not program.wallet_auto_send:
             return self.browse()
         self.env.flush_all()
         self.env.cr.execute(SQL("""
             SELECT DISTINCT lc.partner_id FROM loyalty_card lc
-            WHERE lc.program_id = %s AND lc.partner_id IS NOT NULL AND lc.active
+            WHERE lc.program_id = %s AND lc.partner_id IS NOT NULL AND lc.active AND lc.id > %s
               AND NOT EXISTS (SELECT 1 FROM wallet_card w WHERE w.partner_id = lc.partner_id AND w.company_id = %s)""",
-            program.id, self.env.company.id))
+            program.id, 0 if everyone else program.sudo().wallet_send_after, self.env.company.id))
         ids = [row[0] for row in self.env.cr.fetchall()]
         return self.sudo().search([("id", "in", ids), ("email", "!=", False)] + self._wallet_issue_domain(), limit=limit, order="id")
 
     @api.model
     def _wallet_issue_domain(self):
-        return []
+        return [("is_blacklisted", "=", False)]
 
     @api.model
     def _wallet_without_card(self, partners, limit):
@@ -747,10 +747,36 @@ class LoyaltyProgram(models.Model):
     )
 
     wallet_auto_send = fields.Boolean(
-        "Send wallet cards automatically", copy=False, groups="base.group_system",
-        help="Create a card for every member with an email and email it. Switching this on emails every member "
-        "who has no card yet.",
+        "Send Tieroo cards automatically", copy=False, groups="base.group_system",
+        help="Every new member with an email gets the card by email. Members from before get it only when you press "
+        "Send to existing members.",
     )
+    wallet_send_after = fields.Integer(copy=False, groups="base.group_system")
+    wallet_existing_count = fields.Integer(compute="_compute_wallet_existing_count", groups="base.group_system")
+
+    def _compute_wallet_existing_count(self):
+        for program in self:
+            company = program.company_id or self.env.company
+            ready = program.wallet_auto_send and program.id and program.wallet_send_after
+            program.wallet_existing_count = len(self.env["res.partner"].with_company(company)._wallet_issue_candidates(None, everyone=True)) if ready else 0
+
+    def action_wallet_send_existing(self):
+        self.ensure_one()
+        company = self.company_id or self.env.company
+        count = self.wallet_existing_count
+        account = company._wallet_account() or {}
+        limit, used = account.get("limit") or (account.get("plan") or {}).get("cards"), account.get("billableCards") or 0
+        if limit and used + count > limit:
+            raise UserError(_("%(count)s members would get a card, your Tieroo plan has room for %(room)s more. "
+                              "Choose a bigger plan first: Settings → Tieroo → Plan and billing.", count=count, room=max(limit - used, 0)))
+        self.wallet_send_after = 0
+        self.env["res.partner"].with_company(company)._wallet_wake()
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {"type": "success", "message": _("Sending the card to %s members in the background.", count),
+                       "next": {"type": "ir.actions.act_window_close"}},
+        }
 
     @api.constrains("wallet_card", "program_type", "company_id", "active")
     def _check_wallet_card(self):
@@ -768,6 +794,9 @@ class LoyaltyProgram(models.Model):
         return programs
 
     def write(self, vals):
+        if vals.get("wallet_auto_send"):
+            last = self.env["loyalty.card"].sudo().with_context(active_test=False).search([], order="id desc", limit=1)
+            vals = {**vals, "wallet_send_after": last.id}
         res = super().write(vals)
         if {"wallet_card", "active", "company_id", "program_type", "name", "portal_point_name", "currency_id"} & vals.keys():
             _wallet_programs_changed(self)

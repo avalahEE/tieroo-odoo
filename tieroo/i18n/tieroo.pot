@@ -1,19 +1,27 @@
 # Translation of Odoo Server.
 # This file contains the translation of the following modules:
-# 	* wallet_card
+# 	* tieroo
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 17:09+0000\n"
-"PO-Revision-Date: 2026-10-07 17:09+0000\n"
+"POT-Creation-Date: 2026-10-08 20:03+0000\n"
+"PO-Revision-Date: 2026-10-08 20:03+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid ""
+"%(count)s members would get a card, your Tieroo plan has room for %(room)s "
+"more. Choose a bigger plan first: Settings → Tieroo → Plan and billing."
+msgstr ""
 
 #. module: tieroo
 #. odoo-python
@@ -27,6 +35,20 @@ msgid ", after that no new cards."
 msgstr ""
 
 #. module: tieroo
+#: model:mail.template,body_html:tieroo.mail_template_join_confirm
+msgid ""
+"<div>\n"
+"    <p>Hello <t t-out=\"object.name or ''\"/>,</p>\n"
+"    <p>Confirm your email address to join the loyalty programme of <t t-out=\"object.company_id.name\"/>. Then add the card to your phone.</p>\n"
+"    <p style=\"margin: 24px 0;\">\n"
+"        <a t-att-href=\"ctx.get('confirm_url')\" style=\"display:inline-block;background:#111111;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;\">Confirm and get the card</a>\n"
+"    </p>\n"
+"    <p style=\"color:#64748b;font-size:13px;\">The link works for 48 hours. Did not ask for this? Ignore this email: nothing happens.</p>\n"
+"</div>\n"
+"        "
+msgstr ""
+
+#. module: tieroo
 #: model:mail.template,body_html:tieroo.mail_template_wallet_card
 msgid ""
 "<div>\n"
@@ -34,8 +56,10 @@ msgid ""
 "    <p>Hello <t t-out=\"object.partner_id.name\"/>,</p>\n"
 "    <p>Add your loyalty card to your phone's wallet. Show the card at the checkout to use your customer benefits.</p>\n"
 "    <p style=\"margin: 24px 0;\">\n"
-"        <a t-if=\"card.apple_url\" t-att-href=\"card.apple_url\" style=\"display:inline-block;margin:0 8px 8px 0;background:#000000;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Add to Apple Wallet</a>\n"
-"        <a t-if=\"card.google_url\" t-att-href=\"card.google_url\" style=\"display:inline-block;margin:0 8px 8px 0;background:#1f1f1f;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Add to Google Wallet</a>\n"
+"        <t t-set=\"badge\" t-value=\"card.platform_url + '/badge/'\"/>\n"
+"        <t t-set=\"lang\" t-value=\"'.png?lang=' + (object.partner_id.lang or 'en_US')\"/>\n"
+"        <a t-if=\"card.apple_url\" t-att-href=\"card.apple_url\" style=\"display:inline-block;margin:0 8px 8px 0;text-decoration:none;\"><img t-att-src=\"badge + 'apple' + lang\" height=\"48\" alt=\"Add to Apple Wallet\" style=\"display:block;height:48px;width:auto;border:0;\"/></a>\n"
+"        <a t-if=\"card.google_url\" t-att-href=\"card.google_url\" style=\"display:inline-block;margin:0 8px 8px 0;text-decoration:none;\"><img t-att-src=\"badge + 'google' + lang\" height=\"48\" alt=\"Add to Google Wallet\" style=\"display:block;height:48px;width:auto;max-width:100%;border:0;\"/></a>\n"
 "        <a t-if=\"not card.apple_url and not card.google_url\" t-att-href=\"card.url\" style=\"display:inline-block;background:#0f172a;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;\">Open loyalty card</a>\n"
 "    </p>\n"
 "    <p style=\"color:#64748b;font-size:13px;\">The buttons work for 48 hours, until the card is on your phone.</p>\n"
@@ -54,9 +78,16 @@ msgstr ""
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid ""
-"A QR code (a poster in the shop) opens a page where customers join the loyalty"
-" programme themselves and get the card by email. Print-ready PDF and SVG "
-"posters."
+"<span invisible=\"wallet_levels_missing != 'add'\">Customer Levels is installed in Odoo but not on your Tieroo plan: levels and pricelists work in Odoo, the cards do not show them. Add Customer Levels in Plan and billing.</span>\n"
+"                                    <span invisible=\"wallet_levels_missing != 'upgrade'\">Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing.</span>"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"A QR code (a poster in the shop) opens a page where customers join the "
+"loyalty programme themselves and get the card by email. Print-ready PDF and "
+"SVG posters."
 msgstr ""
 
 #. module: tieroo
@@ -77,19 +108,60 @@ msgid "Active"
 msgstr ""
 
 #. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__add
+msgid "Add it to the plan"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Add the card to your phone:"
+msgstr ""
+
+#. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid "Add the customer's email address first."
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Add to Apple Wallet"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Add to Google Wallet"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Add warehouse addresses"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_res_company__wallet_signup_tag_id
+#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_signup_tag_id
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Add-ons"
+msgid ""
+"Added to every customer who joins via the QR. Use it in Odoo Automation "
+"Rules or Marketing Automation, e.g. a welcome email or a newsletter. Empty ="
+" no tag."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_id
+msgid "Address"
 msgstr ""
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Advanced"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join_controllers.py:0
+msgid "Agree to the terms to join."
 msgstr ""
 
 #. module: tieroo
@@ -103,8 +175,51 @@ msgid "Apple Url"
 msgstr ""
 
 #. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__4
+msgid "April"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__8
+msgid "August"
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.tieroo_return_page
 msgid "Back to Settings"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__birth_day
+msgid "Birth Day"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__birth_month
+msgid "Birth Month"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
+msgid "Birthday"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_birth_day
+#: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_birth_day
+msgid "Birthday (day)"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_birth_month
+#: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_birth_month
+msgid "Birthday (month)"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid ""
+"Birthday <span style=\"font-weight: 400; color: #71717a\">(optional)</span>"
 msgstr ""
 
 #. module: tieroo
@@ -133,10 +248,20 @@ msgid "Check again"
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Check your email"
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid ""
 "Choose a plan and connect this company to Tieroo. A card is required, also "
 "for the free plan (nothing is charged on the free plan)."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__city
+msgid "City"
 msgstr ""
 
 #. module: tieroo
@@ -147,14 +272,38 @@ msgid "Closed"
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid ""
+"Collect points and get rewards. The card goes to Apple Wallet or Google "
+"Wallet: first confirm your email address."
+msgstr ""
+
+#. module: tieroo
 #: model:ir.model,name:tieroo.model_res_company
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__company_id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__company_id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__company_id
 msgid "Company"
 msgstr ""
 
 #. module: tieroo
 #: model:ir.model,name:tieroo.model_res_config_settings
 msgid "Config Settings"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Confirm and get the card"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Confirm joining"
+msgstr ""
+
+#. module: tieroo
+#: model:mail.template,subject:tieroo.mail_template_join_confirm
+msgid "Confirm joining {{ object.company_id.name }}"
 msgstr ""
 
 #. module: tieroo
@@ -189,19 +338,16 @@ msgid "Could not reach Tieroo. Try again later."
 msgstr ""
 
 #. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_loyalty_program__wallet_auto_send
-msgid ""
-"Create a card for every member with an email and email it. Switching this on"
-" emails every member who has no card yet."
-msgstr ""
-
-#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__create_uid
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__create_uid
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__create_uid
 msgid "Created by"
 msgstr ""
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__create_date
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__create_date
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__create_date
 msgid "Created on"
 msgstr ""
 
@@ -226,6 +372,17 @@ msgid ""
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
+msgid "Day"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__12
+msgid "December"
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Design the card"
 msgstr ""
@@ -240,16 +397,73 @@ msgstr ""
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_history__display_name
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_program__display_name
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_reward__display_name
+#: model:ir.model.fields,field_description:tieroo.field_mail_template__display_name
 #: model:ir.model.fields,field_description:tieroo.field_res_company__display_name
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__display_name
 #: model:ir.model.fields,field_description:tieroo.field_res_partner__display_name
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__display_name
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__display_name
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__display_name
 msgid "Display Name"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__email
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Email"
 msgstr ""
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__email_pending
 msgid "Email Pending"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model,name:tieroo.model_mail_template
+msgid "Email Template"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Email templates"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
+msgid ""
+"Email the Tieroo card to every member who has none yet? The emails go out "
+"through your mail server: check its daily sending limit."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0 code:addons/tieroo/join_controllers.py:0
+msgid "Enter a valid email address."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0
+msgid ""
+"Enter the birthday as a day and a month that exist (29 February is fine)."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join_controllers.py:0
+msgid "Enter your name."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_loyalty_program__wallet_auto_send
+msgid ""
+"Every new member with an email gets the card by email. Members from before "
+"get it only when you press Send to existing members."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__2
+msgid "February"
 msgstr ""
 
 #. module: tieroo
@@ -261,8 +475,18 @@ msgid ""
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "For a birthday offer. It cannot be changed later."
+msgstr ""
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__google_url
 msgid "Google Url"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__has_point
+msgid "Has Point"
 msgstr ""
 
 #. module: tieroo
@@ -276,22 +500,46 @@ msgid "I agree that Odoo sends data to Tieroo"
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "I join the loyalty programme of"
+msgstr ""
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_card__id
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_history__id
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_program__id
 #: model:ir.model.fields,field_description:tieroo.field_loyalty_reward__id
+#: model:ir.model.fields,field_description:tieroo.field_mail_template__id
 #: model:ir.model.fields,field_description:tieroo.field_res_company__id
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__id
 #: model:ir.model.fields,field_description:tieroo.field_res_partner__id
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__id
 msgid "ID"
 msgstr ""
 
 #. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_res_config_settings__module_wallet_signup
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid ""
-"Installs Tieroo – Join via QR: customers scan a QR code, enter their name "
-"and email, and get the wallet card by email. Includes print-ready posters."
+"In a big shopping centre use the shop's own point (copy it from a map app), "
+"not the centre's address: they can be 100-300 m apart."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Inventory is not installed: add the shops' addresses one by one."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__ip_hash
+msgid "Ip Hash"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_card
+msgid "Issue Tieroo card"
 msgstr ""
 
 #. module: tieroo
@@ -305,8 +553,64 @@ msgid "It is taking longer than usual. Check again in a moment."
 msgstr ""
 
 #. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__module_wallet_signup
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__1
+msgid "January"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Join"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_url
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Join link"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Join our loyalty programme"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Join via QR"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model,name:tieroo.model_wallet_signup_request
+msgid "Join via QR sign-up"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0
+msgid ""
+"Joined %(program)s via the QR code: confirmed the email address and agreed "
+"to the terms (%(company)s)."
+msgstr ""
+
+#. module: tieroo
+#: model:res.partner.category,name:tieroo.tag_joined_via_qr
+msgid "Joined via QR"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Joining is not open at the moment"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__7
+msgid "July"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__6
+msgid "June"
 msgstr ""
 
 #. module: tieroo
@@ -316,13 +620,38 @@ msgid ""
 msgstr ""
 
 #. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_status__elsewhere
+msgid "Key in use elsewhere"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__lang
+msgid "Lang"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Language"
+msgstr ""
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__write_uid
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__write_uid
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__write_uid
 msgid "Last Updated by"
 msgstr ""
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__write_date
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__write_date
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__write_date
 msgid "Last Updated on"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_latitude
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Latitude"
 msgstr ""
 
 #. module: tieroo
@@ -331,11 +660,35 @@ msgid "Leave empty to use https://app.tieroo.com"
 msgstr ""
 
 #. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_res_company__wallet_privacy_url
+#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_privacy_url
+msgid "Linked from the join page's consent checkbox."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_res_company__wallet_terms_url
+#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_terms_url
+msgid "Linked from the join page's consent checkbox: \"agree to its terms\"."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/join.py:0
+msgid "Links must start with https://"
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid ""
 "Logo, colours, background image, fields and translations, with a live "
 "preview. Saving updates every customer's card. The loyalty programme on the "
 "card: tick 'Issue Tieroo card' on it."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_longitude
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Longitude"
 msgstr ""
 
 #. module: tieroo
@@ -359,16 +712,65 @@ msgid "Loyalty cards (this company)"
 msgstr ""
 
 #. module: tieroo
-#: model:ir.module.module,summary:base.module_wallet_card
+#: model:ir.module.module,summary:base.module_tieroo
 msgid ""
 "Loyalty cards in Apple Wallet and Google Wallet from Odoo Loyalty. Uses the "
 "Tieroo service (free up to 100 cards)."
 msgstr ""
 
 #. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_terms_url
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_terms_url
+msgid "Loyalty programme terms URL"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__3
+msgid "March"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__5
+msgid "May"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
+msgid "Month"
+msgstr ""
+
+#. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid "Monthly"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__name
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Name"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"Near one of your shops the iPhone shows the card on the lock screen and "
+"Android shows a reminder. Each card carries up to 10 of your shops' "
+"coordinates, chosen by where that customer bought and the city in their "
+"address, listed in your order. The phone compares its own position with "
+"them: Tieroo and Google never learn where a customer is."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__upgrade
+msgid "Needs a paid plan"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid ""
+"No email within a few minutes? Check the spam folder, or ask the staff."
 msgstr ""
 
 #. module: tieroo
@@ -380,6 +782,26 @@ msgstr ""
 #. module: tieroo
 #: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_card_state__none
 msgid "Not created"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__11
+msgid "November"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "OK"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__10
+msgid "October"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__on_card
+msgid "On the card"
 msgstr ""
 
 #. module: tieroo
@@ -407,6 +829,11 @@ msgid "Only one programme of this type per company can issue Tieroo cards."
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Open the card"
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Over the plan's limit: choose a bigger plan by"
 msgstr ""
@@ -420,6 +847,7 @@ msgstr ""
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__partner_id
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__partner_id
 msgid "Partner"
 msgstr ""
 
@@ -449,8 +877,44 @@ msgid "Platform URL"
 msgstr ""
 
 #. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_card__platform_url
+msgid "Platform Url"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Please ask the staff."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Please try again in a few minutes"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "Please try again later"
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Privacy"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_privacy_url
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_privacy_url
+msgid "Privacy policy URL"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "QR code and posters"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_auto_send
+msgid "Send Tieroo cards automatically"
 msgstr ""
 
 #. module: tieroo
@@ -459,8 +923,43 @@ msgid "Send the wallet card again to the customer's email address?"
 msgstr ""
 
 #. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_auto_send
-msgid "Send wallet cards automatically"
+#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
+msgid "Send to existing members"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Sending the card to %s members in the background."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__9
+msgid "September"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__sequence
+msgid "Sequence"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model,name:tieroo.model_wallet_shop
+msgid "Shop on the Tieroo card"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Shops on the card"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_shops_on
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_on
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Show the card near our shops"
 msgstr ""
 
 #. module: tieroo
@@ -503,6 +1002,13 @@ msgid "Suspended"
 msgstr ""
 
 #. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_wallet_shop__on_card
+msgid ""
+"Switch off while the shop is closed, e.g. for renovation: it stays on the "
+"list."
+msgstr ""
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_wallet_card__sync_needed
 msgid "Sync Needed"
 msgstr ""
@@ -510,6 +1016,12 @@ msgstr ""
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "Sync key"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_tag_id
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_tag_id
+msgid "Tag for new members"
 msgstr ""
 
 #. module: tieroo
@@ -534,10 +1046,54 @@ msgid ""
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid ""
+"The card could not be made right now. Open the link in the email again in a "
+"few minutes; your sign-up is saved."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"The card email and the joining confirmation, sent by Odoo. Change the text "
+"and translations here; Reset Template brings back the original."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.constraint,message:tieroo.constraint_res_company_wallet_signup_token_unique
+msgid "The join link must be unique."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid ""
+"The link works for 48 hours. Join again with the QR code, or ask the staff."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"This Tieroo key is in use in another Odoo database or company: the cards do "
+"not update from here. Contact Tieroo."
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid ""
 "This account is suspended or closed: the cards do not update. Contact "
 "Tieroo."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.constraint,message:tieroo.constraint_wallet_shop_partner_unique
+msgid "This address is already on the list."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_card
+msgid ""
+"This address is on the blacklist (no marketing emails). Send the wallet card"
+" anyway? Do it only if the customer asked for it."
 msgstr ""
 
 #. module: tieroo
@@ -549,7 +1105,27 @@ msgstr ""
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
+msgid ""
+"This company's Tieroo key is in use in another Odoo database or company. "
+"Contact Tieroo."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
 msgid "This customer has no active wallet card in %s."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid ""
+"This link has been used. Your card was emailed to you: add it to your phone "
+"from that email."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "This link has expired"
 msgstr ""
 
 #. module: tieroo
@@ -601,14 +1177,45 @@ msgid ""
 msgstr ""
 
 #. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Tieroo email templates"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"Tieroo is an external service. To open the account, Odoo sends it this "
+"company's name, VAT number, address and your email. After that, to issue and"
+" update the cards, it sends each card holder's name, barcode, points, next "
+"reward, level and language, and, if you show the card near your shops, for "
+"each card up to 10 of your shops' coordinates, chosen by where that customer"
+" bought and the city in their address. Emails with the cards are sent by "
+"Odoo itself."
+msgstr ""
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_api_url
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_api_url
 msgid "Tieroo platform URL"
 msgstr ""
 
 #. module: tieroo
-#: model:ir.module.module,shortdesc:base.module_wallet_card
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid ""
+"Tieroo sends this email, so the template cannot be deleted. Change its text,"
+" or bring back the original with Reset Template."
+msgstr ""
+
+#. module: tieroo
+#: model:ir.module.module,shortdesc:base.module_tieroo
 msgid "Tieroo – Loyalty cards"
+msgstr ""
+
+#. module: tieroo
+#: model:mail.template,name:tieroo.mail_template_join_confirm
+msgid "Tieroo: confirm joining"
 msgstr ""
 
 #. module: tieroo
@@ -619,6 +1226,18 @@ msgstr ""
 #. module: tieroo
 #: model:mail.template,name:tieroo.mail_template_wallet_card
 msgid "Tieroo: wallet card"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__token_hash
+msgid "Token Hash"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid ""
+"Too many sign-ups from this network in the last hour. Try again in a while, "
+"or ask the staff."
 msgstr ""
 
 #. module: tieroo
@@ -652,8 +1271,18 @@ msgid "Wallet Connected"
 msgstr ""
 
 #. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_existing_count
+msgid "Wallet Existing Count"
+msgstr ""
+
+#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_grace_until
 msgid "Wallet Grace Until"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_levels_missing
+msgid "Wallet Levels Missing"
 msgstr ""
 
 #. module: tieroo
@@ -667,14 +1296,29 @@ msgid "Wallet Plan Extra"
 msgstr ""
 
 #. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_card
-msgid "Issue Tieroo card"
+#: model:ir.model.fields,field_description:tieroo.field_loyalty_program__wallet_send_after
+msgid "Wallet Send After"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_count
+msgid "Wallet Shops Count"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_missing
+msgid "Wallet Shops Missing"
 msgstr ""
 
 #. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_notice
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_notice
 msgid "Wallet Signup Notice"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_token
+msgid "Wallet Signup Token"
 msgstr ""
 
 #. module: tieroo
@@ -716,606 +1360,6 @@ msgid "Wallet sync key"
 msgstr ""
 
 #. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Yearly"
-msgstr ""
-
-#. module: tieroo
-#: model:mail.template,subject:tieroo.mail_template_wallet_card
-msgid "Your loyalty card – {{ object.company_id.name }}"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Your sign-up is being confirmed (the VAT number check). Try again in a "
-"minute."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "cards in use"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__add
-msgid "Add it to the plan"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_levels_missing__upgrade
-msgid "Needs a paid plan"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_levels_missing
-msgid "Wallet Levels Missing"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Customer Levels is installed in Odoo but not on your Tieroo plan: levels and pricelists work in Odoo, the cards do not show them. Add Customer Levels in Plan and billing."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_config_settings__wallet_status__elsewhere
-msgid "Key in use elsewhere"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "This Tieroo key is in use in another Odoo database or company: the cards do not update from here. Contact Tieroo."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "This company's Tieroo key is in use in another Odoo database or company. Contact Tieroo."
-msgstr ""
-
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
-msgid "Add warehouse addresses"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_id
-msgid "Address"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__city
-msgid "City"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"In a big shopping centre use the shop's own point (copy it from a map app), "
-"not the centre's address: they can be 100-300 m apart."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Inventory is not installed: add the shops' addresses one by one."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_latitude
-#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
-msgid "Latitude"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_longitude
-#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
-msgid "Longitude"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__sequence
-msgid "Sequence"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model,name:tieroo.model_wallet_shop
-msgid "Shop on the Tieroo card"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Shops on the card"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_shops_on
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_on
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Show the card near our shops"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.constraint,message:tieroo.constraint_wallet_shop_partner_unique
-msgid "This address is already on the list."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_count
-msgid "Wallet Shops Count"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_missing
-msgid "Wallet Shops Missing"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"shops on the list. Each card shows up to 10: where the customer bought, then"
-" their city, then your order."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Near one of your shops the iPhone shows the card on the lock screen and "
-"Android shows a reminder. Each card carries up to 10 of your shops' "
-"coordinates, chosen by where that customer bought and the city in their "
-"address, listed in your order. The phone compares its own position with "
-"them: Tieroo and Google never learn where a customer is."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Tieroo is an external service. To open the account, Odoo sends it this "
-"company's name, VAT number, address and your email. After that, to issue and"
-" update the cards, it sends each card holder's name, barcode, points, next "
-"reward, level and language, and, if you show the card near your shops, for "
-"each card up to 10 of your shops' coordinates, chosen by where that customer"
-" bought and the city in their address. Emails with the cards are sent by "
-"Odoo itself."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "without valid coordinates: left out until they have them."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__on_card
-msgid "On the card"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_wallet_shop__on_card
-msgid "Switch off while the shop is closed, e.g. for renovation: it stays on the list."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Add the card to your phone:"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Add to Apple Wallet"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Add to Google Wallet"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.module.module,summary:base.module_tieroo_join
-msgid ""
-"Add-on: customers join the loyalty programme with a QR code and get their "
-"wallet card by email"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_res_company__wallet_signup_tag_id
-#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_signup_tag_id
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_signup
-msgid ""
-"Added to every customer who joins via the QR. Use it in Odoo Automation "
-"Rules or Marketing Automation, e.g. a welcome email or a newsletter. Empty ="
-" no tag."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/controllers.py:0
-msgid "Agree to the terms to join."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__4
-msgid "April"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__8
-msgid "August"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__birth_day
-msgid "Birth Day"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__birth_month
-msgid "Birth Month"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
-msgid "Birthday"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_birth_day
-#: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_birth_day
-msgid "Birthday (day)"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_partner__wallet_birth_month
-#: model:ir.model.fields,field_description:tieroo.field_res_users__wallet_birth_month
-msgid "Birthday (month)"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"Birthday <span style=\"font-weight: 400; color: #71717a\">(optional)</span>"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Check your email"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"Collect points and get rewards. The card goes to Apple Wallet or Google "
-"Wallet: first confirm your email address."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Confirm and get the card"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Confirm joining"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Confirm joining %(company)s"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Confirm your email address to join the loyalty programme of %(company)s. "
-"Then add the card to your phone."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
-msgid "Day"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__12
-msgid "December"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__email
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Email"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/controllers.py:0
-#: code:addons/tieroo/models.py:0
-msgid "Enter a valid email address."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Enter the birthday as a day and a month that exist (29 February is fine)."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/controllers.py:0
-msgid "Enter your name."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__2
-msgid "February"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "For a birthday offer. It cannot be changed later."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Hello %(name)s,"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "I join the loyalty programme of"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__ip_hash
-msgid "Ip Hash"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__1
-msgid "January"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Join"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_url
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_signup
-msgid "Join link"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Join our loyalty programme"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Joined %(program)s via the QR code: confirmed the email address and agreed "
-"to the terms (%(company)s)."
-msgstr ""
-
-#. module: tieroo
-#: model:res.partner.category,name:tieroo.tag_joined_via_qr
-msgid "Joined via QR"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Joining is not open at the moment"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__7
-msgid "July"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__6
-msgid "June"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__lang
-msgid "Lang"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Language"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_res_company__wallet_privacy_url
-#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_privacy_url
-msgid "Linked from the join page's consent checkbox."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,help:tieroo.field_res_company__wallet_terms_url
-#: model:ir.model.fields,help:tieroo.field_res_config_settings__wallet_terms_url
-msgid "Linked from the join page's consent checkbox: \"agree to its terms\"."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Links must start with https://"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_terms_url
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_terms_url
-msgid "Loyalty programme terms URL"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__3
-msgid "March"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__5
-msgid "May"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-#: model_terms:ir.ui.view,arch_db:tieroo.res_partner_form_wallet_signup
-msgid "Month"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__name
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Name"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"No email within a few minutes? Check the spam folder, or ask the staff."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__11
-msgid "November"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "OK"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__10
-msgid "October"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Open the card"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Please ask the staff."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Please try again in a few minutes"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "Please try again later"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_privacy_url
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_privacy_url
-msgid "Privacy policy URL"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_signup
-msgid "QR code and posters"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__9
-msgid "September"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_tag_id
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_signup_tag_id
-msgid "Tag for new members"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"The card could not be made right now. Open the link in the email again in a "
-"few minutes; your sign-up is saved."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.constraint,message:tieroo.constraint_res_company_wallet_signup_token_unique
-msgid "The join link must be unique."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"The link works for 48 hours. Did not ask for this? Ignore this email: "
-"nothing happens."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"The link works for 48 hours. Join again with the QR code, or ask the "
-"staff."
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "This link has expired"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_signup_request__token_hash
-msgid "Token Hash"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid ""
-"Too many sign-ups from this network in the last hour. Try again in a while, "
-"or ask the staff."
-msgstr ""
-
-#. module: tieroo
-#: model:ir.module.module,shortdesc:base.module_tieroo_join
-msgid "Tieroo – Join via QR"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_signup_token
-msgid "Wallet Signup Token"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model,name:tieroo.model_wallet_signup_request
-msgid "Join via QR sign-up"
-msgstr ""
-
-#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "We also emailed you the card, so you can add it later."
 msgstr ""
@@ -1339,8 +1383,32 @@ msgid "Welcome!"
 msgstr ""
 
 #. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Yearly"
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "You are joining the loyalty programme of"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.join_page
+msgid "You have already joined"
+msgstr ""
+
+#. module: tieroo
+#: model:mail.template,subject:tieroo.mail_template_wallet_card
+msgid "Your loyalty card – {{ object.company_id.name }}"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid ""
+"Your sign-up is being confirmed (the VAT number check). Try again in a "
+"minute."
 msgstr ""
 
 #. module: tieroo
@@ -1354,8 +1422,30 @@ msgid "and the"
 msgstr ""
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_signup
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "cards in use"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "company_id"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "https://"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "id"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
+msgid "members from before have no card yet."
 msgstr ""
 
 #. module: tieroo
@@ -1364,71 +1454,18 @@ msgid "privacy policy"
 msgstr ""
 
 #. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"shops on the list. Each card shows up to 10: where the customer bought, then"
+" their city, then your order."
+msgstr ""
+
+#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "terms"
 msgstr ""
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "You have already joined"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.join_page
-msgid "This link has been used. Your card was emailed to you: add it to your phone from that email."
-msgstr ""
-
-#. module: tieroo
-#: model:mail.template,body_html:tieroo.mail_template_join_confirm
-msgid ""
-"<div>\n"
-"    <p>Hello <t t-out=\"object.name or ''\"/>,</p>\n"
-"    <p>Confirm your email address to join the loyalty programme of <t t-out=\"object.company_id.name\"/>. Then add the card to your phone.</p>\n"
-"    <p style=\"margin: 24px 0;\">\n"
-"        <a t-att-href=\"ctx.get('confirm_url')\" style=\"display:inline-block;background:#111111;color:#ffffff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:bold;\">Confirm and get the card</a>\n"
-"    </p>\n"
-"    <p style=\"color:#64748b;font-size:13px;\">The link works for 48 hours. Did not ask for this? Ignore this email: nothing happens.</p>\n"
-"</div>\n"
-"        "
-msgstr ""
-
-#. module: tieroo
-#: model:mail.template,subject:tieroo.mail_template_join_confirm
-msgid "Confirm joining {{ object.company_id.name }}"
-msgstr ""
-
-#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "Email templates"
-msgstr ""
-
-#. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"The card email and the joining confirmation, sent by Odoo. Change the text "
-"and translations here; Reset Template brings back the original."
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Tieroo email templates"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid ""
-"Tieroo sends this email, so the template cannot be deleted. Change its text,"
-" or bring back the original with Reset Template."
-msgstr ""
-
-#. module: tieroo
-#: model:mail.template,name:tieroo.mail_template_join_confirm
-msgid "Tieroo: confirm joining"
-msgstr ""
-
-#. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__has_point
-msgid "Has Point"
+msgid "without valid coordinates: left out until they have them."
 msgstr ""

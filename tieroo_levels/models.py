@@ -353,15 +353,15 @@ class ResPartner(models.Model):
         return payload
 
     @api.model
-    def _wallet_issue_candidates(self, limit):
-        candidates = super()._wallet_issue_candidates(limit)
+    def _wallet_issue_candidates(self, limit, everyone=False):
+        candidates = super()._wallet_issue_candidates(limit, everyone)
         if not self.env.company.wallet_levels_auto_send:
             return candidates
         people = self.sudo().search([
             ("commercial_partner_id.wallet_period_start", "!=", False), ("commercial_partner_id.wallet_excluded", "!=", True),
             ("type", "=", "contact"), ("is_company", "=", False), ("email", "!=", False),
             ("wallet_card_ids", "not any", [("company_id", "=", self.env.company.id)]),
-        ], limit=limit, order="id")
+        ] + self._wallet_issue_domain(), limit=limit, order="id")
         people = people.filtered(lambda p: not (p.commercial_partner_id == p and not p._wallet_is_b2c()))
         return (candidates | people)[:limit]
 
