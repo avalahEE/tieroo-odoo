@@ -40,7 +40,7 @@ class TestTieroo(TierooSetup, TransactionCase):
         self.assertEqual(action, {"type": "ir.actions.act_url", "url": "https://wallet.test/billing/open?t=x", "target": "self"})
         self.assertEqual(post.call_args.args[0], "https://wallet.test/onboard/v1/start")
         sent = post.call_args.kwargs["json"]
-        self.assertEqual(sent["accepted"]["terms"], "2026-10-08")
+        self.assertEqual(sent["accepted"]["terms"], "2026-10-09")
         self.assertIn(self.env.user.name, sent["accepted"]["by"])
         self.assertEqual({k: v for k, v in sent.items() if k != "accepted"}, {
             "company": {"name": self.company.name, "vat": "EE123456780", "country": "EE", "email": "admin@kohvik.ee",

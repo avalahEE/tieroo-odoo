@@ -12,7 +12,7 @@ from odoo.tools import SQL, split_every
 _logger = logging.getLogger(__name__)
 PLATFORM_URL = "https://app.tieroo.com"
 TIMEOUT = 10
-TERMS_VERSION = "2026-10-08"
+TERMS_VERSION = "2026-10-09"
 BATCH = 200
 BATCH_TIMEOUT = 120
 CRON_RESERVE = 120
