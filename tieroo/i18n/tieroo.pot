@@ -893,3 +893,13 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "without valid coordinates: left out until they have them."
 msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__on_card
+msgid "On the card"
+msgstr ""
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_wallet_shop__on_card
+msgid "Switch off while the shop is closed, e.g. for renovation: it stays on the list."
+msgstr ""

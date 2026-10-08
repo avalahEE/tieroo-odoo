@@ -61,6 +61,7 @@
                 <field name="city"/>
                 <field name="partner_latitude" string="Latitude"/>
                 <field name="partner_longitude" string="Longitude"/>
+                <field name="on_card" widget="boolean_toggle"/>
             </list>
         </field>
     </record>

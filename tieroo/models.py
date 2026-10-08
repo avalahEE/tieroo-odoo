@@ -123,7 +123,7 @@ class ResCompany(models.Model):
         self.ensure_one()
         if not self.wallet_shops_on:
             return self.env["wallet.shop"]
-        return self.env["wallet.shop"].sudo().search([("company_id", "=", self.id)]).filtered("has_point")
+        return self.env["wallet.shop"].sudo().search([("company_id", "=", self.id), ("on_card", "=", True)]).filtered("has_point")
 
     def _wallet_mark_all(self, always=False):
         companies = self if always else self.filtered("wallet_shops_on")
@@ -822,6 +822,7 @@ class WalletShop(models.Model):
     _order = "sequence, id"
 
     sequence = fields.Integer(default=10)
+    on_card = fields.Boolean("On the card", default=True, help="Switch off while the shop is closed, e.g. for renovation: it stays on the list.")
     company_id = fields.Many2one("res.company", required=True, index=True, ondelete="cascade", default=lambda self: self.env.company)
     partner_id = fields.Many2one("res.partner", "Address", required=True, ondelete="cascade")
     city = fields.Char(related="partner_id.city")
