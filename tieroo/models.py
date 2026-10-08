@@ -372,6 +372,7 @@ class WalletCard(models.Model):
     url = fields.Char(readonly=True, groups="base.group_system")
     apple_url = fields.Char(readonly=True, groups="base.group_system")
     google_url = fields.Char(readonly=True, groups="base.group_system")
+    platform_url = fields.Char(compute="_compute_platform_url")
     sync_needed = fields.Boolean()
     email_pending = fields.Boolean(help="Issued in bulk; the email with the card is still to be sent.")
     state = fields.Selection([("active", "Active"), ("closed", "Closed")], compute="_compute_state", compute_sudo=True)
@@ -382,6 +383,10 @@ class WalletCard(models.Model):
         _sql_constraints = [("partner_company_unique", "UNIQUE(partner_id, company_id)", "A customer has one card per company.")]
 
     @api.depends("partner_id.active")
+    def _compute_platform_url(self):
+        for card in self:
+            card.platform_url = card.company_id._wallet_base()
+
     def _compute_state(self):
         for card in self:
             card.state = "active" if card._open() else "closed"

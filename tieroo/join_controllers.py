@@ -94,7 +94,8 @@ class WalletSignup(http.Controller):
             if request.httprequest.method == "POST":
                 try:
                     card = req._confirm().sudo()
-                    values.update(state="done", card={"apple": card.apple_url, "google": card.google_url, "page": card.url})
+                    values.update(state="done", card={"apple": card.apple_url, "google": card.google_url, "page": card.url,
+                                                         "badge": company._wallet_base() + "/badge"})
                 except UserError:
                     values["state"] = "error"
         return request.render("tieroo.join_page", values)
