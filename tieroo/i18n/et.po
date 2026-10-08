@@ -654,15 +654,6 @@ msgstr ""
 "aadressi."
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"Tieroo is an external service. To open the account, Odoo sends it this "
-"company's name, VAT number, address and your email. After that, to issue and"
-" update the cards, it sends each card holder's name, barcode, points, next "
-"reward, level and language. Emails with the cards are sent by Odoo itself."
-msgstr "Tieroo on väline teenus. Konto avamiseks saadab Odoo sellele ettevõtte nime, KMKR numbri, aadressi ja sinu e-posti aadressi. Seejärel saadab see kaartide väljastamiseks ja uuendamiseks iga kaardiomaniku nime, triipkoodi, punktid, järgmise preemia, taseme ja keele. Kaartidega e-kirjad saadab Odoo ise."
-
-#. module: tieroo
 #: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_api_url
 #: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_api_url
 msgid "Tieroo platform URL"
@@ -843,3 +834,117 @@ msgstr "See Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes: 
 #: code:addons/tieroo/models.py:0
 msgid "This company's Tieroo key is in use in another Odoo database or company. Contact Tieroo."
 msgstr "Selle ettevõtte Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes. Võta ühendust Tierooga."
+
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Add warehouse addresses"
+msgstr "Lisa ladude aadressid"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_id
+msgid "Address"
+msgstr "Aadress"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__city
+msgid "City"
+msgstr "Linn"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"In a big shopping centre use the shop's own point (copy it from a map app), "
+"not the centre's address: they can be 100-300 m apart."
+msgstr "Suures kaubanduskeskuses kasuta poe enda asukohta (kopeeri see kaardirakendusest), mitte keskuse aadressi: need võivad olla 100–300 m lahus."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Inventory is not installed: add the shops' addresses one by one."
+msgstr "Ladu pole paigaldatud: lisa poodide aadressid ükshaaval."
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_latitude
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Latitude"
+msgstr "Laiuskraad"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__partner_longitude
+#: model_terms:ir.ui.view,arch_db:tieroo.wallet_shop_view_list
+msgid "Longitude"
+msgstr "Pikkuskraad"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__sequence
+msgid "Sequence"
+msgstr "Järjestus"
+
+#. module: tieroo
+#: model:ir.model,name:tieroo.model_wallet_shop
+msgid "Shop on the Tieroo card"
+msgstr "Pood Tieroo kaardil"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Shops on the card"
+msgstr "Poed kaardil"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_company__wallet_shops_on
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_on
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Show the card near our shops"
+msgstr "Näita kaarti meie poodide lähedal"
+
+#. module: tieroo
+#: model:ir.model.constraint,message:tieroo.constraint_wallet_shop_partner_unique
+msgid "This address is already on the list."
+msgstr "See aadress on juba nimekirjas."
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_count
+msgid "Wallet Shops Count"
+msgstr "Poode nimekirjas"
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_shops_missing
+msgid "Wallet Shops Missing"
+msgstr "Poode ilma koordinaatideta"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"shops on the list. Each card shows up to 10: where the customer bought, then"
+" their city, then your order."
+msgstr "poodi nimekirjas. Iga kaart näitab kuni 10: kus klient ostis, siis tema linn, siis sinu järjekord."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"Near one of your shops the iPhone shows the card on the lock screen and "
+"Android shows a reminder. Each card carries up to 10 of your shops' "
+"coordinates, chosen by where that customer bought and the city in their "
+"address, listed in your order. The phone compares its own position with "
+"them: Tieroo and Google never learn where a customer is."
+msgstr "Mõne sinu poe lähedal näitab iPhone kaarti lukustusekraanil ja Android tuletab kaarti meelde. Igal kaardil on kuni 10 sinu poe koordinaadid, valitud selle järgi, kus klient on ostnud ja mis linn on tema aadressis, ning sinu järjekorras. Telefon võrdleb ise oma asukohta nendega: Tieroo ega Google ei saa kunagi teada, kus klient on."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ""
+"Tieroo is an external service. To open the account, Odoo sends it this "
+"company's name, VAT number, address and your email. After that, to issue and"
+" update the cards, it sends each card holder's name, barcode, points, next "
+"reward, level and language, and, if you show the card near your shops, for "
+"each card up to 10 of your shops' coordinates, chosen by where that customer"
+" bought and the city in their address. Emails with the cards are sent by "
+"Odoo itself."
+msgstr "Tieroo on väline teenus. Konto avamiseks saadab Odoo sellele ettevõtte nime, KMKR numbri, aadressi ja sinu e-posti aadressi. Seejärel saadab see kaartide väljastamiseks ja uuendamiseks iga kaardiomaniku nime, triipkoodi, punktid, järgmise preemia, taseme ja keele ning, kui näitad kaarti oma poodide lähedal, iga kaardi kohta kuni 10 sinu poe koordinaadid, valitud selle järgi, kus klient on ostnud ja mis linn on tema aadressis. Kaartidega e-kirjad saadab Odoo ise."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "without valid coordinates: left out until they have them."
+msgstr "ilma korrektsete koordinaatideta: jäävad välja, kuni need on parandatud."

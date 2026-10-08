@@ -47,6 +47,24 @@
         </field>
     </record>
 
+    <record id="wallet_shop_view_list" model="ir.ui.view">
+        <field name="name">wallet.shop.list</field>
+        <field name="model">wallet.shop</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <header>
+                    <button name="action_add_warehouses" type="object" string="Add warehouse addresses" display="always"/>
+                </header>
+                <field name="sequence" widget="handle"/>
+                <field name="company_id" column_invisible="True"/>
+                <field name="partner_id"/>
+                <field name="city"/>
+                <field name="partner_latitude" string="Latitude"/>
+                <field name="partner_longitude" string="Longitude"/>
+            </list>
+        </field>
+    </record>
+
     <record id="res_config_settings_view_form_wallet_card" model="ir.ui.view">
         <field name="name">res.config.settings.view.form.wallet.card</field>
         <field name="model">res.config.settings</field>
@@ -65,7 +83,7 @@
                                  help="Choose a plan and connect this company to Tieroo. A card is required, also for the free plan (nothing is charged on the free plan).">
                             <div class="text-muted mt-2" invisible="wallet_signup_notice != 'cancelled'">Sign-up cancelled: nothing was charged. Start again when you are ready.</div>
                             <div class="mt-2">
-                                <p class="text-muted mb-1">Tieroo is an external service. To open the account, Odoo sends it this company's name, VAT number, address and your email. After that, to issue and update the cards, it sends each card holder's name, barcode, points, next reward, level and language. Emails with the cards are sent by Odoo itself.
+                                <p class="text-muted mb-1">Tieroo is an external service. To open the account, Odoo sends it this company's name, VAT number, address and your email. After that, to issue and update the cards, it sends each card holder's name, barcode, points, next reward, level and language, and, if you show the card near your shops, for each card up to 10 of your shops' coordinates, chosen by where that customer bought and the city in their address. Emails with the cards are sent by Odoo itself.
                                     <a href="https://tieroo.com/terms.html" target="_blank">Terms</a> · <a href="https://tieroo.com/privacy.html" target="_blank">Privacy</a></p>
                                 <div class="d-flex gap-2 align-items-center">
                                     <field name="wallet_data_consent" nolabel="1"/>
@@ -105,6 +123,16 @@
                             </div>
                             <div class="mt-2">
                                 <button name="action_wallet_billing" type="object" string="Plan and billing" class="btn-link ps-0" icon="oi-arrow-right"/>
+                            </div>
+                        </setting>
+                        <setting string="Show the card near our shops" company_dependent="1" invisible="not wallet_connected"
+                                 help="Near one of your shops the iPhone shows the card on the lock screen and Android shows a reminder. Each card carries up to 10 of your shops' coordinates, chosen by where that customer bought and the city in their address, listed in your order. The phone compares its own position with them: Tieroo and Google never learn where a customer is.">
+                            <field name="wallet_shops_on"/>
+                            <div class="mt-2" invisible="not wallet_shops_on">
+                                <div><field name="wallet_shops_count" class="oe_inline"/> shops on the list. Each card shows up to 10: where the customer bought, then their city, then your order.</div>
+                                <div class="text-warning" invisible="not wallet_shops_missing"><field name="wallet_shops_missing" class="oe_inline"/> without valid coordinates: left out until they have them.</div>
+                                <div class="text-muted">In a big shopping centre use the shop's own point (copy it from a map app), not the centre's address: they can be 100-300 m apart.</div>
+                                <button name="action_wallet_shops" type="object" string="Shops on the card" icon="oi-arrow-right" class="btn-link ps-0"/>
                             </div>
                         </setting>
                         <setting string="Card design" company_dependent="1" help="Logo, colours, background image, fields and translations, with a live preview. Saving updates every customer's card. The loyalty programme on the card: tick 'Issue Tieroo card' on it.">

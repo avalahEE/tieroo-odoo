@@ -114,6 +114,29 @@ class ResCompany(models.Model):
     wallet_claim_token = fields.Char(groups="base.group_system", copy=False)
     wallet_signup_notice = fields.Selection([("connected", "Connected"), ("cancelled", "Cancelled")], groups="base.group_system", copy=False)
     wallet_consent_date = fields.Datetime("Agreed to send data to Tieroo", groups="base.group_system", copy=False)
+    wallet_shops_on = fields.Boolean("Show the card near our shops")
+
+    def _wallet_shop_points(self, shops):
+        return [{"lat": s.partner_id.partner_latitude, "lon": s.partner_id.partner_longitude} for s in shops]
+
+    def _wallet_shops(self):
+        self.ensure_one()
+        if not self.wallet_shops_on:
+            return self.env["wallet.shop"]
+        return self.env["wallet.shop"].sudo().search([("company_id", "=", self.id)]).filtered("has_point")
+
+    def _wallet_mark_all(self, always=False):
+        companies = self if always else self.filtered("wallet_shops_on")
+        cards = self.env["wallet.card"].sudo().search([("company_id", "in", companies.ids), ("sync_needed", "=", False)])
+        if cards:
+            cards.write({"sync_needed": True})
+            self.env["res.partner"]._wallet_wake()
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "wallet_shops_on" in vals:
+            self._wallet_mark_all(always=True)
+        return res
 
     def _wallet_base(self):
         return (self.sudo().wallet_api_url or PLATFORM_URL).rstrip("/")
@@ -253,8 +276,25 @@ class ResCompany(models.Model):
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    @api.depends("company_id")
+    def _compute_wallet_shops(self):
+        for s in self:
+            shops = self.env["wallet.shop"].sudo().search([("company_id", "=", s.company_id.id)])
+            s.wallet_shops_count = len(shops)
+            s.wallet_shops_missing = len(shops.filtered(lambda x: not x.has_point))
+
+    def action_wallet_shops(self):
+        self.ensure_one()
+        return {
+            "type": "ir.actions.act_window", "name": _("Shops on the card"), "res_model": "wallet.shop", "view_mode": "list",
+            "domain": [("company_id", "=", self.company_id.id)], "context": {"default_company_id": self.company_id.id},
+        }
+
     wallet_api_url = fields.Char(related="company_id.wallet_api_url", readonly=False)
     wallet_api_key = fields.Char(related="company_id.wallet_api_key", readonly=False)
+    wallet_shops_on = fields.Boolean(related="company_id.wallet_shops_on", readonly=False)
+    wallet_shops_count = fields.Integer(compute="_compute_wallet_shops")
+    wallet_shops_missing = fields.Integer(compute="_compute_wallet_shops")
     module_tieroo_join = fields.Boolean(
         "Join via QR",
         help="Installs Tieroo – Join via QR: customers scan a QR code, enter their name and email, and get "
@@ -376,16 +416,17 @@ class WalletCard(models.Model):
 
     def _push_batch(self):
         company = self.company_id
-        customers, close, texts = [], [], {}
+        customers, close, texts, shops = [], [], {}, company._wallet_shop_points(company._wallet_shops()[:10])
         for card in self:
             ref = str(card.partner_id.id)
             if card._open():
                 payload = card._scoped()._wallet_payload()
                 texts.update(payload.pop("texts"))
+                payload.pop("shops")
                 customers.append({"ref": ref, **payload})
             else:
                 close.append(ref)
-        r = requests.put(f"{company._wallet_base()}/sync/v1/customers", json={"texts": texts, "customers": customers, "close": close},
+        r = requests.put(f"{company._wallet_base()}/sync/v1/customers", json={"texts": texts, "shops": shops, "customers": customers, "close": close},
                          headers=company._wallet_headers(), timeout=BATCH_TIMEOUT)
         r.raise_for_status()
         results = {x["ref"]: x for x in r.json()["results"]}
@@ -528,7 +569,28 @@ class ResPartner(models.Model):
             "rewards": _wallet_rewards(program),
             "lang": self.lang or None,
             "texts": _wallet_texts(program or self._wallet_points_program()),
+            "places": self._wallet_places(),
+            "shops": self.env.company._wallet_shop_points(self.env.company._wallet_shops()[:10]),
         }
+
+    def _wallet_places(self):
+        self.ensure_one()
+        company = self.env.company
+        shops = company._wallet_shops()
+        if not shops:
+            return []
+        bought = {}
+        if "warehouse_id" in self.env["pos.config"]._fields:
+            for config, count in self.env["pos.order"].sudo()._read_group(
+                    [("partner_id", "=", self.id), ("company_id", "=", company.id), ("state", "not in", ("draft", "cancel"))],
+                    ["config_id"], ["__count"]):
+                address = config.warehouse_id.partner_id
+                if address:
+                    bought[address.id] = bought.get(address.id, 0) + count
+        city = (self.city or "").strip().lower()
+        same_city = lambda s: bool(city) and (s.partner_id.city or "").strip().lower() == city
+        ranked = sorted(shops, key=lambda s: (-bought.get(s.partner_id.id, 0), not same_city(s), s.sequence, s.id))
+        return company._wallet_shop_points(sorted(ranked[:10], key=lambda s: (s.sequence, s.id)))
 
 
     @api.model
@@ -601,6 +663,10 @@ class ResPartner(models.Model):
             self._wallet_mark()
         if {"email", "parent_id", "active"} & vals.keys():
             self._wallet_wake()
+        if "city" in vals:
+            self._wallet_mark()
+        if {"partner_latitude", "partner_longitude", "city", "active"} & vals.keys():
+            self.env["wallet.shop"].sudo().search([("partner_id", "in", self.ids)]).company_id._wallet_mark_all()
         return res
 
     def _wallet_wake(self):
@@ -748,3 +814,57 @@ class LoyaltyCard(models.Model):
             (before | self.partner_id)._wallet_mark()
             self.partner_id._wallet_wake()
         return res
+
+
+class WalletShop(models.Model):
+    _name = "wallet.shop"
+    _description = "Shop on the Tieroo card"
+    _order = "sequence, id"
+
+    sequence = fields.Integer(default=10)
+    company_id = fields.Many2one("res.company", required=True, index=True, ondelete="cascade", default=lambda self: self.env.company)
+    partner_id = fields.Many2one("res.partner", "Address", required=True, ondelete="cascade")
+    city = fields.Char(related="partner_id.city")
+    partner_latitude = fields.Float(related="partner_id.partner_latitude", readonly=False)
+    partner_longitude = fields.Float(related="partner_id.partner_longitude", readonly=False)
+    has_point = fields.Boolean(compute="_compute_has_point")
+
+    @api.depends("partner_id.partner_latitude", "partner_id.partner_longitude", "partner_id.active")
+    def _compute_has_point(self):
+        for s in self:
+            lat, lon = s.partner_id.partner_latitude, s.partner_id.partner_longitude
+            s.has_point = bool(s.partner_id.active and lat and lon) and -90 <= lat <= 90 and -180 <= lon <= 180
+
+    _CONSTRAINTS = [("partner_unique", "UNIQUE(company_id, partner_id)", "This address is already on the list.")]
+    if hasattr(models, "Constraint"):
+        _partner_unique = models.Constraint(_CONSTRAINTS[0][1], _CONSTRAINTS[0][2])
+    else:
+        _sql_constraints = _CONSTRAINTS
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        shops = super().create(vals_list)
+        shops.company_id._wallet_mark_all()
+        return shops
+
+    def write(self, vals):
+        before = self.company_id
+        res = super().write(vals)
+        (before | self.company_id)._wallet_mark_all()
+        return res
+
+    def unlink(self):
+        companies = self.company_id
+        res = super().unlink()
+        companies._wallet_mark_all()
+        return res
+
+    @api.model
+    def action_add_warehouses(self):
+        company = self.env.company
+        if "stock.warehouse" not in self.env:
+            raise UserError(_("Inventory is not installed: add the shops' addresses one by one."))
+        have = self.search([("company_id", "=", company.id)]).partner_id
+        addresses = self.env["stock.warehouse"].search([("company_id", "=", company.id)]).partner_id - have
+        self.create([{"company_id": company.id, "partner_id": a.id} for a in addresses])
+
