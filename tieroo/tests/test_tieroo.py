@@ -123,7 +123,7 @@ class TestTieroo(TierooSetup, TransactionCase):
             "billableCards": 112, "limit": 100, "overLimitSince": "2026-10-01T08:00:00.000Z", "graceUntil": "2026-10-15T08:00:00.000Z",
             "canCreate": True, "subscribed": False}))
         self.assertEqual(get.call_args.args[0], "https://wallet.test/sync/v1/account")
-        self.assertEqual(get.call_args.kwargs["headers"], {"Authorization": "Bearer wk_testkey"})
+        self.assertEqual(get.call_args.kwargs["headers"]["Authorization"], "Bearer wk_testkey")
         self.assertEqual(
             (settings.wallet_connected, settings.wallet_account_error, settings.wallet_plan_name, settings.wallet_cards_used,
              settings.wallet_cards_limit, settings.wallet_status, settings.wallet_over_limit, str(settings.wallet_grace_until),
@@ -131,6 +131,8 @@ class TestTieroo(TierooSetup, TransactionCase):
             (True, False, "Loyalty Cards 100", 112, 100, "past_due", True, "2026-10-15", True, ""))
         settings, _get = self.connected(resp(403, {"error": "suspended"}))
         self.assertEqual((settings.wallet_status, settings.wallet_account_error), ("suspended", False))
+        settings, _get = self.connected(resp(409, {"error": "key_in_use"}))
+        self.assertEqual((settings.wallet_status, settings.wallet_account_error), ("elsewhere", False))
         with patch(GET, side_effect=requests.Timeout("slow")):
             settings = self.env["res.config.settings"].create({})
             self.assertTrue(settings.wallet_account_error)
@@ -158,7 +160,7 @@ class TestTieroo(TierooSetup, TransactionCase):
         self.assertEqual(post.call_args.args[0], "https://wallet.test/sync/v1/billing")
         self.assertEqual(post.call_args.kwargs["json"], {"returnUrl": f"{self.company.get_base_url()}/odoo/settings?cids={self.company.id}#tieroo",
                                                          "levelsModule": self.company._wallet_levels_on()})
-        self.assertEqual(post.call_args.kwargs["headers"], {"Authorization": "Bearer wk_testkey"})
+        self.assertEqual(post.call_args.kwargs["headers"]["Authorization"], "Bearer wk_testkey")
 
 
 @tagged("post_install", "-at_install")
