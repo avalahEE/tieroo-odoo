@@ -48,6 +48,7 @@ class TestLevelCards(TransactionCase):
             "currency": self.env.company.currency_id.symbol,
             "expires": None,
             "expiring": None,
+            "lastSale": None,
             "rewards": [],
             "lang": self.mari.lang,
             "places": [], "shops": [],

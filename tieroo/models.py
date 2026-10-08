@@ -89,6 +89,13 @@ def _wallet_push_soon(registry, uid, ids):
         _logger.warning("tieroo: sending a change straight away failed, the job will", exc_info=True)
 
 
+def _wallet_last_sale(card):
+    if not card:
+        return None
+    h = card.env["loyalty.history"].sudo().search([("card_id", "=", card.id), ("order_id", "!=", False)], order="id desc", limit=1)
+    return f"{h.create_date.isoformat()}Z" if h else None
+
+
 def _wallet_expiring(card):
     history = card.env["loyalty.history"].sudo() if card else None
     if not card or not hasattr(history, "_get_points_left_per_award"):
@@ -593,6 +600,7 @@ class ResPartner(models.Model):
             "currency": None,
             "expires": card.expiration_date.isoformat() if card and card.expiration_date else None,
             "expiring": _wallet_expiring(card),
+            "lastSale": _wallet_last_sale(card),
             "rewards": _wallet_rewards(program),
             "lang": self.lang or None,
             "texts": _wallet_texts(program or self._wallet_points_program()),
