@@ -948,3 +948,13 @@ msgstr "Tieroo on väline teenus. Konto avamiseks saadab Odoo sellele ettevõtte
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "without valid coordinates: left out until they have them."
 msgstr "ilma korrektsete koordinaatideta: jäävad välja, kuni need on parandatud."
+
+#. module: tieroo
+#: model:ir.model.fields,field_description:tieroo.field_wallet_shop__on_card
+msgid "On the card"
+msgstr "Kaardil"
+
+#. module: tieroo
+#: model:ir.model.fields,help:tieroo.field_wallet_shop__on_card
+msgid "Switch off while the shop is closed, e.g. for renovation: it stays on the list."
+msgstr "Lülita välja, kui pood on suletud, näiteks remondi ajaks: see jääb nimekirja alles."

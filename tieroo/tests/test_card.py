@@ -438,6 +438,9 @@ class TestWalletCard(TransactionCase):
         self.assertEqual(places[0], {"lat": 59.42, "lon": 24.70})
         self.assertEqual(places[-1], {"lat": 58.36, "lon": 26.68})
         self.assertNotIn({"lat": 58.36, "lon": 26.68}, self.mari._wallet_payload()["shops"])
+        Shop.search([("partner_id", "=", tartu.id)]).on_card = False
+        self.assertNotIn({"lat": 58.36, "lon": 26.68}, self.mari._wallet_payload()["places"])
+        Shop.search([("partner_id", "=", tartu.id)]).on_card = True
         nowhere.partner_latitude = 594.37
         self.assertNotIn(594.37, [p["lat"] for p in self.mari._wallet_payload()["places"]])
         with patch(PUT, return_value=ok()):
