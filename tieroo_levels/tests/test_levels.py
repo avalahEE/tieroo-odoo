@@ -1,4 +1,5 @@
 from datetime import datetime
+from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 
@@ -225,10 +226,8 @@ class TestWalletLevels(AccountTestInvoicingCommon):
 
     def test_level_pricelists_are_enabled_in_every_pos(self):
         admin = self.env(su=True)
+        admin["pos.config"].create({"name": "A shop opened after the levels"})
         configs = admin["pos.config"].search([("company_id", "=", self.env.company.id)])
-        if not configs:
-            configs = admin["pos.config"].create({"name": "Kassa"})
-            (self.bronze | self.silver | self.gold).sudo()._wallet_allow_in_pos()
         self.assertTrue(all(c.use_pricelist for c in configs))
         for c in configs:
             self.assertLessEqual(self.silver_pl | self.gold_pl, c.available_pricelist_ids)
@@ -236,6 +235,20 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.gold.sudo().pricelist_id = vip
         for c in configs:
             self.assertIn(vip, c.available_pricelist_ids)
+
+    def test_an_open_pos_session_gets_the_new_pricelist_at_once(self):
+        admin = self.env(su=True)
+        self.bronze.sudo().pricelist_id = admin["product.pricelist"].create({"name": "Bronze -5%"})
+        config = admin["pos.config"].create({"name": "Kassa 2"})
+        session = admin["pos.session"].create({"config_id": config.id, "user_id": self.env.uid})
+        PosConfig = type(admin["pos.config"])
+        with patch.object(PosConfig, "notify_synchronisation", autospec=True) as notify:
+            anna = self.env["res.partner"].create({"name": "Anna"})
+            anna.wallet_excluded = False
+            anna.wallet_excluded = True
+        sent = [c.args for c in notify.call_args_list if c.args[0] == config]
+        self.assertEqual(len(sent), 2)
+        self.assertEqual(sent[0][1:], (session.id, 0, {"res.partner": [anna.id]}))
 
     def test_level_pricelist_really_applies_and_nobody_else_gets_it(self):
         discount = "discount" in dict(self.env["product.pricelist.item"]._fields["compute_price"].selection)
