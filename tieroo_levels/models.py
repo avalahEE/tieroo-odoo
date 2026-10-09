@@ -464,7 +464,7 @@ def _upgrade_safely(partners, company):
     partners = partners.sudo().with_company(company)
     try:
         with partners.env.cr.savepoint():
-            partners._wallet_update_levels()
+            partners._wallet_update_levels(now=fields.Datetime.now() + relativedelta(seconds=1))
             partners.commercial_partner_id._wallet_mark()
     except Exception:
         _logger.exception("tieroo_levels: level update failed for partners %s", partners.ids)

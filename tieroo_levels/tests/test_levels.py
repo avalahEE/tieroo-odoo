@@ -253,6 +253,15 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.assertEqual(len(sent), 2)
         self.assertEqual(sent[0][1:], (session.id, 0, {"res.partner": [anna.id]}))
 
+    def test_a_paid_pos_order_upgrades_at_once(self):
+        admin = self.env(su=True)
+        config = admin["pos.config"].create({"name": "Kassa 3"})
+        session = admin["pos.session"].create({"config_id": config.id, "user_id": self.env.uid})
+        order = admin["pos.order"].create({"session_id": session.id, "partner_id": self.customer.id, "amount_tax": 0,
+                                           "amount_total": 400, "amount_paid": 400, "amount_return": 0})
+        order.write({"state": "paid"})
+        self.assertEqual(self.customer.wallet_level_id, self.silver)
+
     def test_level_pricelist_really_applies_and_nobody_else_gets_it(self):
         discount = "discount" in dict(self.env["product.pricelist.item"]._fields["compute_price"].selection)
         rule = {"compute_price": "discount", "price_discount": 10} if discount else {"compute_price": "percentage", "percent_price": 10}
