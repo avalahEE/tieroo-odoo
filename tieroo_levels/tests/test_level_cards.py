@@ -66,7 +66,7 @@ class TestLevelCards(TransactionCase):
         with patch(PUT, return_value=ok()):
             self.mari._wallet_create_card()
         settings = self.env["res.config.settings"].create({})
-        self.assertIn("1 card holders join at Silver", settings.wallet_levels_preview)
+        self.assertIn("Card holders who join at Silver: 1", settings.wallet_levels_preview)
         with patch(PUT, return_value=ok()):
             settings.action_wallet_levels_start()
         self.assertFalse(self.mari.wallet_excluded)
@@ -83,6 +83,7 @@ class TestLevelCards(TransactionCase):
         kati = self.env["res.partner"].create({"name": "Kati", "parent_id": company.id, "email": "kati@moobel.ee"})
         with self.assertRaises(UserError):
             jaan.wallet_excluded = False
+        b2b = self.b2b_gold.sudo().pricelist_id = self.env["product.pricelist"].sudo().create({"name": "B2B -7%"})
         company.wallet_excluded = False
         self.assertTrue(jaan.wallet_excluded)
         (jaan | kati).write({"wallet_excluded": False})
@@ -102,6 +103,7 @@ class TestLevelCards(TransactionCase):
         self.assertEqual(kati.wallet_card_state, "closed")
         self.assertEqual(jaan.wallet_card_state, "active")
         self.assertTrue(company.wallet_level_id)
+        self.assertEqual(kati.property_product_pricelist, b2b)
 
     def test_leaving_closes_the_card_and_joining_again_reopens_it(self):
         self.start()
@@ -214,7 +216,7 @@ class TestLevelCards(TransactionCase):
         with patch(PUT, return_value=ok()):
             self.mari._wallet_create_card()
         settings = self.env["res.config.settings"].create({})
-        self.assertIn("1 card holders join at Silver", settings.wallet_levels_preview)
+        self.assertIn("Card holders who join at Silver: 1", settings.wallet_levels_preview)
         mails = self.env["mail.mail"].sudo().search_count([])
         with patch(PUT, return_value=ok()):
             settings.action_wallet_levels_start()
