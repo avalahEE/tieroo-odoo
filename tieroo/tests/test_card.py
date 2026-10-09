@@ -6,6 +6,7 @@ import requests
 from odoo import fields
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tests import TransactionCase, tagged
+from odoo.addons.tieroo.models import _wallet_commit
 
 
 def add_points(card, points, description="test"):
@@ -13,6 +14,11 @@ def add_points(card, points, description="test"):
     card.env["loyalty.history"].create({"card_id": card.id, "description": description, "issued": points, "used": 0})
     if card.points == before:
         card.points = before + points
+
+
+def changed(card):
+    card.env["wallet.card"]._wallet_take()
+    return card.sync_needed
 
 
 def groups(env):
@@ -78,6 +84,14 @@ class TestWalletCard(TransactionCase):
         self.program.wallet_send_after = 0
 
 
+    def test_the_scheduled_job_commits_on_every_odoo_version(self):
+        cron = self.env.ref("tieroo.cron_wallet_sync")
+        progress = self.env["ir.cron.progress"].sudo().create({"cron_id": cron.id, "remaining": 5, "done": 0})
+        env = self.env(context=dict(self.env.context, ir_cron_progress_id=progress.id, cron_id=cron.id))
+        with patch.object(self.env.cr, "commit") as commit:
+            self.assertGreater(_wallet_commit(env, 2), 0)
+        commit.assert_called()
+
     def test_card_shows_points_and_next_reward(self):
         with patch(PUT, return_value=ok()) as put:
             self.mari._wallet_create_card()
@@ -131,7 +145,7 @@ class TestWalletCard(TransactionCase):
         with patch(PUT, return_value=ok()):
             self.mari._wallet_create_card()
         add_points(self.mari_card, 50, "ost")
-        self.assertTrue(self.mari._wallet_card().sync_needed)
+        self.assertTrue(changed(self.mari._wallet_card()))
         with patch(PUT, return_value=ok()) as put:
             self.env["wallet.card"]._cron_sync()
         payload = put.call_args.kwargs["json"]
@@ -470,10 +484,10 @@ class TestWalletCard(TransactionCase):
         with patch(PUT, return_value=ok()):
             self.mari._wallet_create_card()
         self.mari.lang = "en_US"
-        self.assertTrue(self.mari._wallet_card().sync_needed)
+        self.assertTrue(changed(self.mari._wallet_card()))
         self.mari._wallet_card().sync_needed = False
         self.program.reward_ids = [(0, 0, {"reward_type": "discount", "discount": 5, "required_points": 50, "description": "Kringel"})]
-        self.assertTrue(self.mari._wallet_card().sync_needed)
+        self.assertTrue(changed(self.mari._wallet_card()))
 
     def test_renaming_in_odoo_updates_the_card(self):
         with patch(PUT, return_value=ok()):
@@ -482,9 +496,10 @@ class TestWalletCard(TransactionCase):
         for record, vals in ((self.program, {"name": "Püsikliendid"}), (self.program, {"portal_point_name": "Templid"}),
                              (self.program.reward_ids[:1], {"description": "Tasuta kohv"}),
                              (self.program.reward_ids.filtered(lambda r: r.reward_type == "discount")[:1], {"discount": 15})):
+            changed(card)
             card.sync_needed = False
             record.write(vals)
-            self.assertTrue(card.sync_needed, vals)
+            self.assertTrue(changed(card), vals)
 
 
     def test_shops_on_the_card_city_first_then_the_merchants_order(self):
@@ -515,12 +530,13 @@ class TestWalletCard(TransactionCase):
         with patch(PUT, return_value=ok()):
             self.mari._wallet_create_card()
         card = self.mari._wallet_card()
+        changed(card)
         card.sync_needed = False
         tartu.partner_latitude = 58.37
-        self.assertTrue(card.sync_needed)
+        self.assertTrue(changed(card))
         card.sync_needed = False
         self.mari.city = "Tallinn"
-        self.assertTrue(card.sync_needed)
+        self.assertTrue(changed(card))
         settings = self.env["res.config.settings"].create({})
         self.assertEqual((settings.wallet_shops_count, settings.wallet_shops_missing), (13, 1))
         if "stock.warehouse" in self.env:
@@ -542,7 +558,7 @@ class TestWalletCard(TransactionCase):
             self.env["wallet.card"]._cron_sync()
         delete.assert_called_once()
         self.mari_card.active = True
-        self.assertTrue(card.sync_needed)
+        self.assertTrue(changed(card))
         with patch(PUT, return_value=ok()) as put:
             self.env["wallet.card"]._cron_sync()
         put.assert_called_once()
@@ -551,7 +567,7 @@ class TestWalletCard(TransactionCase):
         self.assertFalse(self.mails_to(self.mari))
         card.sync_needed = False
         self.mari_card.unlink()
-        self.assertTrue(card.sync_needed)
+        self.assertTrue(changed(card))
         card.invalidate_recordset(["state"])
         self.assertEqual(card.state, "closed")
 
