@@ -247,6 +247,9 @@ class ResPartner(models.Model):
         if level.pricelist_id or old.pricelist_id:
             vals["property_product_pricelist"] = level.pricelist_id.id
         self.with_context(wallet_levels_internal=True).write(vals)
+        if "property_product_pricelist" in vals:
+            for session in self.env["pos.session"].sudo().search([("company_id", "=", self.env.company.id), ("state", "!=", "closed")]):
+                session.config_id.notify_synchronisation(session.id, 0, {"res.partner": (self | self.child_ids).ids})
         self._wallet_mark()
         self._wallet_note(self.env._(
             "Level changed: %(old)s → %(new)s (spend: %(spend)s, %(company)s)",
@@ -471,6 +474,16 @@ class PosOrder(models.Model):
             for order in self:
                 _upgrade_safely(order.partner_id, order.company_id)
         return res
+
+
+class PosConfig(models.Model):
+    _inherit = "pos.config"
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        configs = super().create(vals_list)
+        self.env["wallet.level"].sudo().search([("company_id", "in", configs.company_id.ids)])._wallet_allow_in_pos()
+        return configs
 
 
 class AccountMove(models.Model):
