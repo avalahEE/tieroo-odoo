@@ -59,7 +59,10 @@ class ResCompany(models.Model):
     def _wallet_signup_open(self):
         self.ensure_one()
         company = self.sudo()
-        return bool(company._wallet_loyalty_program() and company.wallet_api_key)
+        return bool(company._wallet_join_target() and company.wallet_api_key)
+
+    def _wallet_join_target(self):
+        return bool(self._wallet_loyalty_program())
 
     def _wallet_brand(self):
         self.ensure_one()
@@ -200,17 +203,19 @@ class WalletSignupRequest(models.Model):
                 partner.category_id = [(4, company.wallet_signup_tag_id.id)]
             if self.birth_month and not partner.wallet_birth_month:
                 partner.write({"wallet_birth_day": self.birth_day, "wallet_birth_month": self.birth_month})
-            loyalty = env["loyalty.card"].with_context(active_test=False).search(
-                [("partner_id", "=", partner.id), ("program_id", "=", program.id)], order="active desc, id", limit=1)
-            if not loyalty:
-                env["loyalty.card"].create({"program_id": program.id, "partner_id": partner.id})
-            elif not loyalty.active:
-                loyalty.active = True
+            if program:
+                loyalty = env["loyalty.card"].with_context(active_test=False).search(
+                    [("partner_id", "=", partner.id), ("program_id", "=", program.id)], order="active desc, id", limit=1)
+                if not loyalty:
+                    env["loyalty.card"].create({"program_id": program.id, "partner_id": partner.id})
+                elif not loyalty.active:
+                    loyalty.active = True
             note_env = partner.with_context(lang=company.partner_id.lang or env.lang).env
             partner.message_post(body=note_env._("Joined %(program)s via the QR code: confirmed the email address and agreed to the terms (%(company)s).",
-                                                 program=program.name, company=company.name))
+                                                 program=program.name or company.name, company=company.name))
             self.sudo().partner_id = partner
         partner = self.partner_id.with_company(company)
+        partner._wallet_signup_joined()
         with env.cr.savepoint():
             had_card = bool(partner._wallet_card())
             card = partner._wallet_create_card()
