@@ -24,7 +24,7 @@ class TestMultiCompany(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.user.sudo()[groups(cls.env)] += cls.env.ref("point_of_sale.group_pos_manager")
+        cls.env.user.sudo()[groups(cls.env)] += cls.env.ref("point_of_sale.group_pos_manager") | cls.env.ref("tieroo_levels.group_levels_admin")
         cls.company_a = cls.env.company
         cls.company_b = cls.setup_other_company(name="Pood B")["company"]
         admin = cls.env(su=True)
@@ -34,6 +34,8 @@ class TestMultiCompany(AccountTestInvoicingCommon):
         cls.gold_a = Level.create({"name": "Gold", "company_id": cls.company_a.id, "tag_id": Tag.create({"name": "A Gold"}).id, "min_spend": 1000})
         cls.gold_b = Level.with_company(cls.company_b).create({"name": "Gold", "company_id": cls.company_b.id, "tag_id": Tag.create({"name": "B Gold"}).id, "min_spend": 100})
         cls.mari = cls.env["res.partner"].create({"name": "Mari Maasikas", "email": "mari@example.ee"})
+        for company in (cls.company_a, cls.company_b):
+            company.sudo().wallet_levels_started = fields.Datetime.now()
 
     def invoice(self, amount, company):
         return self.init_invoice(
@@ -44,8 +46,14 @@ class TestMultiCompany(AccountTestInvoicingCommon):
     def in_company(self, company):
         return self.mari.with_company(company)
 
+    def join(self, *companies):
+        for company in companies:
+            self.in_company(company).wallet_excluded = False
+
     def test_spend_and_level_are_per_company(self):
+        self.join(self.company_b)
         self.invoice(500, self.company_b)
+        self.invoice(2000, self.company_a)
         a, b = self.in_company(self.company_a), self.in_company(self.company_b)
         self.assertEqual(b.wallet_level_id, self.gold_b)
         self.assertEqual(b.wallet_period_spend, 500)
@@ -56,11 +64,13 @@ class TestMultiCompany(AccountTestInvoicingCommon):
         self.assertNotIn("A Gold", self.mari.category_id.mapped("name"))
 
     def test_a_level_change_in_one_company_keeps_the_other_companys_tag(self):
+        self.join(self.company_a, self.company_b)
         self.invoice(500, self.company_b)
         self.invoice(1500, self.company_a)
         self.assertEqual(sorted(self.mari.category_id.mapped("name")), ["A Gold", "B Gold"])
 
     def test_each_company_has_its_own_card_and_platform(self):
+        self.join(self.company_a, self.company_b)
         self.invoice(500, self.company_b)
         self.invoice(1500, self.company_a)
         with patch(PUT, return_value=ok("https://a.wallet.test/p/1?s=x")) as put:
@@ -77,6 +87,7 @@ class TestMultiCompany(AccountTestInvoicingCommon):
         self.assertEqual(self.in_company(self.company_b).wallet_card_state, "active")
 
     def test_exclusion_is_per_company(self):
+        self.join(self.company_a, self.company_b)
         self.invoice(500, self.company_b)
         self.invoice(1500, self.company_a)
         for company, url in ((self.company_a, "https://a.wallet.test/p/1?s=x"), (self.company_b, "https://b.wallet.test/p/2?s=y")):
@@ -93,10 +104,7 @@ class TestMultiCompany(AccountTestInvoicingCommon):
         settings_b = self.env["res.config.settings"].with_company(self.company_b).create({})
         self.assertEqual(settings_a.wallet_api_url, "https://a.wallet.test")
         self.assertEqual(settings_b.wallet_api_url, "https://b.wallet.test")
-        settings_b.wallet_levels_auto_send = True
-        settings_b.execute()
-        self.assertTrue(self.company_b.wallet_levels_auto_send)
-        self.assertFalse(self.company_a.wallet_levels_auto_send)
+        self.assertTrue(settings_b.wallet_levels_started)
 
     def test_designer_gets_only_this_companys_levels(self):
         self.assertEqual(self.company_b._wallet_design_context()["levels"], [{"id": str(self.gold_b.id), "name": "Gold", "type": "b2c"}])

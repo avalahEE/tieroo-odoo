@@ -6,7 +6,7 @@
         <field name="arch" type="xml">
             <list editable="bottom">
                 <header>
-                    <button name="action_recompute_all" type="object" string="Recalculate all customers" display="always" groups="point_of_sale.group_pos_manager"/>
+                    <button name="action_recompute_all" type="object" string="Recalculate all customers" display="always" groups="tieroo_levels.group_levels_admin"/>
                 </header>
                 <field name="company_id" groups="base.group_multi_company"/>
                 <field name="customer_type"/>
@@ -40,15 +40,17 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='category_id']" position="after">
                 <separator string="Customer level"/>
-                <field name="wallet_level_id" invisible="not wallet_level_id"/>
+                <field name="wallet_excluded" widget="boolean_toggle"/>
+                <field name="wallet_level_id" invisible="wallet_excluded or parent_id" options="{'no_create': True}"/>
+                <field name="wallet_entity_level_id" invisible="not parent_id or not wallet_entity_level_id"/>
                 <field name="wallet_period_spend" invisible="not wallet_period_end"/>
-                <label for="wallet_period_end" string="Level period" invisible="not wallet_period_end"/>
-                <div class="o_row" invisible="not wallet_period_end">
-                    <field name="wallet_period_start"/>
-                    <span>–</span>
+                <label for="wallet_period_end" string="Level period" invisible="not wallet_period_end or parent_id"/>
+                <div class="o_row" invisible="not wallet_period_end or parent_id">
+                    <field name="wallet_period_start" groups="tieroo_levels.group_levels_admin"/>
+                    <span groups="tieroo_levels.group_levels_admin">–</span>
                     <field name="wallet_period_end"/>
                 </div>
-                <field name="wallet_excluded" widget="boolean_toggle"/>
+                <field name="wallet_opening_spend" invisible="wallet_excluded or parent_id" groups="tieroo_levels.group_levels_admin"/>
             </xpath>
         </field>
     </record>
@@ -60,11 +62,19 @@
         <field name="arch" type="xml">
             <xpath expr="//block[@name='wallet_join']" position="after">
                 <block title="Customer Levels" name="wallet_levels">
-                <setting string="Customer levels" help="Levels from spend (Bronze, Silver, Gold…) that give pricelists, shown on the card. Point of Sale → Configuration → Customer Levels. A paid add-on: choose it in Plan and billing.">
-                    <div class="mt16">
-                        <field name="wallet_levels_auto_send" class="w-auto"/>
-                        <label for="wallet_levels_auto_send" class="o_light_label"/>
-                        <div class="text-muted">Create a card for every customer in the levels programme who has an email (for B2B: each contact person) and email it. Switching this on emails everyone who has no card yet.</div>
+                <setting string="Customer levels" help="Levels from spend (Bronze, Silver, Gold…) that give pricelists, shown on the card. Customers join by intent: private persons on the join page, companies and each of their contact persons by a levels administrator (Excluded from Levels on the contact, or an import). A paid add-on: choose it in Plan and billing.">
+                    <div class="mt8" invisible="not wallet_levels_started">
+                        Started on <field name="wallet_levels_started" class="oe_inline" readonly="1"/>.
+                    </div>
+                    <div class="mt8" invisible="wallet_levels_started or not wallet_levels_preview">
+                        <field name="wallet_levels_preview" class="text-muted" readonly="1"/>
+                        <div class="mt8">
+                            <button name="action_wallet_levels_start" type="object" string="Start levels" class="btn-primary" groups="tieroo_levels.group_levels_admin"
+                                    confirm="Start Customer Levels? Today's card holders join at the lowest level and get its pricelist; their cards show the level. Customers outside the levels get no card until they join."/>
+                        </div>
+                    </div>
+                    <div class="mt8 text-muted" invisible="wallet_levels_started or wallet_levels_preview">
+                        Set up the levels first (Point of Sale → Configuration → Customer Levels), design the card with a banner per level, then start here.
                     </div>
                 </setting>
                 </block>
