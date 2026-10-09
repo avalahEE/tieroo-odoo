@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import fields
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
 
 from odoo.addons.tieroo_levels.models import _pricelists_enabled
@@ -18,7 +18,7 @@ class TestWalletLevels(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.env.user.sudo()[groups(cls.env)] += cls.env.ref("point_of_sale.group_pos_manager")
+        cls.env.user.sudo()[groups(cls.env)] += cls.env.ref("point_of_sale.group_pos_manager") | cls.env.ref("tieroo_levels.group_levels_admin")
         admin = cls.env(su=True)
         Tag = admin["res.partner.category"]
         Pricelist = admin["product.pricelist"]
@@ -34,6 +34,7 @@ class TestWalletLevels(AccountTestInvoicingCommon):
             {"name": "Gold", "customer_type": "b2b", "tag_id": gold.id, "min_spend": 20000, "pricelist_id": cls.gold_pl.id},
         ])
         cls.customer = cls.env["res.partner"].create({"name": "Mari Maasikas"})
+        cls.customer.wallet_excluded = False
         cls.today = fields.Date.today()
 
     def invoice(self, amount, days_ago=0, partner=None, refund=False):
@@ -53,16 +54,24 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.env["res.partner"]._cron_wallet_levels(now=datetime.now() + relativedelta(**delta))
 
 
-    def test_joining_starts_the_period_today_and_counts_the_last_12_months(self):
-        self.invoice(1200, days_ago=200)
-        self.assertEqual(self.customer.wallet_period_start, self.today)
-        self.assertEqual(self.customer.wallet_period_end, self.today + relativedelta(months=12))
-        self.assertEqual(self.customer.wallet_level_id, self.gold)
-        self.assertEqual(self.customer.wallet_period_spend, 0)
+    def test_joining_starts_today_at_the_lowest_level_and_earlier_purchases_do_not_count(self):
+        anna = self.env["res.partner"].create({"name": "Anna"})
+        self.invoice(1200, days_ago=200, partner=anna)
+        self.assertFalse(anna.wallet_level_id)
+        self.assertTrue(anna.wallet_excluded)
+        anna.wallet_excluded = False
+        self.assertEqual(anna.wallet_period_start, self.today)
+        self.assertEqual(anna.wallet_period_end, self.today + relativedelta(months=12))
+        self.assertEqual(anna.wallet_level_id, self.bronze)
+        self.assertEqual(anna.wallet_period_spend, 0)
+        self.assertIn("Joined Customer Levels", anna.message_ids[0].body + anna.message_ids[1].body)
 
-    def test_purchases_older_than_12_months_do_not_count_when_joining(self):
-        self.invoice(5000, days_ago=400)
-        self.assertEqual(self.customer.wallet_level_id, self.bronze)
+    def test_nobody_joins_by_buying_or_by_the_nightly_job(self):
+        lonely = self.env["res.partner"].create({"name": "Never joined"})
+        self.invoice(5000, partner=lonely)
+        self.run_nightly()
+        self.assertFalse(lonely.wallet_level_id)
+        self.assertFalse(lonely.wallet_period_start)
 
     def test_upgrade_immediately_during_the_period(self):
         self.invoice(350)
@@ -108,20 +117,60 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.assertEqual(self.customer._wallet_progress()["keep"], {"missing": 300, "until": last_day.isoformat()})
 
 
-    def test_excluded_customer_is_left_alone(self):
+    def test_a_customer_outside_the_levels_is_left_alone(self):
         vip_pl = self.env(su=True)["product.pricelist"].create({"name": "VIP Mari -20%"})
-        vip_tag = self.env(su=True)["res.partner.category"].create({"name": "VIP"})
-        self.customer.write({
-            "wallet_excluded": True,
-            "property_product_pricelist": vip_pl.id,
-            "category_id": [(4, vip_tag.id), (4, self.silver.tag_id.id)],
-        })
-        self.invoice(5000)
+        vip = self.env["res.partner"].create({"name": "VIP", "property_product_pricelist": vip_pl.id})
+        self.invoice(5000, partner=vip)
         self.run_nightly(months=13)
-        self.assertFalse(self.customer.wallet_level_id)
-        self.assertFalse(self.customer.wallet_period_start)
-        self.assertEqual(self.customer.property_product_pricelist, vip_pl)
-        self.assertEqual(sorted(self.customer.category_id.mapped("name")), ["Silver", "VIP"])
+        self.assertFalse(vip.wallet_level_id)
+        self.assertEqual(vip.property_product_pricelist, vip_pl)
+
+    def test_leaving_removes_the_level_its_tag_and_pricelist_and_coming_back_starts_again(self):
+        anna = self.env["res.partner"].create({"name": "Anna", "wallet_excluded": False,
+                                               "wallet_period_start": self.today - relativedelta(days=30)})
+        self.invoice(1200, days_ago=10, partner=anna)
+        self.assertEqual(anna.property_product_pricelist, self.gold_pl)
+        anna.wallet_excluded = True
+        self.assertFalse(anna.wallet_level_id)
+        self.assertEqual(self.level_tags(anna), [])
+        self.assertNotIn(anna.property_product_pricelist, self.silver_pl | self.gold_pl)
+        self.assertFalse(anna.wallet_period_start)
+        anna.wallet_excluded = False
+        self.assertEqual(anna.wallet_level_id, self.bronze)
+        self.assertEqual(anna.wallet_period_start, self.today)
+
+
+    def test_import_with_opening_spend_and_level_holds_the_level_to_the_period_end(self):
+        start = self.today - relativedelta(months=2)
+        kai = self.env["res.partner"].create({"name": "Kai", "wallet_excluded": False, "wallet_period_start": start,
+                                              "wallet_opening_spend": 150, "wallet_level_id": self.silver.id})
+        self.assertEqual(kai.wallet_level_id, self.silver)
+        self.assertEqual(kai.wallet_period_spend, 150)
+        self.assertEqual(kai.property_product_pricelist, self.silver_pl)
+        self.invoice(900, partner=kai)
+        self.assertEqual(kai.wallet_level_id, self.gold)
+        self.run_nightly(months=10, days=1)
+        self.assertEqual(kai.wallet_level_id, self.gold)
+        self.assertEqual(kai.wallet_opening_spend, 0)
+        self.assertIn("opening spend", kai.message_ids[0].body + kai.message_ids[1].body)
+
+    def test_an_import_by_level_name_takes_the_customer_s_kind(self):
+        kai = self.env["res.partner"].create({"name": "Kai", "wallet_excluded": False, "wallet_level_id": self.b2b_silver.id})
+        self.assertEqual(kai.wallet_level_id, self.silver)
+
+    def test_imported_period_start_must_be_within_the_last_12_months(self):
+        for day in (self.today + relativedelta(days=1), self.today - relativedelta(months=12)):
+            with self.assertRaises(UserError):
+                self.env["res.partner"].create({"name": "X", "wallet_excluded": False, "wallet_period_start": day})
+
+    def test_a_level_needs_a_member_of_its_kind(self):
+        outside = self.env["res.partner"].create({"name": "Outside"})
+        with self.assertRaises(UserError):
+            outside.wallet_level_id = self.gold
+        platinum = self.env(su=True)["wallet.level"].create({"name": "Platinum", "customer_type": "b2b", "min_spend": 50000,
+                                                             "tag_id": self.env(su=True)["res.partner.category"].create({"name": "Platinum"}).id})
+        with self.assertRaises(UserError):
+            self.customer.wallet_level_id = platinum
 
     def test_level_change_keeps_other_tags(self):
         newsletter = self.env(su=True)["res.partner.category"].create({"name": "Newsletter"})
@@ -136,9 +185,11 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         company = Partner.create({"name": "Mööbel OÜ", "vat": "EE100931558"})
         jaan = Partner.create({"name": "Jaan", "parent_id": company.id})
         kati = Partner.create({"name": "Kati", "parent_id": company.id})
+        company.wallet_excluded = False
 
         self.invoice(3000, partner=jaan)
         self.assertEqual(company.wallet_period_start, self.today)
+        self.assertTrue(jaan.wallet_excluded)
         self.assertFalse(company.wallet_level_id)
         self.assertFalse(jaan.wallet_level_id)
 
@@ -154,7 +205,7 @@ class TestWalletLevels(AccountTestInvoicingCommon):
     def test_company_with_only_a_registry_code_is_b2b(self):
         if "additional_identifiers" not in self.env["res.partner"]._fields:
             self.skipTest("this Odoo has no additional identifiers")
-        firm = self.env["res.partner"].create({"name": "Väike OÜ", "additional_identifiers": {"EE_EN": "11234563"}})
+        firm = self.env["res.partner"].create({"name": "Väike OÜ", "additional_identifiers": {"EE_EN": "11234563"}, "wallet_excluded": False})
         self.assertFalse(firm._wallet_is_b2c())
         self.invoice(1500, partner=firm)
         self.assertFalse(firm.wallet_level_id)
@@ -199,24 +250,21 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.assertNotIn(fallback, self.silver_pl | self.gold_pl)
         self.assertAlmostEqual(fallback._get_product_price(product, 1.0) if fallback else 100, 100)
 
-    def test_only_pos_managers_exclude_customers_or_recalculate(self):
+    def test_only_levels_administrators_switch_customers_or_recalculate(self):
         clerk = self.env["res.users"].sudo().create({
             "name": "Müüja", "login": "myyja@example.ee",
-            groups(self.env): [(6, 0, [self.env.ref("base.group_user").id, self.env.ref("base.group_partner_manager").id])],
+            groups(self.env): [(6, 0, [self.env.ref("base.group_user").id, self.env.ref("base.group_partner_manager").id,
+                                       self.env.ref("point_of_sale.group_pos_manager").id])],
         })
         customer = self.customer.with_user(clerk)
         customer.name = "Mari Mets"
         with self.assertRaises(AccessError):
             customer.wallet_excluded = True
         with self.assertRaises(AccessError):
-            customer.wallet_period_start = self.today
-        self.assertFalse(customer.wallet_period_end)
+            customer.wallet_level_id = self.gold
+        with self.assertRaises(AccessError):
+            customer.wallet_period_start = self.today - relativedelta(days=1)
+        self.assertTrue(customer.wallet_period_end)
         self.env["res.partner"].with_user(clerk).get_views([(False, "form")])
         with self.assertRaises(AccessError):
             self.bronze.with_user(clerk).action_recompute_all()
-
-    def test_customers_without_spend_do_not_join(self):
-        lonely = self.env["res.partner"].create({"name": "Never bought"})
-        self.run_nightly()
-        self.assertFalse(lonely.wallet_level_id)
-        self.assertFalse(lonely.wallet_period_start)

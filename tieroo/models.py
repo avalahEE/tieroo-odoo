@@ -681,6 +681,9 @@ class ResPartner(models.Model):
             self._wallet_wake()
         return True
 
+    def _wallet_signup_joined(self):
+        pass
+
     def _wallet_prepare_card(self):
         self.ensure_one()
         self._wallet_ensure_barcode()
