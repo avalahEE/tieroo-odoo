@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 23:17+0000\n"
+"POT-Creation-Date: 2026-10-09 20:27+0000\n"
 "PO-Revision-Date: 2026-10-06 20:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -15,12 +15,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
-#. module: tieroo_levels
-#. odoo-python
-#: code:addons/tieroo_levels/models.py:0
-msgid "Card holders who join at %(level)s: %(holders)s. Nobody else changes."
-msgstr "Tasemel %(level)s liitub kaardiomanikke: %(holders)s. Teised ei muutu."
 
 #. module: tieroo_levels
 #. odoo-python
@@ -73,6 +67,12 @@ msgid "B2C: private customers, by their own spend. B2B: companies, by the spend 
 msgstr "B2C: eraisikud, nende enda ostusumma järgi. B2B: ettevõtted, ettevõtte ja kõigi selle kontaktide ostusumma järgi."
 
 #. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Card holders who join at %(level)s: %(holders)s. Nobody else changes."
+msgstr "Tasemel %(level)s liitub kaardiomanikke: %(holders)s. Teised ei muutu."
+
+#. module: tieroo_levels
 #: model:ir.model,name:tieroo_levels.model_res_company
 #: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__company_id
 msgid "Company"
@@ -82,6 +82,12 @@ msgstr "Ettevõte"
 #: model:ir.model.fields.selection,name:tieroo_levels.selection__wallet_level__customer_type__b2b
 msgid "Company (B2B)"
 msgstr "Ettevõte (B2B)"
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_entity_level_id
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_entity_level_id
+msgid "Company level"
+msgstr "Ettevõtte tase"
 
 #. module: tieroo_levels
 #: model:ir.model,name:tieroo_levels.model_res_config_settings
@@ -149,6 +155,7 @@ msgstr "Määra oma tasemed, nt Bronze alates 0, Silver alates 300, Gold alates 
 
 #. module: tieroo_levels
 #: model:ir.model.fields,field_description:tieroo_levels.field_account_move__display_name
+#: model:ir.model.fields,field_description:tieroo_levels.field_pos_config__display_name
 #: model:ir.model.fields,field_description:tieroo_levels.field_pos_order__display_name
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_company__display_name
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__display_name
@@ -168,6 +175,12 @@ msgid "Each level of a customer type needs its own tag."
 msgstr "Sama kliendi tüübi igal tasemel peab olema oma silt."
 
 #. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Every member's level is being recalculated in the background. A change shows in the contact's history."
+msgstr "Kõigi liikmete tasemed arvutatakse taustal uuesti. Muudatus on näha kontakti ajaloos."
+
+#. module: tieroo_levels
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_excluded
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_excluded
 msgid "Excluded from Levels"
@@ -175,6 +188,7 @@ msgstr "Tasemeprogrammist väljas"
 
 #. module: tieroo_levels
 #: model:ir.model.fields,field_description:tieroo_levels.field_account_move__id
+#: model:ir.model.fields,field_description:tieroo_levels.field_pos_config__id
 #: model:ir.model.fields,field_description:tieroo_levels.field_pos_order__id
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_company__id
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__id
@@ -298,6 +312,11 @@ msgid "Period spend"
 msgstr "Perioodi ostud"
 
 #. module: tieroo_levels
+#: model:ir.model,name:tieroo_levels.model_pos_config
+msgid "Point of Sale Configuration"
+msgstr "Kassa seadistused"
+
+#. module: tieroo_levels
 #: model:ir.model,name:tieroo_levels.model_pos_order
 msgid "Point of Sale Order"
 msgstr "Kassa tellimus"
@@ -318,7 +337,25 @@ msgid "Recalculate all customers"
 msgstr "Arvuta klientide tasemed uuesti"
 
 #. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_company__wallet_levels_recompute
+msgid "Recalculate every member"
+msgstr "Arvuta kõigi liikmete tasemed uuesti"
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Registers opened before the level prices were set up: %s. Open them again from Point of Sale (Continue Selling) so they load the level prices. This note stays until their session is closed."
+msgstr "Kassad, mis avati enne tasemete hindade seadistamist: %s. Ava need kassamoodulist uuesti (Jätka müümist), et need laadiksid tasemete hinnad. See teade jääb, kuni nende sessioon on suletud."
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__wallet_levels_reopen
+msgid "Registers to reopen"
+msgstr "Uuesti avatavad kassad"
+
+#. module: tieroo_levels
+#: model:ir.model.fields,help:tieroo_levels.field_res_partner__wallet_entity_level_id
 #: model:ir.model.fields,help:tieroo_levels.field_res_partner__wallet_level_id
+#: model:ir.model.fields,help:tieroo_levels.field_res_users__wallet_entity_level_id
 #: model:ir.model.fields,help:tieroo_levels.field_res_users__wallet_level_id
 msgid "Set from the period's spend. An imported level holds until the end of its period."
 msgstr "Arvutatakse perioodi ostusummast. Imporditud tase kehtib oma perioodi lõpuni."

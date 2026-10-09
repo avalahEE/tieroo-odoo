@@ -8,7 +8,7 @@
             <xpath expr="//div[@name='button_box']" position="inside">
                 <field name="wallet_card_state" invisible="1"/>
                 <field name="is_blacklisted" invisible="1"/>
-                <button name="action_wallet_resend" type="object" class="oe_stat_button" icon="account_balance_wallet"
+                <button name="action_wallet_resend" type="object" class="oe_stat_button" icon="fa-credit-card"
                         invisible="wallet_card_state != 'active' or is_blacklisted" groups="base.group_system"
                         confirm="Send the wallet card again to the customer's email address?"
                         help="Customer did not get the email? Check the email address, then press to send the card again.">
@@ -17,7 +17,7 @@
                         <span class="o_stat_text">Wallet card</span>
                     </div>
                 </button>
-                <button name="action_wallet_resend" type="object" class="oe_stat_button" icon="account_balance_wallet"
+                <button name="action_wallet_resend" type="object" class="oe_stat_button" icon="fa-credit-card"
                         invisible="wallet_card_state != 'active' or not is_blacklisted" groups="base.group_system"
                         confirm="This address is on the blacklist (no marketing emails). Send the wallet card anyway? Do it only if the customer asked for it."
                         help="Customer did not get the email? Check the email address, then press to send the card again.">
@@ -57,7 +57,7 @@
                     <button name="action_wallet_send_existing" type="object" class="btn-link ps-0" icon="oi-arrow-right"
                             string="Send to existing members"
                             confirm="Email the Tieroo card to every member who has none yet? The emails go out through your mail server: check its daily sending limit."/>
-                    <span class="text-muted"><field name="wallet_existing_count" class="oe_inline" readonly="1"/> members from before have no card yet.</span>
+                    <span class="text-muted">Members from before without a card: <field name="wallet_existing_count" class="oe_inline" readonly="1"/></span>
                 </div>
             </xpath>
         </field>

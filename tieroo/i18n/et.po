@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 23:17+0000\n"
+"POT-Creation-Date: 2026-10-09 20:27+0000\n"
 "PO-Revision-Date: 2026-10-07 17:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -592,11 +592,6 @@ msgid "Join via QR"
 msgstr "Liitumine QR-iga"
 
 #. module: tieroo
-#: model:ir.model,name:tieroo.model_wallet_signup_request
-msgid "loyalty programme sign-up"
-msgstr "liitumine kliendiprogrammiga"
-
-#. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/join.py:0
 msgid "Joined %(program)s via the QR code: confirmed the email address and agreed to the terms (%(company)s)."
@@ -739,6 +734,17 @@ msgstr "märts"
 #: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__5
 msgid "May"
 msgstr "mai"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
+msgid "Members from before without a card:"
+msgstr "Varasemaid liikmeid ilma kaardita:"
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Members getting the card in the background: %s."
+msgstr "Liikmeid, kellele kaart taustal saadetakse: %s."
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
@@ -929,12 +935,6 @@ msgstr "Kas saata rahakoti kaart uuesti kliendi e-posti aadressile?"
 #: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
 msgid "Send to existing members"
 msgstr "Saada olemasolevatele liikmetele"
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Sending the card to %s members in the background."
-msgstr "Kaart saadetakse taustal %s liikmele."
 
 #. module: tieroo
 #: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__9
@@ -1409,9 +1409,9 @@ msgid "id"
 msgstr ""
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
-msgid "members from before have no card yet."
-msgstr "varasemal liikmel pole veel kaarti."
+#: model:ir.model,name:tieroo.model_wallet_signup_request
+msgid "loyalty programme sign-up"
+msgstr "liitumine kliendiprogrammiga"
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page

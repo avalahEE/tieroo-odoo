@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import fields
 from odoo.exceptions import UserError
-from odoo.addons.tieroo.tests.test_card import platform
+from odoo.addons.tieroo.tests.test_card import changed, platform
 from odoo.tests import Form, TransactionCase, tagged
 
 PUT = "odoo.addons.tieroo.models.requests.put"
@@ -96,9 +96,10 @@ class TestLevelCards(TransactionCase):
         with patch(PUT, return_value=ok("https://wallet.test/p/kati?s=x")):
             kati._wallet_create_card()
         self.assertNotEqual(jaan.barcode, kati.barcode)
+        self.env["wallet.card"]._wallet_take()
         (jaan | kati).wallet_card_ids.sync_needed = False
         company._wallet_mark()
-        self.assertTrue(jaan._wallet_card().sync_needed and kati._wallet_card().sync_needed)
+        self.assertTrue(changed(jaan._wallet_card()) and kati._wallet_card().sync_needed)
         kati.wallet_excluded = True
         self.assertEqual(kati.wallet_card_state, "closed")
         self.assertEqual(jaan.wallet_card_state, "active")
