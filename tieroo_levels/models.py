@@ -69,6 +69,11 @@ class WalletLevel(models.Model):
             self.env["wallet.card"].sudo().search([("company_id", "in", self.company_id.ids)]).partner_id._wallet_mark()
         return res
 
+    @api.model
+    def name_search(self, name="", domain=None, operator="ilike", limit=100):
+        found = super().name_search(name, domain, operator, limit)
+        return found[:1] if operator == "=" else found
+
     def _wallet_allow_in_pos(self):
         for company in self.company_id:
             self.with_company(company)._wallet_allow_in_pos_company()
@@ -281,7 +286,7 @@ class ResPartner(models.Model):
             internal = p.with_context(wallet_levels_internal=True)
             if p.commercial_partner_id == p:
                 if p.wallet_level_id:
-                    p._wallet_set_level(levels.browse(), levels, 0.0)
+                    p._wallet_set_level(levels.browse(), levels, p.wallet_period_spend)
                 internal.write({"wallet_joined": False, "wallet_period_start": False, "wallet_opening_spend": 0.0})
                 p.search([("commercial_partner_id", "=", p.id), ("id", "!=", p.id), ("wallet_joined", "!=", False)])._wallet_levels_leave()
             else:
@@ -555,7 +560,7 @@ class ResConfigSettings(models.TransientModel):
                 s.wallet_levels_preview = False
                 continue
             p = company._wallet_levels_preview()
-            s.wallet_levels_preview = self.env._("%(holders)s card holders join at %(level)s. Nobody else changes.", **p)
+            s.wallet_levels_preview = self.env._("Card holders who join at %(level)s: %(holders)s. Nobody else changes.", **p)
 
     def action_wallet_levels_start(self):
         self.env["res.partner"]._wallet_check_levels_admin()
