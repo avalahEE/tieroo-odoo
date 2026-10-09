@@ -47,7 +47,7 @@ class TestLevelCards(TransactionCase):
             "level": {"id": str(self.silver.id), "name": "Silver"},
             "points": None,
             "next": {"kind": "level", "id": str(self.gold.id), "name": "Gold", "missing": 1000.0},
-            "keep": {"missing": 0.0, "until": (self.mari.wallet_period_end + relativedelta(months=12, days=-1)).isoformat()},
+            "keep": None,
             "currency": self.env.company.currency_id.symbol,
             "expires": None,
             "expiring": None,

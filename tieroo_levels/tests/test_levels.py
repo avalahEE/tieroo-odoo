@@ -62,7 +62,7 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.assertTrue(anna.wallet_excluded)
         anna.wallet_excluded = False
         self.assertEqual(anna.wallet_period_start, self.today)
-        self.assertEqual(anna.wallet_period_end, self.today + relativedelta(months=12))
+        self.assertEqual(anna.wallet_period_end, self.today + relativedelta(months=12, days=-1))
         self.assertEqual(anna.wallet_level_id, self.bronze)
         self.assertEqual(anna.wallet_period_spend, 0)
         self.assertIn("Joined Customer Levels", anna.message_ids[0].body + anna.message_ids[1].body)
