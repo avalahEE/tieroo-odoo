@@ -8,7 +8,7 @@ from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
 
-from odoo.addons.tieroo_levels.models import _pricelists_enabled
+from odoo.addons.tieroo_levels.models import _at, _pricelists_enabled, _today
 
 
 def groups(env):
@@ -73,6 +73,16 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.run_nightly()
         self.assertFalse(lonely.wallet_level_id)
         self.assertFalse(lonely.wallet_period_start)
+
+    def test_periods_are_the_shop_s_days(self):
+        self.env.company.partner_id.tz = "Europe/Tallinn"
+        day = datetime(2026, 10, 10).date()
+        self.assertEqual(_at(self.env, day), datetime(2026, 10, 9, 21, 0))
+        self.assertEqual(_today(self.env, datetime(2026, 10, 9, 21, 14)), day)
+        self.customer.with_context(wallet_levels_internal=True).wallet_period_start = day
+        with patch.object(type(self.env["pos.order"]), "_read_group", return_value=[[304.0]]) as pos:
+            self.customer._wallet_spend_between(_at(self.env, day), datetime(2026, 10, 9, 21, 20))
+        self.assertIn(("date_order", ">=", datetime(2026, 10, 9, 21, 0)), pos.call_args.args[0])
 
     def test_upgrade_immediately_during_the_period(self):
         self.invoice(350)
@@ -169,6 +179,16 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.assertEqual(kai.wallet_opening_spend, 0)
         self.assertIn("opening spend", kai.message_ids[0].body + kai.message_ids[1].body)
 
+    def test_an_import_row_writes_one_level_line_with_the_real_spend(self):
+        mari = self.env["res.partner"].create({"name": "Mari", "wallet_excluded": False, "wallet_opening_spend": 250,
+                                               "wallet_period_start": self.today - relativedelta(months=1),
+                                               "wallet_level_id": self.silver.id})
+        lines = mari.message_ids.filtered(lambda m: "Level changed" in (m.body or ""))
+        self.assertEqual(len(lines), 1)
+        self.assertIn("Silver", lines.body)
+        self.assertIn("250", lines.body)
+        self.assertNotIn("Bronze", lines.body)
+
     def test_an_import_by_level_name_takes_the_customer_s_kind(self):
         kai = self.env["res.partner"].create({"name": "Kai", "wallet_excluded": False, "wallet_level_id": self.b2b_silver.id})
         self.assertEqual(kai.wallet_level_id, self.silver)
@@ -235,10 +255,35 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.invoice(1200)
         self.assertEqual(self.customer.wallet_level_id, self.gold)
         self.customer.vat = "12345678"
-        self.run_nightly(days=1)
         self.assertFalse(self.customer.wallet_level_id)
         self.assertEqual(self.level_tags(self.customer), [])
         self.assertFalse(self.customer.specific_property_product_pricelist)
+
+    def test_a_company_that_becomes_a_person_moves_to_the_b2c_levels(self):
+        firm = self.env["res.partner"].create({"name": "Puit AS", "is_company": True, "vat": "EE100931558", "wallet_excluded": False})
+        self.invoice(5500, partner=firm)
+        self.assertEqual(firm.wallet_level_id, self.b2b_silver)
+        firm.write({"is_company": False, "vat": False})
+        self.assertEqual(firm.wallet_level_id, self.gold)
+        self.assertEqual(firm.property_product_pricelist, self.gold_pl)
+
+    def test_a_company_turned_person_in_the_form_keeps_its_tax_id_cleared(self):
+        firm = self.env["res.partner"].create({"name": "Puit AS", "is_company": True, "vat": "EE100931558", "wallet_excluded": False})
+        self.env["res.partner"].create({"name": "Tonu", "parent_id": firm.id})
+        self.invoice(5500, partner=firm)
+        vals = {"vat": False}
+        if "company_type" in firm._fields:
+            vals["company_type"] = "person"
+        firm.web_save(vals, {})
+        self.assertFalse(firm.vat)
+        self.assertEqual(firm.wallet_level_id, self.gold)
+        self.assertEqual(firm.property_product_pricelist, self.gold_pl)
+
+    def test_a_person_who_becomes_a_company_has_no_card_of_their_own(self):
+        self.env.company.sudo().wallet_levels_started = fields.Datetime.now()
+        self.assertTrue(self.customer._wallet_card_open())
+        self.customer.is_company = True
+        self.assertFalse(self.customer._wallet_card_open())
 
 
     def test_level_pricelists_are_enabled_in_every_pos(self):
@@ -288,6 +333,29 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         fallback = bystander.property_product_pricelist
         self.assertNotIn(fallback, self.silver_pl | self.gold_pl)
         self.assertAlmostEqual(fallback._get_product_price(product, 1.0) if fallback else 100, 100)
+
+    def test_recalculate_all_reaches_every_member_in_the_background(self):
+        self.invoice(1200)
+        self.customer.with_context(wallet_levels_internal=True)._wallet_set_level(
+            self.bronze, self.env["wallet.level"]._company_levels(), 0.0)
+        self.run_nightly(days=3)
+        self.assertEqual(self.customer.wallet_level_id, self.bronze)
+        action = self.bronze.action_recompute_all()
+        self.assertEqual(action["tag"], "display_notification")
+        self.run_nightly(days=3)
+        self.assertEqual(self.customer.wallet_level_id, self.gold)
+        self.assertFalse(self.env.company.wallet_levels_recompute)
+
+    def test_settings_name_the_registers_to_reopen(self):
+        admin = self.env(su=True)
+        config = admin["pos.config"].create({"name": "Kassa 2"})
+        session = admin["pos.session"].create({"config_id": config.id, "user_id": self.env.uid})
+        self.env.cr.execute("UPDATE pos_session SET create_date = create_date - interval '1 day' WHERE id = %s", [session.id])
+        session.invalidate_recordset(["create_date"])
+        self.assertIn("Kassa 2", self.env["res.config.settings"].create({}).wallet_levels_reopen)
+        self.env.cr.execute("UPDATE pos_session SET create_date = now() + interval '1 day' WHERE id = %s", [session.id])
+        session.invalidate_recordset(["create_date"])
+        self.assertFalse(self.env["res.config.settings"].create({}).wallet_levels_reopen)
 
     def test_only_levels_administrators_switch_customers_or_recalculate(self):
         clerk = self.env["res.users"].sudo().create({

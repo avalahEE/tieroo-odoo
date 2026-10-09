@@ -1,6 +1,8 @@
 import logging
 import secrets
 import threading
+import time
+from contextlib import contextmanager
 
 import requests
 
@@ -19,6 +21,7 @@ CRON_RESERVE = 120
 ACCOUNT_TIMEOUT = 4
 CLAIM_TIMEOUT = 30
 SOON = 20
+PUSH_LOCK = 7461766
 
 
 def _wallet_api(env, method, url, company=None, timeout=TIMEOUT, **kw):
@@ -76,15 +79,44 @@ def _wallet_texts(program):
 
 def _wallet_commit(env, processed=1):
     if env.context.get("ir_cron_progress_id"):
-        return env["ir.cron"]._commit_progress(processed)
+        cron = env["ir.cron"]
+        if hasattr(cron, "_commit_progress"):
+            return cron._commit_progress(processed)
+        env.cr.commit()
     return float("inf")
+
+
+@contextmanager
+def _wallet_pushing(cr, wait):
+    if odoo_module.current_test:
+        yield True
+        return
+    deadline = time.monotonic() + wait
+    cr.execute("SELECT pg_try_advisory_lock(%s)", [PUSH_LOCK])
+    while not cr.fetchone()[0]:
+        if time.monotonic() > deadline:
+            yield False
+            return
+        time.sleep(1)
+        cr.execute("SELECT pg_try_advisory_lock(%s)", [PUSH_LOCK])
+    try:
+        cr.commit()
+        yield True
+        cr.commit()
+    except BaseException:
+        cr.rollback()
+        raise
+    finally:
+        cr.execute("SELECT pg_advisory_unlock(%s)", [PUSH_LOCK])
 
 
 def _wallet_push_soon(registry, uid, ids):
     try:
-        with registry.cursor() as cr:
-            env = api.Environment(cr, uid, {})
-            env["wallet.card"].sudo().browse(sorted(ids)).exists().filtered("sync_needed")._push(raise_errors=False)
+        with registry.cursor() as cr, _wallet_pushing(cr, wait=30) as mine:
+            if mine:
+                Card = api.Environment(cr, uid, {})["wallet.card"].sudo()
+                Card._wallet_take()
+                Card.browse(sorted(ids)).exists().filtered("sync_needed")._push(raise_errors=False)
     except Exception:
         _logger.warning("tieroo: sending a change straight away failed, the job will", exc_info=True)
 
@@ -135,9 +167,9 @@ class ResCompany(models.Model):
 
     def _wallet_mark_all(self, always=False):
         companies = self if always else self.filtered("wallet_shops_on")
-        cards = self.env["wallet.card"].sudo().search([("company_id", "in", companies.ids), ("sync_needed", "=", False)])
+        cards = self.env["wallet.card"].sudo().search([("company_id", "in", companies.ids)])
         if cards:
-            cards.write({"sync_needed": True})
+            cards._wallet_changed()
             self.env["res.partner"]._wallet_wake()
 
     def write(self, vals):
@@ -394,6 +426,25 @@ class WalletCard(models.Model):
     else:
         _sql_constraints = [("partner_company_unique", "UNIQUE(partner_id, company_id)", "A customer has one card per company.")]
 
+    def init(self):
+        self.env.cr.execute("CREATE TABLE IF NOT EXISTS wallet_card_change (card_id integer NOT NULL)")
+
+    def _register_hook(self):
+        super()._register_hook()
+        self.init()
+
+    def _wallet_changed(self):
+        if self:
+            self.env.cr.execute(SQL("INSERT INTO wallet_card_change (card_id) SELECT unnest(%s::int[])", self.ids))
+
+    @api.model
+    def _wallet_take(self):
+        self.env.flush_all()
+        self.env.cr.execute("""
+            WITH taken AS (DELETE FROM wallet_card_change RETURNING card_id)
+            UPDATE wallet_card SET sync_needed = TRUE WHERE id IN (SELECT card_id FROM taken)""")
+        self.invalidate_model(["sync_needed"])
+
     def unlink(self):
         self.env["wallet.erasure"].sudo().create([
             {"company_id": card.company_id.id, "ref": str(card.partner_id.id)} for card in self.sudo() if card.company_id.wallet_api_key])
@@ -514,22 +565,27 @@ class WalletCard(models.Model):
 
     @api.model
     def _cron_sync(self):
-        self.env["wallet.erasure"].sudo().search([])._send()
-        for company in self.env["res.company"].sudo().search([("wallet_api_key", "!=", False)]):
-            Partner = self.env["res.partner"].sudo().with_company(company)
-            if not Partner._wallet_issue_new_cards():
+        with _wallet_pushing(self.env.cr, wait=60) as mine:
+            if not mine:
+                self.env["res.partner"]._wallet_wake()
                 return
-            while True:
-                todo = self.sudo().search([("company_id", "=", company.id), ("sync_needed", "=", True)], limit=BATCH)
-                if not todo:
-                    break
-                pushed = todo._push(raise_errors=False)
-                left = _wallet_commit(self.env, len(todo))
-                if not pushed:
-                    break
-                if left < CRON_RESERVE:
-                    Partner._wallet_wake()
+            self.env["wallet.erasure"].sudo().search([])._send()
+            for company in self.env["res.company"].sudo().search([("wallet_api_key", "!=", False)]):
+                Partner = self.env["res.partner"].sudo().with_company(company)
+                if not Partner._wallet_issue_new_cards():
                     return
+                while True:
+                    self._wallet_take()
+                    todo = self.sudo().search([("company_id", "=", company.id), ("sync_needed", "=", True)], limit=BATCH)
+                    if not todo:
+                        break
+                    pushed = todo._push(raise_errors=False)
+                    left = _wallet_commit(self.env, len(todo))
+                    if not pushed:
+                        break
+                    if left < CRON_RESERVE:
+                        Partner._wallet_wake()
+                        return
 
 
 class ResPartner(models.Model):
@@ -656,6 +712,7 @@ class ResPartner(models.Model):
     @api.model
     def _wallet_issue_new_cards(self, limit=1000):
         Card = self.env["wallet.card"].sudo()
+        Card._wallet_take()
         candidates = self._wallet_issue_candidates(limit)
         cards = Card.search([("company_id", "=", self.env.company.id), ("email_pending", "=", True), ("sync_needed", "=", True)], limit=limit)
         for partner in candidates:
@@ -716,7 +773,7 @@ class ResPartner(models.Model):
             "|", ("partner_id", "in", self.ids), ("partner_id.commercial_partner_id", "in", entities.ids),
         ])
         if cards:
-            cards.write({"sync_needed": True})
+            cards._wallet_changed()
             self._wallet_wake()
             self._wallet_push_after_commit(cards)
 
@@ -822,7 +879,7 @@ class LoyaltyProgram(models.Model):
         return {
             "type": "ir.actions.client",
             "tag": "display_notification",
-            "params": {"type": "success", "message": _("Sending the card to %s members in the background.", count),
+            "params": {"type": "success", "message": _("Members getting the card in the background: %s.", count),
                        "next": {"type": "ir.actions.act_window_close"}},
         }
 

@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 23:17+0000\n"
-"PO-Revision-Date: 2026-10-08 23:17+0000\n"
+"POT-Creation-Date: 2026-10-09 20:27+0000\n"
+"PO-Revision-Date: 2026-10-09 20:27+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -589,11 +589,6 @@ msgid "Join via QR"
 msgstr ""
 
 #. module: tieroo
-#: model:ir.model,name:tieroo.model_wallet_signup_request
-msgid "loyalty programme sign-up"
-msgstr ""
-
-#. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/join.py:0
 msgid ""
@@ -744,6 +739,17 @@ msgstr ""
 #. module: tieroo
 #: model:ir.model.fields.selection,name:tieroo.selection__res_partner__wallet_birth_month__5
 msgid "May"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
+msgid "Members from before without a card:"
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Members getting the card in the background: %s."
 msgstr ""
 
 #. module: tieroo
@@ -942,12 +948,6 @@ msgstr ""
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
 msgid "Send to existing members"
-msgstr ""
-
-#. module: tieroo
-#. odoo-python
-#: code:addons/tieroo/models.py:0
-msgid "Sending the card to %s members in the background."
 msgstr ""
 
 #. module: tieroo
@@ -1468,8 +1468,8 @@ msgid "id"
 msgstr ""
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.loyalty_program_form_wallet_card
-msgid "members from before have no card yet."
+#: model:ir.model,name:tieroo.model_wallet_signup_request
+msgid "loyalty programme sign-up"
 msgstr ""
 
 #. module: tieroo

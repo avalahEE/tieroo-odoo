@@ -63,6 +63,9 @@
             <xpath expr="//block[@name='wallet_join']" position="after">
                 <block title="Customer Levels" name="wallet_levels">
                 <setting string="Customer levels" help="Levels from spend (Bronze, Silver, Gold…) that give pricelists, shown on the card. Customers join by intent: private persons on the join page, companies and each of their contact persons by a levels administrator (Excluded from Levels on the contact, or an import). A paid add-on: choose it in Plan and billing.">
+                    <div class="mt8 text-warning" invisible="not wallet_levels_reopen">
+                        <field name="wallet_levels_reopen" readonly="1"/>
+                    </div>
                     <div class="mt8" invisible="not wallet_levels_started">
                         Started on <field name="wallet_levels_started" class="oe_inline" readonly="1"/>.
                     </div>

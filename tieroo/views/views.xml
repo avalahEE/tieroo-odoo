@@ -57,7 +57,7 @@
                     <button name="action_wallet_send_existing" type="object" class="btn-link ps-0" icon="oi-arrow-right"
                             string="Send to existing members"
                             confirm="Email the Tieroo card to every member who has none yet? The emails go out through your mail server: check its daily sending limit."/>
-                    <span class="text-muted"><field name="wallet_existing_count" class="oe_inline" readonly="1"/> members from before have no card yet.</span>
+                    <span class="text-muted">Members from before without a card: <field name="wallet_existing_count" class="oe_inline" readonly="1"/></span>
                 </div>
             </xpath>
         </field>

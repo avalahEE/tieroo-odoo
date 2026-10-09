@@ -1,5 +1,6 @@
 import logging
-from datetime import datetime, time
+from datetime import datetime, time, timezone
+from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
 
@@ -13,8 +14,24 @@ _logger = logging.getLogger(__name__)
 PERIOD = relativedelta(months=12)
 
 
-def _at(day):
-    return datetime.combine(day, time.min)
+def _tz(env):
+    admin = env.ref("base.user_admin", raise_if_not_found=False)
+    try:
+        return ZoneInfo(env.company.partner_id.tz or (admin and admin.sudo().tz) or "UTC")
+    except (KeyError, ValueError):
+        return ZoneInfo("UTC")
+
+
+def _at(env, day):
+    return datetime.combine(day, time.min, _tz(env)).astimezone(timezone.utc).replace(tzinfo=None)
+
+
+def _local(env, moment):
+    return moment.replace(tzinfo=timezone.utc).astimezone(_tz(env)).replace(tzinfo=None)
+
+
+def _today(env, now=None):
+    return _local(env, now or fields.Datetime.now()).date()
 
 
 def _pricelists_enabled(env):
@@ -108,7 +125,11 @@ class WalletLevel(models.Model):
     def action_recompute_all(self):
         if not self.env.user.has_group("tieroo_levels.group_levels_admin"):
             raise AccessError(_("Only Customer levels administrators can recalculate the customer levels."))
-        self.env["res.partner"].with_company(self.env.company)._wallet_levels_run_company()
+        (self.company_id or self.env.company).sudo().wallet_levels_recompute = True
+        self.env.ref("tieroo_levels.cron_wallet_levels").sudo()._trigger()
+        return {"type": "ir.actions.client", "tag": "display_notification", "params": {
+            "type": "info", "message": _("Every member's level is being recalculated in the background. A change shows in "
+                                         "the contact's history.")}}
 
     @api.model
     def _company_levels(self):
@@ -158,7 +179,8 @@ class ResPartner(models.Model):
     def _inverse_wallet_excluded(self):
         pass
 
-    @api.depends("wallet_period_start", "commercial_partner_id.wallet_period_start")
+    @api.depends("wallet_period_start", "wallet_joined", "wallet_opening_spend", "commercial_partner_id.wallet_period_start",
+                 "commercial_partner_id.wallet_joined", "commercial_partner_id.wallet_opening_spend")
     @api.depends_context("company")
     def _compute_wallet_period(self):
         now = fields.Datetime.now()
@@ -166,11 +188,13 @@ class ResPartner(models.Model):
             entity = p.commercial_partner_id.sudo()
             start = entity.wallet_joined and entity.wallet_period_start
             p.wallet_period_end = start and start + PERIOD - relativedelta(days=1)
-            p.wallet_period_spend = entity._wallet_spend_between(_at(start), now) + entity.wallet_opening_spend if start and entity.id else 0.0
+            p.wallet_period_spend = entity._wallet_spend_between(_at(self.env, start), now) + entity.wallet_opening_spend if start and entity.id else 0.0
             p.wallet_currency_id = self.env.company.currency_id
 
     def _wallet_spend_between(self, since, until):
         self.ensure_one()
+        first, last = _local(self.env, since), _local(self.env, until)
+        first, end = first.date(), last.date() if last.time() == time.min else last.date() + relativedelta(days=1)
         members = self.env["res.partner"].sudo().with_context(active_test=False).search(
             [("commercial_partner_id", "=", self.id)]
         )
@@ -183,7 +207,7 @@ class ResPartner(models.Model):
         invoices = self.env["account.move"].sudo()._read_group(
             [("partner_id", "in", members.ids), ("company_id", "=", self.env.company.id), ("move_type", "in", ("out_invoice", "out_refund")),
              ("state", "=", "posted"), ("pos_order_ids", "=", False),
-             ("invoice_date", ">=", since.date()), ("invoice_date", "<", until.date() if until.time() == time.min else until.date() + relativedelta(days=1))],
+             ("invoice_date", ">=", first), ("invoice_date", "<", end)],
             [],
             ["amount_total_signed:sum"],
         )[0][0]
@@ -209,7 +233,7 @@ class ResPartner(models.Model):
         if not levels or not self:
             return
         now = now or fields.Datetime.now()
-        today = now.date()
+        today = _today(self.env, now)
         for contact in self.filtered(lambda p: p.commercial_partner_id != p and p.wallet_level_id):
             contact._wallet_set_level(levels.browse(), levels, 0.0)
 
@@ -218,7 +242,7 @@ class ResPartner(models.Model):
             start, opening = entity.wallet_period_start, entity.wallet_opening_spend
             while start + PERIOD <= today:
                 end = start + PERIOD
-                odoo = entity._wallet_spend_between(_at(start), _at(end))
+                odoo = entity._wallet_spend_between(_at(self.env, start), _at(self.env, end))
                 spend = odoo + opening
                 old = entity.wallet_level_id
                 entity.with_context(wallet_levels_internal=True).write({"wallet_period_start": end, "wallet_opening_spend": 0.0})
@@ -230,7 +254,7 @@ class ResPartner(models.Model):
                         start=start, end=end - relativedelta(days=1), spend=currency.format(spend), opening=currency.format(opening),
                         odoo=currency.format(odoo), old=old.name or entity.env._("none"), new=entity.wallet_level_id.name or entity.env._("none")))
                 start, opening = end, 0.0
-            spend = entity._wallet_spend_between(_at(start), now) + opening
+            spend = entity._wallet_spend_between(_at(self.env, start), now) + opening
             target, current = entity._wallet_level_for(own, spend), entity.wallet_level_id
             type_changed = current and current.customer_type != (own[:1].customer_type or current.customer_type)
             if target != current and (not current or type_changed or target.min_spend > current.min_spend):
@@ -265,8 +289,8 @@ class ResPartner(models.Model):
         self.with_context(lang=self.env.company.partner_id.lang or self.env.lang).message_post(body=body)
 
 
-    def _wallet_levels_join(self):
-        today = fields.Date.context_today(self)
+    def _wallet_levels_join(self, level=None):
+        today = _today(self.env)
         for p in self.sudo().filtered(lambda x: not x.wallet_joined):
             internal = p.with_context(wallet_levels_internal=True)
             if p.commercial_partner_id != p:
@@ -275,7 +299,10 @@ class ResPartner(models.Model):
                 internal.wallet_joined = today
             else:
                 internal.write({"wallet_joined": today, "wallet_period_start": p.wallet_period_start or today})
-                p._wallet_update_levels()
+                if level:
+                    p._wallet_set_level(level, self.env["wallet.level"]._company_levels(), p.wallet_period_spend)
+                else:
+                    p._wallet_update_levels()
             p._wallet_note(p.env._("Joined Customer Levels (%s).", p.env.company.name))
             p._wallet_mark()
         self._wallet_wake()
@@ -301,28 +328,29 @@ class ResPartner(models.Model):
                                 "level, period or opening spend."))
 
     def _wallet_levels_admin_edit(self, vals, excluded, level):
-        today = fields.Date.context_today(self)
+        today = _today(self.env)
+        levels = self.env["wallet.level"]._company_levels()
         for p in self.sudo():
             start = p.wallet_period_start
             if "wallet_period_start" in vals and start and not (today - PERIOD < start <= today):
                 raise UserError(p.env._("%(name)s: the level period must start within the last 12 months, not on %(day)s.",
                                         name=p.display_name, day=start))
-            if excluded is True:
-                p._wallet_levels_leave()
-            elif excluded is False:
-                p._wallet_levels_join()
             if level is not None:
                 if p.commercial_partner_id != p:
                     raise UserError(p.env._("%s: a company's contact person has no level of their own; set it on the company.", p.display_name))
-                if not p.wallet_joined:
+                if excluded is True or (not p.wallet_joined and excluded is not False):
                     raise UserError(p.env._("%s: switch the customer on in Customer Levels first.", p.display_name))
-                own = p._wallet_own_levels(self.env["wallet.level"]._company_levels())
+                own = p._wallet_own_levels(levels)
                 if level and level not in own and len(own.filtered(lambda lvl: lvl.name == level.name)) == 1:
                     level = own.filtered(lambda lvl: lvl.name == level.name)
                 if level and level not in own:
                     raise UserError(p.env._("%(name)s: %(level)s is not a level for this kind of customer.", name=p.display_name, level=level.name))
-                if level != p.wallet_level_id:
-                    p._wallet_set_level(level, self.env["wallet.level"]._company_levels(), 0.0)
+            if excluded is True:
+                p._wallet_levels_leave()
+            elif excluded is False:
+                p._wallet_levels_join(level)
+            if level is not None and level != p.wallet_level_id:
+                p._wallet_set_level(level, levels, p.wallet_period_spend)
             if p.wallet_joined and {"wallet_period_start", "wallet_opening_spend"} & vals.keys():
                 currency = self.env.company.currency_id
                 p._wallet_note(p.env._("Level period from %(start)s, opening spend %(opening)s.",
@@ -336,7 +364,7 @@ class ResPartner(models.Model):
         if not start or not entity.wallet_joined:
             return {"next": None, "keep": None}
         now = now or fields.Datetime.now()
-        spend = entity._wallet_spend_between(_at(start), now) + entity.wallet_opening_spend
+        spend = entity._wallet_spend_between(_at(self.env, start), now) + entity.wallet_opening_spend
         own = entity._wallet_own_levels(self.env["wallet.level"]._company_levels()).sorted("min_spend")
         current = entity.wallet_level_id
         floor = current.min_spend if current else -1
@@ -363,20 +391,26 @@ class ResPartner(models.Model):
         now = now or fields.Datetime.now()
         company, since = self.env.company, now - relativedelta(days=2)
         Partner = self.sudo()
-        ended = Partner.search([("wallet_joined", "!=", False), ("wallet_period_start", "<=", now.date() - PERIOD)])
+        ended = Partner.search([("wallet_joined", "!=", False), ("wallet_period_start", "<=", _today(self.env, now) - PERIOD)])
         buyers = self.env["pos.order"].sudo().search([("company_id", "=", company.id), ("state", "in", ("paid", "done")),
                                                       ("date_order", ">=", since)]).partner_id
         buyers |= self.env["account.move"].sudo().search([("company_id", "=", company.id), ("state", "=", "posted"),
                                                           ("move_type", "in", ("out_invoice", "out_refund")),
                                                           ("invoice_date", ">=", since.date())]).partner_id
         ids = (ended | buyers.commercial_partner_id.filtered("wallet_joined")).ids
+        everyone = company.sudo().wallet_levels_recompute
+        if everyone:
+            ids = Partner.search([("wallet_joined", "!=", False)]).ids
         for chunk in split_every(500, sorted(ids), Partner.browse):
             chunk._wallet_update_levels(now=now)
             _wallet_commit(self.env, len(chunk))
+        if everyone:
+            company.sudo().wallet_levels_recompute = False
 
 
     _WALLET_LEVEL_FIELDS = {"vat", "additional_identifiers", "wallet_period_start", "wallet_joined", "wallet_opening_spend"}
     _WALLET_ADMIN_FIELDS = {"wallet_excluded", "wallet_level_id", "wallet_period_start", "wallet_opening_spend"}
+    _WALLET_KIND_FIELDS = {"is_company", "company_type", "vat", "parent_id", "additional_identifiers"}
 
     @api.depends("wallet_joined", "commercial_partner_id.wallet_joined")
     @api.depends_context("company")
@@ -390,7 +424,7 @@ class ResPartner(models.Model):
         if not self._wallet_levels_started():
             return super()._wallet_is_member()
         me = self.sudo()
-        return bool(me.wallet_joined and me.commercial_partner_id.wallet_joined)
+        return bool(me.wallet_joined and me.commercial_partner_id.wallet_joined) and (me.commercial_partner_id != me or me._wallet_is_b2c())
 
     @staticmethod
     def _wallet_levels_noop(vals):
@@ -413,6 +447,16 @@ class ResPartner(models.Model):
         return partners
 
     def write(self, vals):
+        ctx = self.env.context
+        check = self._WALLET_KIND_FIELDS & vals.keys() and not ctx.get("wallet_levels_internal") and not ctx.get("wallet_levels_kind")
+        before = {p.id: p._wallet_is_b2c() for p in self} if check else {}
+        res = (self.with_context(wallet_levels_kind=True) if check else self)._wallet_levels_write(vals)
+        moved = self.filtered(lambda p: p.id in before and before[p.id] != p._wallet_is_b2c())
+        for company in self.env["wallet.level"].sudo().search([]).company_id if moved else ():
+            _upgrade_safely(moved, company)
+        return res
+
+    def _wallet_levels_write(self, vals):
         if self._WALLET_ADMIN_FIELDS & vals.keys() and not self.env.context.get("wallet_levels_internal"):
             vals = {k: v for k, v in vals.items() if k not in self._WALLET_ADMIN_FIELDS or any(
                 (p.sudo()[k].id if k == "wallet_level_id" else p.sudo()[k]) != (v or False if k != "wallet_opening_spend" else v or 0.0) for p in self)}
@@ -512,6 +556,7 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     wallet_levels_started = fields.Datetime("Customer Levels started", copy=False, readonly=True)
+    wallet_levels_recompute = fields.Boolean("Recalculate every member", copy=False)
 
     def _wallet_join_target(self):
         return super()._wallet_join_target() or bool(self.sudo().wallet_levels_started and self.env["wallet.level"].sudo().search_count([("company_id", "=", self.id)]))
@@ -558,6 +603,17 @@ class ResConfigSettings(models.TransientModel):
 
     wallet_levels_started = fields.Datetime(related="company_id.wallet_levels_started")
     wallet_levels_preview = fields.Char(compute="_compute_wallet_levels_preview")
+    wallet_levels_reopen = fields.Char("Registers to reopen", compute="_compute_wallet_levels_reopen")
+
+    @api.depends("company_id")
+    def _compute_wallet_levels_reopen(self):
+        for s in self:
+            sessions = self.env["pos.session"].sudo().search([("company_id", "=", s.company_id.id), ("state", "!=", "closed")])
+            sessions = sessions.filtered(lambda x: x.create_date < x.config_id.write_date)
+            s.wallet_levels_reopen = bool(sessions) and self.env._(
+                "Registers opened before the level prices were set up: %s. Open them again from Point of Sale (Continue "
+                "Selling) so they load the level prices. This note stays until their session is closed.",
+                ", ".join(sessions.config_id.mapped("name")))
 
     @api.depends("company_id")
     def _compute_wallet_levels_preview(self):

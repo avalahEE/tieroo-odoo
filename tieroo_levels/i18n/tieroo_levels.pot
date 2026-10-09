@@ -6,20 +6,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20260926\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-08 23:17+0000\n"
-"PO-Revision-Date: 2026-10-08 23:17+0000\n"
+"POT-Creation-Date: 2026-10-09 20:27+0000\n"
+"PO-Revision-Date: 2026-10-09 20:27+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
-
-#. module: tieroo_levels
-#. odoo-python
-#: code:addons/tieroo_levels/models.py:0
-msgid "Card holders who join at %(level)s: %(holders)s. Nobody else changes."
-msgstr ""
 
 #. module: tieroo_levels
 #. odoo-python
@@ -82,6 +76,12 @@ msgid ""
 msgstr ""
 
 #. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid "Card holders who join at %(level)s: %(holders)s. Nobody else changes."
+msgstr ""
+
+#. module: tieroo_levels
 #: model:ir.model,name:tieroo_levels.model_res_company
 #: model:ir.model.fields,field_description:tieroo_levels.field_wallet_level__company_id
 msgid "Company"
@@ -90,6 +90,12 @@ msgstr ""
 #. module: tieroo_levels
 #: model:ir.model.fields.selection,name:tieroo_levels.selection__wallet_level__customer_type__b2b
 msgid "Company (B2B)"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_entity_level_id
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_entity_level_id
+msgid "Company level"
 msgstr ""
 
 #. module: tieroo_levels
@@ -159,6 +165,7 @@ msgstr ""
 
 #. module: tieroo_levels
 #: model:ir.model.fields,field_description:tieroo_levels.field_account_move__display_name
+#: model:ir.model.fields,field_description:tieroo_levels.field_pos_config__display_name
 #: model:ir.model.fields,field_description:tieroo_levels.field_pos_order__display_name
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_company__display_name
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__display_name
@@ -181,6 +188,14 @@ msgid "Each level of a customer type needs its own tag."
 msgstr ""
 
 #. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid ""
+"Every member's level is being recalculated in the background. A change shows"
+" in the contact's history."
+msgstr ""
+
+#. module: tieroo_levels
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_partner__wallet_excluded
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_users__wallet_excluded
 msgid "Excluded from Levels"
@@ -188,6 +203,7 @@ msgstr ""
 
 #. module: tieroo_levels
 #: model:ir.model.fields,field_description:tieroo_levels.field_account_move__id
+#: model:ir.model.fields,field_description:tieroo_levels.field_pos_config__id
 #: model:ir.model.fields,field_description:tieroo_levels.field_pos_order__id
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_company__id
 #: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__id
@@ -325,6 +341,11 @@ msgid "Period spend"
 msgstr ""
 
 #. module: tieroo_levels
+#: model:ir.model,name:tieroo_levels.model_pos_config
+msgid "Point of Sale Configuration"
+msgstr ""
+
+#. module: tieroo_levels
 #: model:ir.model,name:tieroo_levels.model_pos_order
 msgid "Point of Sale Order"
 msgstr ""
@@ -345,7 +366,28 @@ msgid "Recalculate all customers"
 msgstr ""
 
 #. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_company__wallet_levels_recompute
+msgid "Recalculate every member"
+msgstr ""
+
+#. module: tieroo_levels
+#. odoo-python
+#: code:addons/tieroo_levels/models.py:0
+msgid ""
+"Registers opened before the level prices were set up: %s. Open them again "
+"from Point of Sale (Continue Selling) so they load the level prices. This "
+"note stays until their session is closed."
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,field_description:tieroo_levels.field_res_config_settings__wallet_levels_reopen
+msgid "Registers to reopen"
+msgstr ""
+
+#. module: tieroo_levels
+#: model:ir.model.fields,help:tieroo_levels.field_res_partner__wallet_entity_level_id
 #: model:ir.model.fields,help:tieroo_levels.field_res_partner__wallet_level_id
+#: model:ir.model.fields,help:tieroo_levels.field_res_users__wallet_entity_level_id
 #: model:ir.model.fields,help:tieroo_levels.field_res_users__wallet_level_id
 msgid ""
 "Set from the period's spend. An imported level holds until the end of its "
@@ -392,8 +434,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:tieroo_levels.res_config_settings_view_form_wallet_levels
 msgid ""
 "Start Customer Levels? Today's card holders join at the lowest level and get"
-" its pricelist. Their cards show the level when your Tieroo plan includes"
-" Customer Levels. Customers outside the levels get no card until they join."
+" its pricelist. Their cards show the level when your Tieroo plan includes "
+"Customer Levels. Customers outside the levels get no card until they join."
 msgstr ""
 
 #. module: tieroo_levels
