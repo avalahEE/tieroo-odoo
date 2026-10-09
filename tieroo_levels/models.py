@@ -361,10 +361,17 @@ class ResPartner(models.Model):
     @api.model
     def _wallet_levels_run_company(self, now=None):
         now = now or fields.Datetime.now()
-        ids = self.sudo().search([("wallet_joined", "!=", False), ("wallet_period_start", "!=", False)]).ids
-        for chunk in split_every(500, sorted(ids), self.sudo().browse):
+        company, since = self.env.company, now - relativedelta(days=2)
+        Partner = self.sudo()
+        ended = Partner.search([("wallet_joined", "!=", False), ("wallet_period_start", "<=", now.date() - PERIOD)])
+        buyers = self.env["pos.order"].sudo().search([("company_id", "=", company.id), ("state", "in", ("paid", "done")),
+                                                      ("date_order", ">=", since)]).partner_id
+        buyers |= self.env["account.move"].sudo().search([("company_id", "=", company.id), ("state", "=", "posted"),
+                                                          ("move_type", "in", ("out_invoice", "out_refund")),
+                                                          ("invoice_date", ">=", since.date())]).partner_id
+        ids = (ended | buyers.commercial_partner_id.filtered("wallet_joined")).ids
+        for chunk in split_every(500, sorted(ids), Partner.browse):
             chunk._wallet_update_levels(now=now)
-            chunk._wallet_mark()
             _wallet_commit(self.env, len(chunk))
 
 

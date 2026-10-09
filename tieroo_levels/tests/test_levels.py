@@ -107,6 +107,20 @@ class TestWalletLevels(AccountTestInvoicingCommon):
         self.assertEqual(self.customer.wallet_level_id, self.bronze)
         self.assertEqual(self.customer.wallet_period_start, self.today + relativedelta(months=36))
 
+    def test_the_nightly_job_takes_only_ended_periods_and_recent_buyers(self):
+        idle = self.env["res.partner"].create({"name": "Idle", "wallet_excluded": False})
+        self.invoice(100)
+        Partner = type(self.env["res.partner"])
+
+        def seen(**delta):
+            with patch.object(Partner, "_wallet_update_levels", autospec=True) as update:
+                self.run_nightly(**delta)
+            return self.env["res.partner"].union(*(c.args[0] for c in update.call_args_list))
+        tomorrow = seen(days=1)
+        self.assertIn(self.customer, tomorrow)
+        self.assertNotIn(idle, tomorrow)
+        self.assertIn(idle, seen(months=12, days=1))
+
     def test_progress_next_level_and_keeping_the_level(self):
         self.invoice(350)
         last_day = self.customer.wallet_period_start + relativedelta(months=12, days=-1)
