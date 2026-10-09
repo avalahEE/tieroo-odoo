@@ -168,6 +168,28 @@ class TestLevelCards(TransactionCase):
         self.assertFalse(self.env["loyalty.card"].search([("partner_id", "=", liis.id)]))
         self.assertEqual(liis.wallet_card_state, "active")
 
+    def join_page(self, name, email, token):
+        with patch("odoo.addons.tieroo.join.secrets.token_urlsafe", return_value=token):
+            self.env["res.partner"]._wallet_signup_request(self.env.company, name, email, lang="en_US", birthday=None, ip_hash=token)
+        with patch(PUT, return_value=ok()):
+            return self.env["wallet.signup.request"]._find(self.env.company, token)._confirm().partner_id
+
+    def test_a_leaver_and_an_archived_contact_come_back_on_the_join_page(self):
+        self.start()
+        liis = self.join_page("Liis Tamm", "liis@example.ee", "tok-1")
+        liis.with_context(wallet_levels_internal=True).wallet_joined = fields.Date.today() - relativedelta(days=100)
+        with patch(PUT, return_value=ok()):
+            liis.wallet_excluded = True
+        self.env["wallet.signup.request"].sudo().search([]).unlink()
+        self.assertEqual(self.join_page("Liis Tamm", "liis@example.ee", "tok-2"), liis)
+        self.assertEqual((liis.wallet_joined, liis.wallet_level_id), (fields.Date.today(), self.silver))
+        self.assertEqual(liis.wallet_card_state, "active")
+
+        old = self.env["res.partner"].create({"name": "Peeter Puu", "email": "peeter@example.ee", "active": False})
+        self.assertEqual(self.join_page("Peeter Puu", "peeter@example.ee", "tok-3"), old)
+        self.assertTrue(old.active)
+        self.assertEqual((old.wallet_joined, old.wallet_level_id), (fields.Date.today(), self.silver))
+
     def test_a_new_contact_from_the_form_by_anyone(self):
         user = self.env["res.users"].create({"name": "Müüja", "login": "myyja@example.ee",
                                              "group_ids" if "group_ids" in self.env["res.users"]._fields else "groups_id":

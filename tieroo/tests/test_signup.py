@@ -112,7 +112,7 @@ class TestSignup(SignupSetup, TransactionCase):
 
     def test_known_email_is_not_duplicated_and_birthday_cannot_be_changed(self):
         self.confirm(self.join(name="Mari", birthday=("3", "5"))[1])
-        self.env.cr.execute("UPDATE wallet_signup_request SET create_date = create_date - interval '11 minutes'")
+        self.env.cr.execute("UPDATE wallet_signup_request SET create_date = create_date - interval '3 minutes'")
         self.confirm(self.join(name="Someone else", birthday=("4", "6"), email="MARI@example.ee")[1])
         mari = self.Partner.search([("email_normalized", "=", "mari@example.ee")])
         self.assertEqual(len(mari), 1)

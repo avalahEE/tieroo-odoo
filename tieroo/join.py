@@ -15,7 +15,7 @@ from odoo.tools import email_normalize
 
 _logger = logging.getLogger(__name__)
 SIGNUPS_PER_HOUR = 30
-RESEND_AFTER = timedelta(minutes=10)
+RESEND_AFTER = timedelta(minutes=2)
 _BRAND = {}
 COLOR = re.compile(r"^#[0-9A-Fa-f]{6}$")
 
