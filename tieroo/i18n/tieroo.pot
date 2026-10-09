@@ -590,7 +590,7 @@ msgstr ""
 
 #. module: tieroo
 #: model:ir.model,name:tieroo.model_wallet_signup_request
-msgid "Join via QR sign-up"
+msgid "loyalty programme sign-up"
 msgstr ""
 
 #. module: tieroo

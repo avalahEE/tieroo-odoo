@@ -18,9 +18,7 @@ msgstr ""
 #. module: tieroo_levels
 #. odoo-python
 #: code:addons/tieroo_levels/models.py:0
-msgid ""
-"%(holders)s card holders join at %(level)s; %(pricelists)s of them get its "
-"pricelist instead of the one they have now. Nobody else changes."
+msgid "Card holders who join at %(level)s: %(holders)s. Nobody else changes."
 msgstr ""
 
 #. module: tieroo_levels

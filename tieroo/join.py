@@ -155,7 +155,7 @@ def _hash(token):
 
 class WalletSignupRequest(models.Model):
     _name = "wallet.signup.request"
-    _description = "Join via QR sign-up"
+    _description = "loyalty programme sign-up"
 
     company_id = fields.Many2one("res.company", required=True, ondelete="cascade")
     email = fields.Char(required=True, index=True)

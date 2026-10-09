@@ -158,6 +158,9 @@ class TestWalletLevels(AccountTestInvoicingCommon):
     def test_an_import_by_level_name_takes_the_customer_s_kind(self):
         kai = self.env["res.partner"].create({"name": "Kai", "wallet_excluded": False, "wallet_level_id": self.b2b_silver.id})
         self.assertEqual(kai.wallet_level_id, self.silver)
+        result = self.env["res.partner"].load(["name", "wallet_excluded", "wallet_level_id"], [["Kaja", "False", "Silver"]])
+        self.assertFalse(result["messages"])
+        self.assertEqual(self.env["res.partner"].browse(result["ids"]).wallet_level_id, self.silver)
 
     def test_imported_period_start_must_be_within_the_last_12_months(self):
         for day in (self.today + relativedelta(days=1), self.today - relativedelta(months=12)):
