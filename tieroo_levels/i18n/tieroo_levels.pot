@@ -394,8 +394,8 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:tieroo_levels.res_config_settings_view_form_wallet_levels
 msgid ""
 "Start Customer Levels? Today's card holders join at the lowest level and get"
-" its pricelist; their cards show the level. Customers outside the levels get"
-" no card until they join."
+" its pricelist. Their cards show the level when your Tieroo plan includes"
+" Customer Levels. Customers outside the levels get no card until they join."
 msgstr ""
 
 #. module: tieroo_levels

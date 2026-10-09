@@ -160,7 +160,7 @@ class ResPartner(models.Model):
         for p in self:
             entity = p.commercial_partner_id.sudo()
             start = entity.wallet_joined and entity.wallet_period_start
-            p.wallet_period_end = start and start + PERIOD
+            p.wallet_period_end = start and start + PERIOD - relativedelta(days=1)
             p.wallet_period_spend = entity._wallet_spend_between(_at(start), now) + entity.wallet_opening_spend if start and entity.id else 0.0
             p.wallet_currency_id = self.env.company.currency_id
 
@@ -338,7 +338,7 @@ class ResPartner(models.Model):
         nxt = next((lvl for lvl in own if lvl.min_spend > floor and lvl.min_spend > spend), None)
         last_day = start + PERIOD - relativedelta(days=1)
         keep = None
-        if current:
+        if current.min_spend > 0:
             if spend >= current.min_spend:
                 keep = {"missing": 0.0, "until": (last_day + PERIOD).isoformat()}
             else:
@@ -537,6 +537,7 @@ class ResCompany(models.Model):
             {"id": str(l.id), "name": l.name, "type": l.customer_type}
             for l in levels.sorted(lambda l: (l.customer_type != "b2c", l.min_spend))
         ]
+        ctx["currency"] = self.currency_id.symbol
         return ctx
 
 

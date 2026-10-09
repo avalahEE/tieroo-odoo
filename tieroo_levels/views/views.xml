@@ -70,7 +70,7 @@
                         <field name="wallet_levels_preview" class="text-muted" readonly="1"/>
                         <div class="mt8">
                             <button name="action_wallet_levels_start" type="object" string="Start levels" class="btn-primary" groups="tieroo_levels.group_levels_admin"
-                                    confirm="Start Customer Levels? Today's card holders join at the lowest level and get its pricelist; their cards show the level. Customers outside the levels get no card until they join."/>
+                                    confirm="Start Customer Levels? Today's card holders join at the lowest level and get its pricelist. Their cards show the level when your Tieroo plan includes Customer Levels. Customers outside the levels get no card until they join."/>
                         </div>
                     </div>
                     <div class="mt8 text-muted" invisible="wallet_levels_started or wallet_levels_preview">
