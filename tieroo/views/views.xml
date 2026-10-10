@@ -165,7 +165,7 @@
                         <setting string="Email templates" help="The card email and the joining confirmation, sent by Odoo. Change the text and translations here; Reset Template brings back the original.">
                             <button name="action_wallet_email_templates" type="object" string="Email templates" icon="oi-arrow-right" class="btn-link"/>
                         </setting>
-                        <setting string="Card design" company_dependent="1" help="Logo, colours, background image, fields and translations, with a live preview. Saving updates every customer's card. The loyalty programme on the card: tick 'Issue Tieroo card' on it.">
+                        <setting string="Card design" company_dependent="1" invisible="not wallet_connected" help="Logo, colours, background image, fields and translations, with a live preview. Saving updates every customer's card. The loyalty programme on the card: tick 'Issue Tieroo card' on it.">
                             <button name="action_wallet_design" type="object" string="Design the card" icon="oi-arrow-right" class="btn-link"/>
                         </setting>
                     </block>
@@ -178,7 +178,7 @@
                         </setting>
                     </block>
                     <block title="Join via QR" name="wallet_join">
-                        <setting string="Join via QR" company_dependent="1" help="A QR code (a poster in the shop) opens a page where customers join the loyalty programme themselves and get the card by email. Print-ready PDF and SVG posters.">
+                        <setting string="Join via QR" company_dependent="1" invisible="not wallet_connected" help="A QR code (a poster in the shop) opens a page where customers join the loyalty programme themselves and get the card by email. Print-ready PDF and SVG posters.">
                             <div class="content-group">
                                 <div class="row mt16">
                                     <label for="wallet_signup_url" string="Join link" class="col-lg-4 o_light_label"/>
