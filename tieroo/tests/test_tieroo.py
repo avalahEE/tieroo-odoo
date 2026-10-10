@@ -136,6 +136,10 @@ class TestTieroo(TierooSetup, TransactionCase):
         self.assertEqual((settings.wallet_status, settings.wallet_account_error), ("suspended", False))
         settings, _get = self.connected(resp(401, {"error": "unauthorized"}))
         self.assertEqual((settings.wallet_status, settings.wallet_account_error), ("closed", False))
+        settings, _get = self.connected(resp(200, {"plan": {"id": "cards_300", "name": "Loyalty Cards 300", "cards": 300}, "status": "active",
+                                                   "billableCards": 1, "limit": 300, "canCreate": True, "subscribed": True,
+                                                   "closesOn": "2027-10-10"}))
+        self.assertEqual(str(settings.wallet_closes_on), "2027-10-10")
         settings, _get = self.connected(resp(409, {"error": "key_in_use"}))
         self.assertEqual((settings.wallet_status, settings.wallet_account_error), ("elsewhere", False))
         with patch(GET, side_effect=requests.Timeout("slow")):
@@ -151,6 +155,8 @@ class TestTieroo(TierooSetup, TransactionCase):
             self.assertEqual(self.connected(resp(200, paid))[0].wallet_levels_missing, "add")
             self.assertFalse(self.connected(resp(200, {**paid, "levels": True}))[0].wallet_levels_missing)
             self.assertFalse(self.connected(resp(503, {}))[0].wallet_levels_missing)
+            self.assertFalse(self.connected(resp(403, {"error": "suspended"}))[0].wallet_levels_missing)
+            self.assertFalse(self.connected(resp(401, {"error": "unauthorized"}))[0].wallet_levels_missing)
         with patch.object(company_cls, "_wallet_levels_on", return_value=False):
             self.assertFalse(self.connected(resp(200, paid))[0].wallet_levels_missing)
 
@@ -166,6 +172,23 @@ class TestTieroo(TierooSetup, TransactionCase):
         self.assertEqual(post.call_args.kwargs["json"], {"returnUrl": f"{self.company.get_base_url()}/odoo/settings?cids={self.company.id}#tieroo",
                                                          "levelsModule": self.company._wallet_levels_on()})
         self.assertEqual(post.call_args.kwargs["headers"]["Authorization"], "Bearer wk_testkey")
+
+    def test_reopen_a_closed_account(self):
+        settings, _get = self.connected(resp(401, {"error": "unauthorized"}))
+        company_cls = type(self.env["res.company"])
+        with patch(POST, return_value=resp(200, {"url": "https://wallet.test/billing/open?t=z"})) as post, \
+                patch.object(company_cls, "_wallet_mark_all") as mark:
+            action = settings.action_wallet_reopen()
+        self.assertEqual(action, {"type": "ir.actions.act_url", "url": "https://wallet.test/billing/open?t=z", "target": "self"})
+        self.assertEqual(post.call_args.args[0], "https://wallet.test/sync/v1/reopen")
+        self.assertEqual(post.call_args.kwargs["headers"]["Authorization"], "Bearer wk_testkey")
+        self.assertIn("X-Tieroo-Instance", post.call_args.kwargs["headers"])
+        mark.assert_called_once_with(always=True)
+        with patch(POST, return_value=resp(403, {"error": "not_reopenable"})), self.assertRaises(UserError) as e:
+            settings.action_wallet_reopen()
+        self.assertIn("support@tieroo.com", str(e.exception))
+        with self.assertRaises(AccessError):
+            settings.with_user(new_test_user(self.env, "kassa2", groups="base.group_user")).company_id._wallet_reopen()
 
 
 @tagged("post_install", "-at_install")

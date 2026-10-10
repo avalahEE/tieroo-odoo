@@ -1095,13 +1095,6 @@ msgid ""
 msgstr ""
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid ""
-"This account is suspended or closed: the cards do not update. Contact "
-"Tieroo."
-msgstr ""
-
-#. module: tieroo
 #: model:ir.model.constraint,message:tieroo.constraint_wallet_shop_partner_unique
 msgid "This address is already on the list."
 msgstr ""
@@ -1492,4 +1485,52 @@ msgstr ""
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "without valid coordinates: left out until they have them."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "The account closes on"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ", at the end of the paid period. To keep it, open Plan and billing."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "This account is suspended: the cards do not update. Contact Tieroo."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "This account is closed, and so are the cards on your customers' phones. You can open it again within 90 days of closing; after that it is deleted."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Open the account again"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Open the Tieroo account again? It comes back on the free plan, and Odoo sends every card again. You can choose a plan on the next page."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "This company's Tieroo account is closed, or its key no longer works. See Settings → Tieroo."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "This account cannot be opened again from here: it was closed more than 90 days ago, it is suspended, or this is not the key it closed with. Write to support@tieroo.com."
+msgstr ""
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Another Tieroo account already has this company's VAT number. Write to support@tieroo.com."
 msgstr ""
