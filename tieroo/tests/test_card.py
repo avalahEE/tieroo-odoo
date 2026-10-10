@@ -206,7 +206,7 @@ class TestWalletCard(TransactionCase):
             self.program.action_unarchive()
 
     def test_programme_form_opens_the_designer(self):
-        r = MagicMock()
+        r = MagicMock(status_code=200)
         r.json.return_value = {"url": "https://wallet.test/design/open?t=abc"}
         with patch(POST, return_value=r) as post:
             action = self.program.action_wallet_design()
@@ -470,7 +470,7 @@ class TestWalletCard(TransactionCase):
 
 
     def test_design_button_opens_the_designer_with_a_one_time_link(self):
-        r = MagicMock()
+        r = MagicMock(status_code=200)
         r.json.return_value = {"url": "https://wallet.test/design/open?t=abc"}
         with patch(POST, return_value=r) as post:
             action = self.env["res.config.settings"].create({}).action_wallet_design()
@@ -479,6 +479,15 @@ class TestWalletCard(TransactionCase):
         self.assertEqual(post.call_args.kwargs["headers"]["Authorization"], "Bearer wk_testkey")
         sent = post.call_args.kwargs["json"]
         self.assertEqual((sent["company"], sent["texts"]["program"]["en_US"], sent["levels"]), (self.env.company.name, "Kohviklubi", []))
+
+    def test_designer_refused_says_why(self):
+        for status, data, text in ((403, {"error": "suspended"}, "suspended"), (401, {"error": "unauthorized"}, "closed")):
+            r = MagicMock(status_code=status)
+            r.json.return_value = data
+            with patch(POST, return_value=r), self.assertRaises(UserError) as e:
+                self.env["res.config.settings"].create({}).action_wallet_design()
+            self.assertIn(text, str(e.exception))
+            self.assertNotIn("could not be reached", str(e.exception))
 
     def test_language_change_and_new_reward_update_the_card(self):
         with patch(PUT, return_value=ok()):

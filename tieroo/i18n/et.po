@@ -1065,11 +1065,6 @@ msgid "This Tieroo key is in use in another Odoo database or company: the cards 
 msgstr "See Tieroo võti on kasutusel teises Odoo andmebaasis või ettevõttes: siit kaardid ei uuene. Võta ühendust Tierooga."
 
 #. module: tieroo
-#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
-msgid "This account is suspended or closed: the cards do not update. Contact Tieroo."
-msgstr "See konto on peatatud või suletud: kaardid ei uuene. Võta ühendust Tierooga."
-
-#. module: tieroo
 #: model:ir.model.constraint,message:tieroo.constraint_wallet_shop_partner_unique
 msgid "This address is already on the list."
 msgstr "See aadress on juba nimekirjas."
@@ -1432,3 +1427,51 @@ msgstr "tingimustega"
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
 msgid "without valid coordinates: left out until they have them."
 msgstr "ilma korrektsete koordinaatideta: jäävad välja, kuni need on parandatud."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "The account closes on"
+msgstr "Konto suletakse"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid ", at the end of the paid period. To keep it, open Plan and billing."
+msgstr ", makstud perioodi lõpus. Konto alles jätmiseks ava Pakett ja arveldus."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "This account is suspended: the cards do not update. Contact Tieroo."
+msgstr "See konto on peatatud: kaardid ei uuene. Võta ühendust Tierooga."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "This account is closed, and so are the cards on your customers' phones. You can open it again within 90 days of closing; after that it is deleted."
+msgstr "See konto on suletud, nagu ka kaardid sinu klientide telefonides. Saad konto 90 päeva jooksul pärast sulgemist uuesti avada, pärast seda see kustutatakse."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Open the account again"
+msgstr "Ava konto uuesti"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Open the Tieroo account again? It comes back on the free plan, and Odoo sends every card again. You can choose a plan on the next page."
+msgstr "Kas avada Tieroo konto uuesti? Konto avatakse tasuta paketiga ja Odoo saadab kõik kaardid uuesti. Paketi saad valida järgmisel lehel."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "This company's Tieroo account is closed, or its key no longer works. See Settings → Tieroo."
+msgstr "Selle ettevõtte Tieroo konto on suletud või selle võti ei tööta enam. Vaata: Seaded → Tieroo."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "This account cannot be opened again from here: it was closed more than 90 days ago, it is suspended, or this is not the key it closed with. Write to support@tieroo.com."
+msgstr "Seda kontot ei saa siit uuesti avada: see suleti üle 90 päeva tagasi, see on peatatud või see pole võti, millega konto suleti. Kirjuta support@tieroo.com."
+
+#. module: tieroo
+#. odoo-python
+#: code:addons/tieroo/models.py:0
+msgid "Another Tieroo account already has this company's VAT number. Write to support@tieroo.com."
+msgstr "Selle ettevõtte KMKR numbriga on juba teine Tieroo konto. Kirjuta support@tieroo.com."

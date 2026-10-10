@@ -38,6 +38,12 @@ def _wallet_api(env, method, url, company=None, timeout=TIMEOUT, **kw):
 
 def _wallet_api_error(env, status, data):
     code = data.get("error")
+    if status == 401 or code == "closed":
+        return env._("This company's Tieroo account is closed, or its key no longer works. See Settings → Tieroo.")
+    if code == "not_reopenable":
+        return env._("This account cannot be opened again from here: it was closed more than 90 days ago, it is suspended, or this is not the key it closed with. Write to support@tieroo.com.")
+    if code == "vat_in_use":
+        return env._("Another Tieroo account already has this company's VAT number. Write to support@tieroo.com.")
     if code == "invalid_vat":
         return env._("The VAT number was not accepted. Check it in the company's settings: the EU VAT number with its country prefix, e.g. EE123456780.")
     if code == "invalid_company":
@@ -199,15 +205,12 @@ class ResCompany(models.Model):
         base, key = company._wallet_base(), company.wallet_api_key
         if not key:
             raise UserError(_("Connect %s to Tieroo first: Settings → Tieroo.", company.name))
+        status, data = _wallet_api(self.env, "post", f"{base}/sync/v1/design-session", company=company,
+                                   json={**company._wallet_design_context(), **({"start": start} if start else {})})
+        if status != 200 or not data.get("url"):
+            raise UserError(_wallet_api_error(self.env, status, data))
         company.wallet_signup_notice = False
-        try:
-            r = requests.post(f"{base}/sync/v1/design-session", json={**company._wallet_design_context(), **({"start": start} if start else {})},
-                              headers=company._wallet_headers(), timeout=TIMEOUT)
-            r.raise_for_status()
-            url = r.json()["url"]
-        except (requests.RequestException, ValueError, KeyError) as e:
-            raise UserError(_("Tieroo could not be reached: %s", e)) from e
-        return {"type": "ir.actions.act_url", "url": url, "target": "new"}
+        return {"type": "ir.actions.act_url", "url": data["url"], "target": "new"}
 
     def _wallet_design_context(self):
         self.ensure_one()
@@ -304,6 +307,19 @@ class ResCompany(models.Model):
             return {"status": "elsewhere"}
         return data if status == 200 else None
 
+    def _wallet_reopen(self):
+        self.ensure_one()
+        self._wallet_check_admin()
+        company = self.sudo()
+        if not company.wallet_api_key:
+            raise UserError(_("Connect %s to Tieroo first: Settings → Tieroo.", company.name))
+        status, data = _wallet_api(self.env, "post", f"{company._wallet_base()}/sync/v1/reopen", company=company,
+                                   json={"returnUrl": company._wallet_settings_url(), "levelsModule": company._wallet_levels_on()})
+        if status != 200 or not data.get("url"):
+            raise UserError(_wallet_api_error(self.env, status, data))
+        company._wallet_mark_all(always=True)
+        return {"type": "ir.actions.act_url", "url": data["url"], "target": "self"}
+
     def _wallet_billing(self):
         self.ensure_one()
         self._wallet_check_admin()
@@ -362,6 +378,7 @@ class ResConfigSettings(models.TransientModel):
     wallet_grace_until = fields.Date(compute="_compute_wallet_account")
     wallet_can_create = fields.Boolean(compute="_compute_wallet_account")
     wallet_levels_missing = fields.Selection([("add", "Add it to the plan"), ("upgrade", "Needs a paid plan")], compute="_compute_wallet_account")
+    wallet_closes_on = fields.Date(compute="_compute_wallet_account")
 
     @api.depends("company_id")
     def _compute_wallet_data_consent(self):
@@ -393,11 +410,15 @@ class ResConfigSettings(models.TransientModel):
             s.wallet_over_limit = bool(a.get("overLimitSince"))
             s.wallet_grace_until = (a.get("graceUntil") or "")[:10] or False
             s.wallet_can_create = a.get("canCreate", True)
-            missing = s.wallet_connected and not s.wallet_account_error and not a.get("levels") and company._wallet_levels_on()
+            s.wallet_closes_on = (a.get("closesOn") or "")[:10] or False
+            missing = bool(plan) and not a.get("levels") and company._wallet_levels_on()
             s.wallet_levels_missing = ("upgrade" if plan.get("id") == "free" else "add") if missing else False
 
     def action_wallet_design(self):
         return self.company_id._wallet_open_designer()
+
+    def action_wallet_reopen(self):
+        return self.company_id._wallet_reopen()
 
     def action_wallet_signup(self):
         return self.company_id._wallet_start()
