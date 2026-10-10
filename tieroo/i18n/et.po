@@ -509,11 +509,6 @@ msgid "History for Loyalty cards and Ewallets"
 msgstr "Lojaalsuskaartide ja e-rahakottide ajalugu"
 
 #. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_data_consent
-msgid "I accept the Tieroo terms of service and data processing agreement"
-msgstr "Nõustun Tieroo kasutustingimuste ja andmetöötluslepinguga"
-
-#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "I join the loyalty programme of"
 msgstr "Liitun kliendiprogrammiga:"
@@ -1116,8 +1111,8 @@ msgstr "Seda liitumist on juba kasutatud. Kui ettevõte pole ikka ühendatud, al
 #. module: tieroo
 #. odoo-python
 #: code:addons/tieroo/models.py:0
-msgid "Tick the box to accept the Tieroo terms of service and data processing agreement first."
-msgstr "Märgi esmalt linnuke, et nõustud Tieroo kasutustingimuste ja andmetöötluslepinguga."
+msgid "Accept the Tieroo terms of service and data processing agreement first: Start with Tieroo in Settings → Tieroo."
+msgstr "Nõustu esmalt Tieroo kasutustingimuste ja andmetöötluslepinguga: Seaded → Tieroo, „Alusta Tierooga“."
 
 #. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
@@ -1475,3 +1470,18 @@ msgstr "Seda kontot ei saa siit uuesti avada: see suleti üle 90 päeva tagasi, 
 #: code:addons/tieroo/models.py:0
 msgid "Another Tieroo account already has this company's VAT number. Write to support@tieroo.com."
 msgstr "Selle ettevõtte KMKR numbriga on juba teine Tieroo konto. Kirjuta support@tieroo.com."
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "I accept the Tieroo terms of service and data processing agreement. Continue?"
+msgstr "Nõustun Tieroo kasutustingimuste ja andmetöötluslepinguga. Kas jätkata?"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Clear the sync key"
+msgstr "Tühjenda sünkroonimisvõti"
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Clear the sync key? This Odoo stops syncing the cards until it is connected again (Start with Tieroo)."
+msgstr "Kas tühjendada sünkroonimisvõti? See Odoo ei sünkrooni enam kaarte, kuni see on uuesti ühendatud („Alusta Tierooga“)."
