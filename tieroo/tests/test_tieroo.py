@@ -36,7 +36,7 @@ class TestTieroo(TierooSetup, TransactionCase):
 
     def test_start_sends_the_company_and_opens_the_billing_page(self):
         with patch(POST, return_value=resp(200, {"url": "https://wallet.test/billing/open?t=x", "claimToken": TOKEN})) as post:
-            action = self.env["res.config.settings"].create({"wallet_data_consent": True}).action_wallet_signup()
+            action = self.env["res.config.settings"].create({}).action_wallet_signup()
         self.assertEqual(action, {"type": "ir.actions.act_url", "url": "https://wallet.test/billing/open?t=x", "target": "self"})
         self.assertEqual(post.call_args.args[0], "https://wallet.test/onboard/v1/start")
         sent = post.call_args.kwargs["json"]
@@ -52,16 +52,20 @@ class TestTieroo(TierooSetup, TransactionCase):
         self.assertFalse(self.company.wallet_api_key)
 
     def test_nothing_is_sent_without_consent(self):
-        with patch(POST) as post, self.assertRaisesRegex(UserError, "accept the Tieroo terms"):
-            self.env["res.config.settings"].create({}).action_wallet_signup()
+        with patch(POST) as post, self.assertRaisesRegex(UserError, "Accept the Tieroo terms"):
+            self.company._wallet_start()
         post.assert_not_called()
         self.assertFalse(self.company.wallet_consent_date)
         with patch(POST, return_value=resp(200, {"url": "https://wallet.test/billing/open?t=x", "claimToken": TOKEN})):
-            self.env["res.config.settings"].create({"wallet_data_consent": True}).action_wallet_signup()
+            self.env["res.config.settings"].create({}).action_wallet_signup()
         self.assertTrue(self.company.wallet_consent_date)
-        self.assertTrue(self.env["res.config.settings"].create({}).wallet_data_consent)
-        self.env["res.config.settings"].create({"wallet_data_consent": False}).execute()
-        self.assertFalse(self.company.wallet_consent_date)
+
+    def test_the_sync_key_can_be_cleared(self):
+        self.company.write({"wallet_api_key": "k", "wallet_signup_notice": "connected"})
+        with patch(GET, return_value=resp(200, {"status": "closed"})):
+            self.env["res.config.settings"].create({}).action_wallet_clear_key()
+        self.assertFalse(self.company.wallet_api_key)
+        self.assertFalse(self.company.wallet_signup_notice)
 
     def test_a_copy_of_the_database_loses_the_key(self):
         from odoo.modules.neutralize import get_neutralization_queries
@@ -76,10 +80,10 @@ class TestTieroo(TierooSetup, TransactionCase):
     def test_missing_vat_and_refused_vat(self):
         self.company.vat = False
         with self.assertRaisesRegex(UserError, "VAT number"):
-            self.env["res.config.settings"].create({"wallet_data_consent": True}).action_wallet_signup()
+            self.env["res.config.settings"].create({}).action_wallet_signup()
         self.company.vat = "EE123456780"
         with patch(POST, return_value=resp(400, {"error": "invalid_vat"})), self.assertRaisesRegex(UserError, "VAT number was not accepted"):
-            self.env["res.config.settings"].create({"wallet_data_consent": True}).action_wallet_signup()
+            self.env["res.config.settings"].create({}).action_wallet_signup()
         self.assertFalse(self.company.wallet_claim_token)
 
     def test_claim_saves_the_key_once_and_waits_for_stripe(self):
@@ -90,10 +94,10 @@ class TestTieroo(TierooSetup, TransactionCase):
             self.assertEqual(self.company._wallet_claim(), "waiting")
         self.assertEqual(self.company.wallet_claim_token, TOKEN)
         with patch(POST, return_value=resp(409, {"error": "vat_pending"})) as post, self.assertRaisesRegex(UserError, "being confirmed"):
-            self.env["res.config.settings"].create({"wallet_data_consent": True}).action_wallet_signup()
+            self.env["res.config.settings"].create({}).action_wallet_signup()
         self.assertEqual(post.call_count, 1)
         with patch(POST, side_effect=[resp(404, {"error": "not_found"}), resp(200, {"url": "https://wallet.test/billing/open?t=z", "claimToken": "u" * 43})]):
-            self.assertEqual(self.env["res.config.settings"].create({"wallet_data_consent": True}).action_wallet_signup()["url"], "https://wallet.test/billing/open?t=z")
+            self.assertEqual(self.env["res.config.settings"].create({}).action_wallet_signup()["url"], "https://wallet.test/billing/open?t=z")
         self.company.wallet_claim_token = TOKEN
         with patch(POST, return_value=resp(200, {"key": "wk_new", "plan": "free"})) as post:
             self.assertEqual(self.company._wallet_claim(), "done")

@@ -253,7 +253,7 @@ class ResCompany(models.Model):
         if company.wallet_api_key:
             raise UserError(_("%s is already connected to Tieroo.", company.name))
         if not company.wallet_consent_date:
-            raise UserError(_("Tick the box to accept the Tieroo terms of service and data processing agreement first."))
+            raise UserError(_("Accept the Tieroo terms of service and data processing agreement first: Start with Tieroo in Settings → Tieroo."))
         if company.wallet_claim_token:
             state = company._wallet_claim(gone_ok=True)
             if state == "done":
@@ -363,8 +363,6 @@ class ResConfigSettings(models.TransientModel):
     wallet_shops_missing = fields.Integer(compute="_compute_wallet_shops")
 
     wallet_signup_notice = fields.Selection(related="company_id.wallet_signup_notice")
-    wallet_data_consent = fields.Boolean("I accept the Tieroo terms of service and data processing agreement", compute="_compute_wallet_data_consent",
-                                         inverse="_inverse_wallet_data_consent")
     wallet_connected = fields.Boolean(compute="_compute_wallet_account")
     wallet_account_error = fields.Boolean(compute="_compute_wallet_account")
     wallet_plan_name = fields.Char("Plan", compute="_compute_wallet_account")
@@ -379,18 +377,6 @@ class ResConfigSettings(models.TransientModel):
     wallet_can_create = fields.Boolean(compute="_compute_wallet_account")
     wallet_levels_missing = fields.Selection([("add", "Add it to the plan"), ("upgrade", "Needs a paid plan")], compute="_compute_wallet_account")
     wallet_closes_on = fields.Date(compute="_compute_wallet_account")
-
-    @api.depends("company_id")
-    def _compute_wallet_data_consent(self):
-        for s in self:
-            s.wallet_data_consent = bool(s.company_id.sudo().wallet_consent_date)
-
-    def _inverse_wallet_data_consent(self):
-        for s in self:
-            company = s.company_id.sudo()
-            if s.wallet_data_consent != bool(company.wallet_consent_date):
-                s.company_id._wallet_check_admin()
-                company.wallet_consent_date = fields.Datetime.now() if s.wallet_data_consent else False
 
     @api.depends("company_id")
     def _compute_wallet_account(self):
@@ -421,7 +407,15 @@ class ResConfigSettings(models.TransientModel):
         return self.company_id._wallet_reopen()
 
     def action_wallet_signup(self):
-        return self.company_id._wallet_start()
+        company = self.company_id
+        company._wallet_check_admin()
+        if not company.wallet_api_key:
+            company.sudo().wallet_consent_date = fields.Datetime.now()
+        return company._wallet_start()
+
+    def action_wallet_clear_key(self):
+        self.company_id._wallet_check_admin()
+        self.company_id.sudo().write({"wallet_api_key": False, "wallet_signup_notice": False})
 
     def action_wallet_billing(self):
         return self.company_id._wallet_billing()

@@ -504,11 +504,6 @@ msgid "History for Loyalty cards and Ewallets"
 msgstr ""
 
 #. module: tieroo
-#: model:ir.model.fields,field_description:tieroo.field_res_config_settings__wallet_data_consent
-msgid "I accept the Tieroo terms of service and data processing agreement"
-msgstr ""
-
-#. module: tieroo
 #: model_terms:ir.ui.view,arch_db:tieroo.join_page
 msgid "I join the loyalty programme of"
 msgstr ""
@@ -1155,8 +1150,8 @@ msgstr ""
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid ""
-"Tick the box to accept the Tieroo terms of service and data processing "
-"agreement first."
+"Accept the Tieroo terms of service and data processing agreement first: "
+"Start with Tieroo in Settings → Tieroo."
 msgstr ""
 
 #. module: tieroo
@@ -1533,4 +1528,19 @@ msgstr ""
 #. odoo-python
 #: code:addons/tieroo/models.py:0
 msgid "Another Tieroo account already has this company's VAT number. Write to support@tieroo.com."
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "I accept the Tieroo terms of service and data processing agreement. Continue?"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Clear the sync key"
+msgstr ""
+
+#. module: tieroo
+#: model_terms:ir.ui.view,arch_db:tieroo.res_config_settings_view_form_wallet_card
+msgid "Clear the sync key? This Odoo stops syncing the cards until it is connected again (Start with Tieroo)."
 msgstr ""
