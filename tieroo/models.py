@@ -558,6 +558,7 @@ class WalletCard(models.Model):
                 email_layout_xmlid="mail.mail_notification_light",
             )
         )
+        self.env.ref("mail.ir_cron_mail_scheduler_action").sudo()._trigger()
         partner = card.partner_id.with_context(lang=card.company_id.partner_id.lang or card.env.lang)
         args = {"company": card.company_id.name, "email": partner.email}
         partner.message_post(body=partner.env._("Wallet card (%(company)s) emailed again to %(email)s.", **args) if again
