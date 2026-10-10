@@ -59,6 +59,13 @@ class TestSignup(SignupSetup, TransactionCase):
         self.assertEqual(len(mail), 1)
         self.assertIn("/confirm/tok-mari@example.ee", mail.body_html)
 
+    def test_the_confirmation_email_goes_out_at_once(self):
+        scheduler = self.env.ref("mail.ir_cron_mail_scheduler_action")
+        Trigger = self.env["ir.cron.trigger"].sudo()
+        before = Trigger.search_count([("cron_id", "=", scheduler.id)])
+        self.join()
+        self.assertGreater(Trigger.search_count([("cron_id", "=", scheduler.id)]), before)
+
     def test_confirmed_customer_gets_contact_tag_birthday_loyalty_card_and_card(self):
         _result, token = self.join(birthday=("29", "2"))
         card = self.confirm(token)

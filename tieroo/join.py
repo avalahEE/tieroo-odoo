@@ -175,6 +175,7 @@ class WalletSignupRequest(models.Model):
             email_values={"model": False, "res_id": False, "auto_delete": True},
             email_layout_xmlid="mail.mail_notification_light",
         )
+        self.env.ref("mail.ir_cron_mail_scheduler_action").sudo()._trigger()
 
     @api.model
     def _find(self, company, token):
