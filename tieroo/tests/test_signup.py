@@ -181,7 +181,7 @@ class TestSignup(SignupSetup, TransactionCase):
         ctx = self.company._wallet_design_context()
         self.assertEqual(ctx["signupUrl"], url)
         self.assertEqual(ctx["address"]["company"], self.company.name)
-        r = MagicMock()
+        r = MagicMock(status_code=200)
         r.json.return_value = {"url": "https://wallet.test/design/open?t=abc"}
         with patch("odoo.addons.tieroo.models.requests.post", return_value=r) as post:
             self.env["res.config.settings"].create({}).action_wallet_signup_posters()
