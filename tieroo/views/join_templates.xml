@@ -86,7 +86,7 @@
                                 <label class="check">
                                     <input type="checkbox" name="consent" value="1" required="required" t-att-checked="post.get('consent')"/>
                                     <span>
-                                        I join the loyalty programme of <t t-out="company.name"/> and agree to its <a t-if="company.wallet_terms_url" t-att-href="company.wallet_terms_url" target="_blank" rel="noopener">terms</a><t t-else="">terms</t><t t-if="company.wallet_privacy_url"> and the <a t-att-href="company.wallet_privacy_url" target="_blank" rel="noopener">privacy policy</a></t>.
+                                        I join the loyalty programme of <t t-out="company.name"/><t t-if="company.wallet_terms_url"> and agree to its <a t-att-href="company.wallet_terms_url" target="_blank" rel="noopener">terms</a><t t-if="company.wallet_privacy_url"> and the <a t-att-href="company.wallet_privacy_url" target="_blank" rel="noopener">privacy policy</a></t></t><t t-elif="company.wallet_privacy_url"> and agree to its <a t-att-href="company.wallet_privacy_url" target="_blank" rel="noopener">privacy policy</a></t>.
                                     </span>
                                 </label>
                                 <div class="hp" aria-hidden="true">
