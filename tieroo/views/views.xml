@@ -123,7 +123,7 @@
                                 <div class="alert alert-danger mt-2 mb-0" role="alert" invisible="wallet_can_create">
                                     Over the plan's limit: no new cards until you choose a bigger plan. Existing cards keep updating.
                                 </div>
-                                <div class="alert alert-info mt-2 mb-0" role="status" invisible="not wallet_levels_missing">
+                                <div class="alert alert-warning mt-2 mb-0" role="alert" invisible="not wallet_levels_missing">
                                     <span invisible="wallet_levels_missing != 'add'">Customer Levels is installed in Odoo but not on your Tieroo plan: levels and pricelists work in Odoo, the cards do not show them. Add Customer Levels in Plan and billing.</span>
                                     <span invisible="wallet_levels_missing != 'upgrade'">Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing.</span>
                                     <button name="action_wallet_billing" type="object" string="Plan and billing" class="btn-link ps-0 d-block" icon="oi-arrow-right"/>
