@@ -1,0 +1,3 @@
+id,name,model_id,group_id/id,operation,domain
+access_wallet_level_user,wallet.level user,wallet.level,base.group_user,r,"[('company_id', 'in', company_ids)]"
+access_wallet_level_manager,wallet.level manager,wallet.level,point_of_sale.group_pos_manager,crud,"[('company_id', 'in', company_ids)]"

@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_partner_form_wallet_card" model="ir.ui.view">
+        <field name="name">res.partner.form.wallet.card</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <field name="wallet_card_state" invisible="1"/>
+                <field name="is_blacklisted" invisible="1"/>
+                <button name="action_wallet_resend" type="object" class="oe_stat_button" icon="credit_card"
+                        invisible="wallet_card_state != 'active' or is_blacklisted" groups="base.group_system"
+                        confirm="Send the wallet card again to the customer's email address?"
+                        help="Customer did not get the email? Check the email address, then press to send the card again.">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value">Active</span>
+                        <span class="o_stat_text">Wallet card</span>
+                    </div>
+                </button>
+                <button name="action_wallet_resend" type="object" class="oe_stat_button" icon="credit_card"
+                        invisible="wallet_card_state != 'active' or not is_blacklisted" groups="base.group_system"
+                        confirm="This address is on the blacklist (no marketing emails). Send the wallet card anyway? Do it only if the customer asked for it."
+                        help="Customer did not get the email? Check the email address, then press to send the card again.">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value">Active</span>
+                        <span class="o_stat_text">Wallet card</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Wallet cards" name="wallet_cards" groups="base.group_system" invisible="not wallet_card_ids">
+                    <field name="wallet_card_ids" readonly="1">
+                        <list>
+                            <field name="company_id"/>
+                            <field name="state"/>
+                            <field name="url" widget="url"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="loyalty_program_form_wallet_card" model="ir.ui.view">
+        <field name="name">loyalty.program.form.wallet.card</field>
+        <field name="model">loyalty.program</field>
+        <field name="inherit_id" ref="loyalty.loyalty_program_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_wallet_design" type="object" string="Design the wallet card"
+                        invisible="not wallet_card or program_type != 'loyalty'" groups="base.group_system"/>
+            </xpath>
+            <xpath expr="//field[@name='program_type']/.." position="after">
+                <field name="wallet_card" invisible="program_type != 'loyalty'"/>
+                <field name="wallet_auto_send" invisible="not wallet_card or program_type != 'loyalty'"/>
+                <div colspan="2" invisible="not wallet_auto_send or not wallet_existing_count or program_type != 'loyalty'" groups="base.group_system">
+                    <button name="action_wallet_send_existing" type="object" class="btn-link ps-0" icon="arrow_forward"
+                            string="Send to existing members"
+                            confirm="Email the Tieroo card to every member who has none yet? The emails go out through your mail server: check its daily sending limit."/>
+                    <span class="text-muted">Members from before without a card: <field name="wallet_existing_count" class="oe_inline" readonly="1"/></span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="wallet_shop_view_list" model="ir.ui.view">
+        <field name="name">wallet.shop.list</field>
+        <field name="model">wallet.shop</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <header>
+                    <button name="action_add_warehouses" type="object" string="Add warehouse addresses" display="always"/>
+                </header>
+                <field name="sequence" widget="handle"/>
+                <field name="company_id" column_invisible="True"/>
+                <field name="partner_id"/>
+                <field name="city"/>
+                <field name="partner_latitude" string="Latitude"/>
+                <field name="partner_longitude" string="Longitude"/>
+                <field name="on_card" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="res_config_settings_view_form_wallet_card" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.wallet.card</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Tieroo" string="Tieroo" name="tieroo" groups="base.group_system">
+                    <block title="Loyalty cards (this company)" name="wallet_cards">
+                        <field name="wallet_connected" invisible="1"/>
+                        <field name="wallet_signup_notice" invisible="1"/>
+                        <field name="wallet_account_error" invisible="1"/>
+                        <field name="wallet_over_limit" invisible="1"/>
+                        <field name="wallet_can_create" invisible="1"/>
+                        <field name="wallet_levels_missing" invisible="1"/>
+                        <setting string="Start with Tieroo" company_dependent="1" invisible="wallet_connected"
+                                 help="Choose a plan and connect this company to Tieroo. A card is required, also for the free plan (nothing is charged on the free plan).">
+                            <div class="text-muted mt-2" invisible="wallet_signup_notice != 'cancelled'">Sign-up cancelled: nothing was charged. Start again when you are ready.</div>
+                            <div class="mt-2">
+                                <p class="text-muted mb-1">Tieroo is an external service. To open the account, Odoo sends it this company's name, VAT number, address and your email. After that, to issue and update the cards, it sends each card holder's name, barcode, points, next reward, level and language, and, if you show the card near your shops, for each card up to 10 of your shops' coordinates, chosen by where that customer bought and the city in their address. Emails with the cards are sent by Odoo itself.
+                                    <a href="https://tieroo.com/terms.html" target="_blank">Terms of service</a> · <a href="https://tieroo.com/dpa.html" target="_blank">Data processing agreement</a> · <a href="https://tieroo.com/privacy.html" target="_blank">Privacy</a></p>
+                            </div>
+                            <button name="action_wallet_signup" type="object" string="Start with Tieroo" class="btn-primary mt-2"
+                                    confirm="I accept the Tieroo terms of service and data processing agreement. Continue?"/>
+                        </setting>
+                        <setting string="Tieroo account" company_dependent="1" invisible="not wallet_connected">
+                            <div class="alert alert-success mt-2 mb-2" role="status" invisible="wallet_signup_notice != 'connected' or wallet_status in ('suspended', 'closed', 'elsewhere')">Connected. Design your card now.</div>
+                            <div class="text-warning mt-2" invisible="not wallet_account_error">Could not reach Tieroo. Try again later.</div>
+                            <div class="mt-2" invisible="wallet_account_error">
+                                <div invisible="wallet_status in ('suspended', 'closed', 'elsewhere')">
+                                    <div><field name="wallet_plan_name" class="fw-bold oe_inline"/></div>
+                                    <div class="text-muted" invisible="not wallet_plan_extra"><field name="wallet_plan_extra" class="oe_inline"/></div>
+                                    <div><field name="wallet_cards_used" class="oe_inline"/> / <field name="wallet_cards_limit" class="oe_inline"/> cards in use</div>
+                                </div>
+                                <div>Status: <field name="wallet_status" class="oe_inline"/></div>
+                                <div class="alert alert-warning mt-2 mb-0" role="alert" invisible="not wallet_closes_on">
+                                    The account closes on <field name="wallet_closes_on" class="oe_inline"/>, at the end of the paid period. To keep it, open Plan and billing.
+                                </div>
+                                <div class="alert alert-warning mt-2 mb-0" role="alert" invisible="not wallet_over_limit or not wallet_can_create">
+                                    Over the plan's limit: choose a bigger plan by <field name="wallet_grace_until" class="oe_inline"/>, after that no new cards.
+                                </div>
+                                <div class="alert alert-danger mt-2 mb-0" role="alert" invisible="wallet_can_create">
+                                    Over the plan's limit: no new cards until you choose a bigger plan. Existing cards keep updating.
+                                </div>
+                                <div class="alert alert-warning mt-2 mb-0" role="alert" invisible="not wallet_levels_missing">
+                                    <span invisible="wallet_levels_missing != 'add'">Customer Levels is installed in Odoo but not on your Tieroo plan: levels and pricelists work in Odoo, the cards do not show them. Add Customer Levels in Plan and billing.</span>
+                                    <span invisible="wallet_levels_missing != 'upgrade'">Customer Levels is installed in Odoo, but the free plan does not include it: levels and pricelists work in Odoo, the cards do not show them. Choose a paid plan with Customer Levels in Plan and billing.</span>
+                                    <button name="action_wallet_billing" type="object" string="Plan and billing" class="btn-link ps-0 d-block" icon="arrow_forward"/>
+                                </div>
+                                <div class="alert alert-warning mt-2 mb-0" role="alert" invisible="wallet_status != 'past_due'">
+                                    Payment failed. Stripe tries again; update your card.
+                                </div>
+                                <div class="alert alert-danger mt-2 mb-0" role="alert" invisible="wallet_status != 'suspended'">
+                                    This account is suspended: the cards do not update. Contact Tieroo.
+                                </div>
+                                <div class="alert alert-danger mt-2 mb-0" role="alert" invisible="wallet_status != 'closed'">
+                                    This account is closed, and so are the cards on your customers' phones. You can open it again within 90 days of closing; after that it is deleted.
+                                    <button name="action_wallet_reopen" type="object" string="Open the account again" class="btn-link ps-0 d-block" icon="arrow_forward"
+                                            confirm="Open the Tieroo account again? It comes back on the free plan, and Odoo sends every card again. You can choose a plan on the next page."/>
+                                </div>
+                                <div class="alert alert-danger mt-2 mb-0" role="alert" invisible="wallet_status != 'elsewhere'">
+                                    This Tieroo key is in use in another Odoo database or company: the cards do not update from here. Contact Tieroo.
+                                </div>
+                            </div>
+                            <div class="mt-2" invisible="wallet_status in ('suspended', 'closed', 'elsewhere')">
+                                <button name="action_wallet_billing" type="object" string="Plan and billing" class="btn-link ps-0" icon="arrow_forward"/>
+                            </div>
+                        </setting>
+                        <setting string="Show the card near our shops" company_dependent="1" invisible="not wallet_connected"
+                                 help="Near one of your shops the iPhone shows the card on the lock screen and Android shows a reminder. Each card carries up to 10 of your shops' coordinates, chosen by where that customer bought and the city in their address, listed in your order. The phone compares its own position with them: Tieroo and Google never learn where a customer is.">
+                            <field name="wallet_shops_on"/>
+                            <div class="mt-2" invisible="not wallet_shops_on">
+                                <div><field name="wallet_shops_count" class="oe_inline"/> shops on the list. Each card shows up to 10: where the customer bought, then their city, then your order.</div>
+                                <div class="text-warning" invisible="not wallet_shops_missing"><field name="wallet_shops_missing" class="oe_inline"/> without valid coordinates: left out until they have them.</div>
+                                <div class="text-muted">In a big shopping centre use the shop's own point (copy it from a map app), not the centre's address: they can be 100-300 m apart.</div>
+                                <button name="action_wallet_shops" type="object" string="Shops on the card" icon="arrow_forward" class="btn-link ps-0"/>
+                            </div>
+                        </setting>
+                        <setting string="Email templates" help="The card email and the joining confirmation, sent by Odoo. Change the text and translations here; Reset Template brings back the original.">
+                            <button name="action_wallet_email_templates" type="object" string="Email templates" icon="arrow_forward" class="btn-link"/>
+                        </setting>
+                        <setting string="Card design" company_dependent="1" invisible="not wallet_connected" help="Logo, colours, background image, fields and translations, with a live preview. Saving updates every customer's card. The loyalty programme on the card: tick 'Issue Tieroo card' on it.">
+                            <button name="action_wallet_design" type="object" string="Design the card" icon="arrow_forward" class="btn-link"/>
+                        </setting>
+                    </block>
+                    <block title="Advanced" name="wallet_advanced" groups="base.group_no_one">
+                        <setting string="Platform URL" company_dependent="1" help="Leave empty to use https://app.tieroo.com">
+                            <field name="wallet_api_url"/>
+                        </setting>
+                        <setting string="Sync key" company_dependent="1" help="Key created for this company on Tieroo (filled in by Start with Tieroo)">
+                            <field name="wallet_api_key" password="True"/>
+                            <button name="action_wallet_clear_key" type="object" string="Clear the sync key" class="btn-link ps-0" invisible="not wallet_connected"
+                                    confirm="Clear the sync key? This Odoo stops syncing the cards until it is connected again (Start with Tieroo)."/>
+                        </setting>
+                    </block>
+                    <block title="Join via QR" name="wallet_join" invisible="not wallet_connected">
+                        <setting string="Join via QR" company_dependent="1" help="A QR code (a poster in the shop) opens a page where customers join the loyalty programme themselves and get the card by email. Print-ready PDF and SVG posters.">
+                            <div class="content-group">
+                                <div class="row mt16">
+                                    <label for="wallet_signup_url" string="Join link" class="col-lg-4 o_light_label"/>
+                                    <field name="wallet_signup_url" widget="CopyClipboardChar" class="col-lg-8"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="wallet_signup_tag_id" class="col-lg-4 o_light_label"/>
+                                    <field name="wallet_signup_tag_id" class="col-lg-8"/>
+                                    <div class="text-muted col-lg-12">Added to every customer who joins via the QR. Use it in Odoo Automation Rules or Marketing Automation, e.g. a welcome email or a newsletter. Empty = no tag.</div>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="wallet_terms_url" class="col-lg-4 o_light_label"/>
+                                    <field name="wallet_terms_url" placeholder="https://" class="col-lg-8"/>
+                                </div>
+                                <div class="row mt8">
+                                    <label for="wallet_privacy_url" class="col-lg-4 o_light_label"/>
+                                    <field name="wallet_privacy_url" placeholder="https://" class="col-lg-8"/>
+                                </div>
+                                <div class="mt8">
+                                    <button name="action_wallet_signup_posters" type="object" string="QR code and posters" icon="arrow_forward" class="btn-link ps-0"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>
